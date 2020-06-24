@@ -8,7 +8,6 @@ body {
 }
 
 
-
 .tabs {
     display: flex;
     width: 300px;
@@ -105,5 +104,58 @@ body {
     font-family: 'Open Sans', sans-serif;
 }
 
+#events-feed {
+    float: left;
+    margin-left: 33%;
+}
+    
+.event-post {
+    width: 420px;
+    border: solid 2.5px #004643;
+    height: 400px;
+    box-shadow: 0 0 5px grey;
+    margin-bottom: 30px;
+}
+
+.event-info {
+    font-size: 20px;
+    margin-left: 4%;
+}
+
+.event-middle {
+    display: flex;
+}
+
+.event-inner-card {
+    background: #004643;
+    color: #fafafa;
+    width: 220px;
+    height: 220px;
+    font-size: 24px;
+    margin-left: 4%;
+}
+
+.event-icon {
+    font-size: 30px;
+    border: solid 1px #fafafa;
+    width: 87%;
+    height: 40%;
+    margin: 6%;
+    text-align: center;
+    line-height: 260%;
+}
+
+.event-title {
+    width: 87%;
+    margin-left: 6%;
+    text-align: center;
+}
+
+.event-description {
+    font-size: 16px;
+    width: 140px;
+    margin: auto;
+    margin-top: 15px;
+}
 
 
