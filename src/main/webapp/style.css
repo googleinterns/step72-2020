@@ -1,0 +1,109 @@
+body {
+    font-family: 'Open Sans', sans-serif;
+    background: #fafafa;
+}
+
+.header {
+    display: flex;
+}
+
+
+
+.tabs {
+    display: flex;
+    width: 300px;
+    justify-content: space-evenly;
+    font-size: 20px;
+    margin-left: 1%;
+    align-items: flex-end;
+    padding-bottom: 8px;
+}
+
+.tab {
+    cursor: pointer;
+}
+
+.feed-heading {
+    font-size: 20px;
+    margin-left: 2%;
+}
+
+.feed-right-side {
+    float: right;
+    margin-right: 12%;
+}
+
+.icon {
+    font-size: 32px;
+}
+
+.feed-box {
+    border: solid 2.5px #004643;
+    width: 260px;
+    font-size: 20px;
+    color: #004643;
+    box-shadow: 0 0 5px grey;
+    cursor: pointer;
+    margin-bottom: 70px;
+}
+
+.feed-box:hover {
+    box-shadow: 0 0 7px grey;
+}
+
+.feed-box-content {
+    margin:auto;
+    display:flex;
+    align-items: center;
+    height: 70px;
+    margin-left: 15px;
+}
+
+.create-event-box {
+    height: 70px;
+    line-height: 70px;
+}
+
+.create-event-text {
+    text-align: center;
+    padding-left: 10px;
+}
+
+.challenges-box {
+    height: 280px;
+}
+
+.challenges-text {
+    padding-left: 10px;
+}
+
+.challenges-badge {
+    border: solid 2.5px #004643;
+    border-radius: 10px;
+    height: 120px;
+    width: 80px;
+    margin:auto;
+    margin-top: 20px;
+}
+
+.badge-icon {
+    text-align: center;
+}
+
+#events-searchbar-input {
+    padding-left: 5px;
+    background: transparent;
+    border: none;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 20px;
+}
+
+#events-searchbar-input:focus {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'Open Sans', sans-serif;
+}
+
+
+
