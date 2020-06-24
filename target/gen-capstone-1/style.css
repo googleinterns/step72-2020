@@ -87,6 +87,25 @@ body {
 
 .badge-icon {
     text-align: center;
+    margin-bottom: 10px;
+}
+
+.challenge-steps {
+    font-size: 20px;
+    color: black;
+    margin: auto;
+    margin-top: 0;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.badge-filling {
+    border-radius: 0 0 10px 10px;
+    width: 80px;
+    background: #e5ecec;
+    position: relative;
+    /* bottom: 28px; */
+    z-index: -1;
 }
 
 #events-searchbar-input {
@@ -110,9 +129,9 @@ body {
 }
     
 .event-post {
-    width: 420px;
+    width: 440px;
     border: solid 2.5px #004643;
-    height: 400px;
+    height: 410px;
     box-shadow: 0 0 5px grey;
     margin-bottom: 30px;
 }
@@ -137,7 +156,7 @@ body {
 
 .event-icon {
     font-size: 30px;
-    border: solid 1px #fafafa;
+    border: solid 1.5px #fafafa;
     width: 87%;
     height: 40%;
     margin: 6%;
