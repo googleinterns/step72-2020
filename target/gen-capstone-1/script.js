@@ -1,3 +1,4 @@
+// will be pulled from backend
 let mockEvent = new Map();
 mockEvent.set("author", "User A");
 mockEvent.set("title", "Farmer's Market");
@@ -14,6 +15,24 @@ mockEvent2.set("location", "Mountain View, California");
 mockEvent2.set("description", "details about event etc etc");
 mockEvent2.set("category", "nature");
 
+let mockCurrentUserChallenge = new Map();
+mockCurrentUserChallenge.set("id", 0);
+mockCurrentUserChallenge.set("step", 2);
+
+// will move to backend eventually, will make challenge & step classes
+let mockChallenges = [];
+mockChallenges[0] = new Map();
+mockChallenges[0].set("title", "gardening");
+mockChallenges[0].set("icon", "🌱");
+mockChallenges[0].set("steps", 3);
+let mockGardeningSteps = ["Plant tomatoes", "Plant a tree", "Save rainwater"];
+let mockGardeningStepDescriptions = ["Start a garden in your backyard",
+"More trees is always good", "Reuse rainwater for your plants"];
+mockChallenges[0].set("steps", mockGardeningSteps);
+mockChallenges[0].set("stepDescriptions", mockGardeningStepDescriptions);
+console.log(mockGardeningStepDescriptions);
+
+
 let eventCategoryIcons = new Map();
 eventCategoryIcons.set("food/drink", "🥑🍋🍏");
 eventCategoryIcons.set("nature", "🌲🌱🌳");
@@ -22,6 +41,8 @@ function loadPage() {
     const feed = document.getElementById("events-feed");
     feed.appendChild(postEvent(mockEvent));
     feed.appendChild(postEvent(mockEvent2));
+
+    setChallenge(mockCurrentUserChallenge);
 }
 
 function postEvent(event) {
@@ -86,4 +107,22 @@ function addEventInfo(event) {
     eventInfo.appendChild(eventLocation);
     eventInfo.appendChild(eventDate);
     return eventInfo;
+}
+
+function setChallenge(challenge) {
+    const badge = document.getElementById("challenges-badge");
+    const icon = document.getElementById("challenges-badge-icon");
+    icon.innerText = mockChallenges[challenge.get("id")].get("icon");
+
+    const currentStep = challenge.get("step");
+    const totalSteps = mockChallenges[challenge.get("id")].get("steps").length;
+
+    const stepsText = document.getElementById("challenge-steps");
+    stepsText.innerText = currentStep + "/" + totalSteps;
+
+    const badgeFilling = document.createElement("div");
+    badgeFilling.className = "badge-filling";
+    badgeFilling.style.height = 120*(currentStep/totalSteps) + "px";
+    badgeFilling.style.bottom = 120*(currentStep/totalSteps) + "px";
+    badge.appendChild(badgeFilling);
 }
