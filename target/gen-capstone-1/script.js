@@ -26,14 +26,11 @@ let mockChallenges = [];
 mockChallenges[0] = new Map();
 mockChallenges[0].set("title", "gardening");
 mockChallenges[0].set("icon", "🌱");
-mockChallenges[0].set("steps", 3);
 let mockGardeningSteps = ["Plant tomatoes", "Plant a tree", "Save rainwater"];
 let mockGardeningStepDescriptions = ["Start a garden in your backyard",
 "More trees is always good", "Reuse rainwater for your plants"];
 mockChallenges[0].set("steps", mockGardeningSteps);
 mockChallenges[0].set("stepDescriptions", mockGardeningStepDescriptions);
-console.log(mockGardeningStepDescriptions);
-
 
 let eventCategoryIcons = new Map();
 eventCategoryIcons.set("food/drink", "🥑🍋🍏");
