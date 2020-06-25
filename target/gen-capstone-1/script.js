@@ -6,6 +6,7 @@ mockEvent.set("date", "July 1 2020");
 mockEvent.set("location", "Mountain View, California");
 mockEvent.set("description", "details about event etc etc");
 mockEvent.set("category", "food/drink");
+mockEvent.set("bookmarks", 10);
 
 let mockEvent2 = new Map();
 mockEvent2.set("author", "User B");
@@ -14,6 +15,7 @@ mockEvent2.set("date", "July 1 2020");
 mockEvent2.set("location", "Mountain View, California");
 mockEvent2.set("description", "details about event etc etc");
 mockEvent2.set("category", "nature");
+mockEvent2.set("bookmarks", 25);
 
 let mockCurrentUserChallenge = new Map();
 mockCurrentUserChallenge.set("id", 0);
@@ -49,9 +51,29 @@ function postEvent(event) {
     const eventEl = document.createElement('div');
     eventEl.className = "event-post";
     eventEl.appendChild(addEventUserText(event));
+    eventEl.appendChild(addEventBookmark(event));
     eventEl.appendChild(addEventMiddleSection(event));
     eventEl.appendChild(addEventInfo(event));
     return eventEl;
+}
+
+function addEventBookmark(event) {
+    const bookmarkDiv = document.createElement('div');
+    bookmarkDiv.style.height = 0;
+    const bookmark = document.createElement('img');
+    bookmark.className = "event-bookmark";
+    // add case for if user has bookmarked this event once users have been created
+    bookmark.src = "../resources/bookmark.png";
+    bookmarkDiv.appendChild(bookmark);
+    bookmarkDiv.appendChild(addEventNumBookmarks(event));
+    return bookmarkDiv;
+}
+
+function addEventNumBookmarks(event) {
+    const bookmarkNum = document.createElement('p');
+    bookmarkNum.className = "event-bookmark-num";
+    bookmarkNum.innerText = event.get("bookmarks");
+    return bookmarkNum;
 }
 
 function addEventUserText(event) {
