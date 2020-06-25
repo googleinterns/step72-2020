@@ -136,8 +136,8 @@ body {
 }
 
 .event-bookmark {
-    height: 42px;
-    width: 30px;
+    height: 40px;
+    width: 28px;
     float: right;
     position: relative;
     margin-right: 10px;
@@ -149,7 +149,7 @@ body {
     width: 30px;
     text-align: center;
     position: relative;
-    left: 91%;
+    left: 91.3%;
     bottom: 50px;
     color: #004643;
     cursor: pointer;
