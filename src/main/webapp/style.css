@@ -104,7 +104,6 @@ body {
     width: 80px;
     background: #e5ecec;
     position: relative;
-    /* bottom: 28px; */
     z-index: -1;
 }
 
@@ -134,6 +133,24 @@ body {
     height: 410px;
     box-shadow: 0 0 5px grey;
     margin-bottom: 30px;
+}
+
+.event-bookmark {
+    height: 42px;
+    width: 30px;
+    float: right;
+    position: relative;
+    margin-right: 10px;
+    bottom: 55px;
+}
+
+.event-bookmark-num {
+    width: 30px;
+    text-align: center;
+    position: relative;
+    left: 91%;
+    bottom: 50px;
+    color: #004643;
 }
 
 .event-info {
@@ -176,5 +193,4 @@ body {
     margin: auto;
     margin-top: 15px;
 }
-
 
