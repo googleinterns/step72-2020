@@ -4,11 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.google.sps</groupId>
-<<<<<<< HEAD
-  <artifactId>portfolio</artifactId>
-=======
   <artifactId>gen-capstone</artifactId>
->>>>>>> f26d83b... Adds directories/setup
   <version>1</version>
   <packaging>war</packaging>
 
@@ -27,6 +23,13 @@
       <version>4.0.1</version>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-api-1.0-sdk</artifactId>
+      <version>1.9.59</version>
+    </dependency>
+    
     <dependency>
         <groupId>com.google.code.gson</groupId>
         <artifactId>gson</artifactId>
@@ -40,10 +43,31 @@
     </dependency>
 
     <dependency>
-        <groupId>com.google.appengine</groupId>
-        <artifactId>appengine-api-1.0-sdk</artifactId>
-        <version>1.9.59</version>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>1.7.25</version>
     </dependency>
+
+    <dependency>
+        <groupId>com.google.cloud</groupId>
+        <artifactId>google-cloud-logging-logback</artifactId>
+        <version>0.117.0-alpha</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>1.10.19</version>
+        <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
