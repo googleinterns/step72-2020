@@ -142,6 +142,7 @@ body {
     position: relative;
     margin-right: 10px;
     bottom: 55px;
+    cursor: pointer;
 }
 
 .event-bookmark-num {
@@ -151,6 +152,7 @@ body {
     left: 91%;
     bottom: 50px;
     color: #004643;
+    cursor: pointer;
 }
 
 .event-info {
