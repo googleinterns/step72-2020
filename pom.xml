@@ -81,6 +81,9 @@
         <configuration>
           <deploy.projectId>gen-step-2020</deploy.projectId>
           <deploy.version>1</deploy.version>
+      <!-- Changes dev server port to 8888 to allow for code server-->
+            <devserver.host>localhost</devserver.host>
+            <devserver.port>8888</devserver.port>
         </configuration>
       </plugin>
     </plugins>

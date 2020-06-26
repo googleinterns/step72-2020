@@ -31,6 +31,10 @@ public class SuperfundSite {
         this.longitude = longitude;
     }
 
+    public boolean isValidSite(){
+        return lattitude != 0 && longitude != 0 && !status.equalsIgnoreCase("Not on the NPL");
+    }
+
     public boolean equals(Object o){
         if(this == o) return true;
         

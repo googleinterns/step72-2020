@@ -15,35 +15,21 @@
 package com.google.sps.servlets;
 
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.ThreadManager;
-import java.io.PrintWriter;
-import com.google.gson.Gson;
-import java.util.ArrayList;
 import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Scanner;
+
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
-import java.util.Scanner;
-import java.lang.Thread;
-import java.util.HashSet;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.stream.*;
-import java.io.*;
-import java.net.*;
+
+import com.google.gson.Gson;
+import com.google.sps.data.SuperfundSite;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.sps.data.SuperfundSite;
 
 /** Servlet that returns a list of all Superfund Sites */
 @WebServlet("/superfund")
@@ -51,12 +37,12 @@ public class SuperfundServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(SuperfundServlet.class);
     
-    private static final String EPA_API_LINK = "https://enviro.epa.gov/enviro/efservice/SEMS_ACTIVE_SITES/";
-    private static final String EPA_ZIP_FORMAT = "SITE_ZIP_CODE/";
-    private static final String EPA_STATE_FORMAT = "SITE_STATE/";
-    private static final String CSV_FORMAT = "/Excel/";
-    private static final String SPLITERATOR = "\",\"";
-    private static final int TOTAL_CELL_COUNT = 18;
+    public static final String EPA_API_LINK = "https://enviro.epa.gov/enviro/efservice/SEMS_ACTIVE_SITES/";
+    public static final String EPA_ZIP_FORMAT = "SITE_ZIP_CODE/";
+    public static final String EPA_STATE_FORMAT = "SITE_STATE/";
+    public static final String CSV_FORMAT = "/Excel/";
+    public static final String SPLITERATOR = "\",\"";
+    public static final int TOTAL_CELL_COUNT = 18;
 
     private static final String AREA_PARAMETER = "area";
     private static final String ZIP = "zip";
@@ -87,16 +73,20 @@ public class SuperfundServlet extends HttpServlet {
     * A function that returns an arraylist of all the superfund sites in 
     * a given zip code
     * @param areaCode the zip code or state to pull data for
+    * @param areaType the Zip or State format for the EPA URL
     * @return the list of superfund sites pulled from the EPA API
     */
-    public ArrayList<SuperfundSite> retrieveSuperfundData(String areaCode, String areaDeliminator){
+    public ArrayList<SuperfundSite> retrieveSuperfundData(String areaCode, String areaType){
         ArrayList<SuperfundSite> sites = new ArrayList<>();
         try {
-            URL url = new URL(EPA_API_LINK + areaDeliminator + areaCode + CSV_FORMAT);
+            URL url = new URL(EPA_API_LINK + areaType + areaCode + CSV_FORMAT);
             sites = parseSuperfundsFromURL(url);
         } catch (IOException e){
             logger.error(e.getMessage());
         }
+
+        //to be stored in database
+        ArrayList<SuperfundSite> invalidSites = cleanSuperfundData(sites);
         
         return sites;
     }
@@ -131,7 +121,24 @@ public class SuperfundServlet extends HttpServlet {
             SuperfundSite site = new SuperfundSite(name, score, state, city, county, status, lattitude, longitude);
             sites.add(site);
         }
+        scanner.close();
         return sites;
+    }
+
+    /**
+     * Removes invalid superfund sites from the given list and returns them as their own list
+     */
+    public ArrayList<SuperfundSite> cleanSuperfundData(final ArrayList<SuperfundSite> sites){
+        ArrayList<SuperfundSite> invalidSites = new ArrayList<>();
+        for(int i = 0; i < sites.size();){
+            if(sites.get(i).isValidSite()){
+                i++;
+            } else {
+                SuperfundSite invalid = sites.remove(i);
+                invalidSites.add(invalid);
+            }
+        }
+        return invalidSites;
     }
 
 }
