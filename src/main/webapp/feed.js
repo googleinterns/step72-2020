@@ -206,6 +206,7 @@ function setChallengesNavBar(user, challenges) {
         navBar.appendChild(createChallengeNavBarItem(user, challenge));
 
         const itemBackground = document.createElement('div');
+        itemBackground.id = "challenges-nav-bar-item-background-" + challenge.get("id");
         itemBackground.className = "challenges-nav-bar-item-background";
         let percentDone = user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
         itemBackground.style.width = percentDone*100+"%";
@@ -230,7 +231,14 @@ function createChallengeNavBarItem(user, challenge) {
 
     item.addEventListener("click", () => {
         boldCurrentChallengeTitle(item);
-        showChallengeInfo(user, challenge, user.get("challengeStatuses")[challenge.get("id")]+1);
+        const step = user.get("challengeStatuses")[challenge.get("id")]+1;
+        console.log(step);
+        if (step < challenge.get("steps").length+1) {
+            showChallengeInfo(user, challenge, step);
+        }
+        else {
+            showChallengeCompletePage(challenge, false);
+        }    
     });
     return item;
 }
@@ -244,10 +252,13 @@ function boldCurrentChallengeTitle(chosenItem) {
 }
 
 function showChallengeInfo(user, challenge, displayedStep) {
-    console.log("user status = " + user.get("challengeStatuses")[challenge.get("id")]);
+    const completeContent = document.getElementById("challenge-complete-content");
+    completeContent.style.display = "none";
+
+    const inProgressContent = document.getElementById("challenges-main-panel-upper-content");
+    inProgressContent.style.display = "flex";
+
     const header = document.getElementById("challenges-main-panel-header");
-    if (displayedStep == 0) displayedStep = 1;
-    else if (displayedStep == challenge.get("steps").length) console.log("go to complete page here");
     let stepsText = displayedStep + "/" + challenge.get("steps").length;
     header.innerText = challenge.get("icon") + " " + challenge.get("title") + " " + stepsText;
 
@@ -275,6 +286,41 @@ function showChallengeInfo(user, challenge, displayedStep) {
     }
 }
 
+function showChallengeCompletePage(challenge, newCompletion) {
+    const nextButton = document.getElementById("challenges-modal-next-step-button");
+    nextButton.style.display = "none";
+
+    const completeContent = document.getElementById("challenge-complete-content");
+    completeContent.style.display = "flex";
+
+    const inProgressContent = document.getElementById("challenges-main-panel-upper-content");
+    inProgressContent.style.display = "none";
+
+    newCompletion ? showNewChallengeCompletePage(challenge) : showOldChallengeCompletePage(challenge);
+
+    
+}
+
+function showNewChallengeCompletePage(challenge) {
+    console.log("new completion");
+    const text = document.getElementById("challenge-complete-text");
+    // add correct logic here
+    if (challenge.get("id") < challenges.length-1) {
+        let newChallenge = challenges[challenge.get("id")+1];
+        text.innerHTML = `${challenge.get("title")} challenge complete!<br>Next up is the <b>${newChallenge.get("title")}</b> challenge`;
+        user.set("currentChallengeId", newChallenge.get("id"));
+    }
+    else {
+        text.innerHTML = "All challenges complete!";
+    }
+}
+
+function showOldChallengeCompletePage(challenge) {
+    console.log("old completion");
+    const text = document.getElementById("challenge-complete-text");
+    text.innerHTML = `${challenge.get("title")} challenge complete!`;
+}
+
 function setPrevButton(displayedStep, user, challenge) {
     const prevButton = document.getElementById("challenges-modal-prev-step-button");
     const nextButton = document.getElementById("challenges-modal-next-step-button");
@@ -295,15 +341,15 @@ function setPrevButton(displayedStep, user, challenge) {
 
 function setNextButton(displayedStep, user, challenge) {
     const nextButton = document.getElementById("challenges-modal-next-step-button");
-    if (user.get("currentChallengeId") != challenge.get("id")) {
-        nextButton.style.display = "none";
-    }
-    else if (displayedStep == user.get("challengeStatuses")[challenge.get("id")]+1) {
-        nextButton.style.display = "block";
-        nextButton.innerText = "step complete →";
-    }
-    else if (displayedStep == challenge.get("steps").length+1) {
-        nextButton.style.display = "none";
+    
+    if (displayedStep == user.get("challengeStatuses")[challenge.get("id")]+1) {
+        if (user.get("currentChallengeId") != challenge.get("id")) {
+            nextButton.style.display = "none";
+        }
+        else {
+            nextButton.style.display = "block";
+            nextButton.innerText = "step complete →";
+        }
     }
     else {
         nextButton.style.display = "block";
@@ -314,12 +360,19 @@ function setNextButton(displayedStep, user, challenge) {
         let currentStatus = user.get("challengeStatuses")[challenge.get("id")];
         if (currentStatus+1 == displayedStep) {
             user.get("challengeStatuses")[challenge.get("id")] = currentStatus+1;
-            console.log("user status set to " + user.get("challengeStatuses")[challenge.get("id")]);
+            const navBarItemBackground = document.getElementById("challenges-nav-bar-item-background-"+user.get("currentChallengeId"));
+            let percentDone = user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
+            navBarItemBackground.style.width = percentDone*100+"%";
+            setChallengeBox(challenge.get("id"));
         }
-        showChallengeInfo(user, challenge, displayedStep+1);
-    };
-
-    
+        if (displayedStep < challenge.get("steps").length) {
+            showChallengeInfo(user, challenge, displayedStep+1);
+        }
+        else {
+            const newCompletion = user.get("challengeStatuses")[challenge.get("id")] == challenge.get("steps").length;
+            showChallengeCompletePage(challenge, newCompletion);
+        }    
+    }; 
 } 
 
 function setCheckbox(challenge) {
@@ -357,6 +410,7 @@ function createModalChallengesBadge(currentStep, challenge) {
 function closeChallengesModal() {
     const modal = document.getElementById("challenges-modal");
     modal.style.display = "none";
+    setChallengeBox(user.get("currentChallengeId"));
 }
 
 function openChallengesModal() {
@@ -364,6 +418,11 @@ function openChallengesModal() {
     modal.style.display = "flex";
     const challenge = challenges[user.get("currentChallengeId")];
     showChallengeInfo(user, challenge, user.get("challengeStatuses")[user.get("currentChallengeId")]+1);
+
+    const navBarItems = document.getElementsByClassName("challenges-nav-bar-item");
+    for (item of navBarItems) {
+        item.style.fontWeight = "normal";
+    }
     
     const navBarItem = document.getElementById("challenges-nav-bar-item-"+user.get("currentChallengeId"));
     navBarItem.style.fontWeight = "bold";

@@ -272,6 +272,17 @@ body {
     height: 100%;
 }
 
+#challenge-complete-content {
+    display: none;
+    height: 100%;
+}
+
+#challenge-complete-text {
+    font-size: 24px;
+    text-align: center;
+    margin: auto;
+}
+
 #challenges-modal-step-buttons {
     font-size: 20px;
     position: relative;
