@@ -77,7 +77,7 @@ function loadPage() {
     feed.appendChild(postEvent(mockEvent));
     feed.appendChild(postEvent(mockEvent2));
 
-    setChallenge(mockCurrentUserChallenge);
+    setChallengeBox(mockCurrentUserChallenge);
 
     setChallengesNavBar(mockUser, mockChallenges);
 }
@@ -166,7 +166,7 @@ function addEventInfo(event) {
     return eventInfo;
 }
 
-function setChallenge(challenge) {
+function setChallengeBox(challenge) {
     const badge = document.getElementById("challenges-badge");
     const icon = document.getElementById("challenges-badge-icon");
     icon.innerText = mockChallenges[challenge.get("id")].get("icon");
@@ -177,11 +177,21 @@ function setChallenge(challenge) {
     const stepsText = document.getElementById("challenge-steps");
     stepsText.innerText = currentStep + "/" + totalSteps;
 
+    badge.appendChild(fillBadge(currentStep, totalSteps));
+}
+
+function fillBadge(currentStep, totalSteps) {
     const badgeFilling = document.createElement("div");
     badgeFilling.className = "badge-filling";
     badgeFilling.style.height = 120*(currentStep/totalSteps) + "px";
     badgeFilling.style.bottom = 120*(currentStep/totalSteps) + "px";
-    badge.appendChild(badgeFilling);
+    if (currentStep/totalSteps == 1) {
+        badgeFilling.style.borderRadius = "10px 10px 10px 10px";
+    }
+    else {
+        badgeFilling.style.borderRadius = "0 0 10px 10px";
+    }
+    return badgeFilling;
 }
 
 function setChallengesNavBar(user, challenges) {
@@ -199,13 +209,32 @@ function setChallengesNavBar(user, challenges) {
 }
 
 function createChallengeNavBarItem(user, challenge) {
-    const item = document.createElement('p');
+    const item = document.createElement('div');
     item.className = "challenges-nav-bar-item";
-    item.innerText = challenge.get("title");
+
+    const title = document.createElement('p');
+    title.className = "challenges-nav-bar-item-title";
+    title.innerText = challenge.get("title");
+    item.appendChild(title);
+
+    const icon = document.createElement('p');
+    icon.className = "challenges-nav-bar-item-icon";
+    icon.innerText = challenge.get("icon");
+    item.appendChild(icon);
+
     item.addEventListener("click", () => {
+        boldCurrentChallengeTitle(item);
         showChallengeInfo(user, challenge);
     });
     return item;
+}
+
+function boldCurrentChallengeTitle(chosenItem) {
+    const items = document.getElementsByClassName("challenges-nav-bar-item");
+    for (item of items) {
+        item.style.fontWeight = "normal";
+    }
+    chosenItem.style.fontWeight = "bold";
 }
 
 function showChallengeInfo(user, challenge) {
@@ -223,4 +252,23 @@ function showChallengeInfo(user, challenge) {
 
     const resources = document.getElementById("challenges-main-panel-resources");
     resources.innerText = challenge.get("resources")[displayedStep-1];
+
+    createModalChallengesBadge(displayedStep, challenge);
+}
+
+function createModalChallengesBadge(currentStep, challenge) {
+    const badge = document.getElementById("modal-challenges-badge");
+    const icon = document.getElementById("modal-challenges-badge-icon");
+    icon.innerText = challenge.get("icon");
+    const totalSteps = challenge.get("steps").length;
+    const badgeFilling = document.getElementById("modal-badge-filling");
+    badgeFilling.style.height = 120*(currentStep/totalSteps) + "px";
+    badgeFilling.style.bottom = 120*(currentStep/totalSteps) + "px";
+    if (currentStep/totalSteps == 1) {
+        badgeFilling.style.borderRadius = "10px 10px 10px 10px";
+    }
+    else {
+        badgeFilling.style.borderRadius = "0 0 10px 10px";
+    }
+    badge.appendChild(badgeFilling);
 }
