@@ -221,11 +221,6 @@ body {
     margin-left: 20%;
 }
 
-#challenges-main-panel {
-    display: flex;
-    width: 45%;
-}
-
 #challenges-nav-bar-header {
     text-align: center;
     font-size: 22px;
@@ -268,6 +263,25 @@ body {
     position: relative;
 }
 
+#challenges-main-panel {
+    width: 45%;
+}
+
+#challenges-main-panel-upper-content {
+    display: flex;
+    height: 100%;
+}
+
+#challenges-modal-step-buttons {
+    display: flex;
+    justify-content: space-between;
+    font-size: 20px;
+    position: relative;
+    bottom: 35px;
+    margin: 10px;
+    margin-top: 0;
+}
+
 .challenges-main-panel-content {
     margin-top: 5%;
     margin-left: 5%;
@@ -289,16 +303,34 @@ body {
     background: transparent;
     z-index: 3;
     margin-top: 140px;
+    width: 100px;
+    height: 150px;
 }
 
 #modal-challenges-badge-icon {
     position: relative;
     z-index: 2;
-    height: 120px;
+    height: 150px;
     margin: 0;
-    line-height: 120px;
+    line-height: 150px;
+    width: 100px;
 }
 
 #modal-badge-filling {
     z-index: 1;
+    width: 100px;
+}
+
+#challenges-modal-set-challenge-div {
+    display: flex;
+    font-size: 24px;
+    margin-left: 0;
+}
+
+#challenges-modal-set-challenge-checkbox {
+    border: solid 2px #004643;
+    height: 24px;
+    width: 24px;
+    margin: auto;
+    margin-left: 10px;
 }

@@ -40,10 +40,10 @@ mockChallenges[1] = new Map();
 mockChallenges[1].set("id", 1);
 mockChallenges[1].set("title", "Recycling");
 mockChallenges[1].set("icon", "♻️");
-let mockRecyclingSteps = ["Reuse", "Reduce","Recycle"];
-let mockRecyclingStepDescriptions = ["Description for step 1",
+let mockRecyclingSteps = ["Use a reusable bag for groceries", "Reduce","Recycle"];
+let mockRecyclingStepDescriptions = ["(More information about why this helps the environment)",
 "Description for step 2", "Description for step 3"];
-let mockRecyclingStepResources = ["Here is a link for more information",
+let mockRecyclingStepResources = ["(External resources about recycling related environmental issues)",
 "Here is a link for more information", "Here is a link for more information"];
 mockChallenges[1].set("steps", mockRecyclingSteps);
 mockChallenges[1].set("descriptions", mockRecyclingStepDescriptions);
@@ -202,7 +202,6 @@ function setChallengesNavBar(user, challenges) {
         const itemBackground = document.createElement('div');
         itemBackground.className = "challenges-nav-bar-item-background";
         let percentDone = user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
-        console.log("percent done" + percentDone + challenge.get("title"));
         itemBackground.style.width = percentDone*100+"%";
         navBar.appendChild(itemBackground);
     }
@@ -238,7 +237,6 @@ function boldCurrentChallengeTitle(chosenItem) {
 }
 
 function showChallengeInfo(user, challenge) {
-    console.log("clicked " + challenge.get("title"));
     const header = document.getElementById("challenges-main-panel-header");
     let displayedStep = Math.min(user.get("challengeStatuses")[challenge.get("id")]+1, challenge.get("steps").length);
     let stepsText = displayedStep + "/" + challenge.get("steps").length;
@@ -262,8 +260,8 @@ function createModalChallengesBadge(currentStep, challenge) {
     icon.innerText = challenge.get("icon");
     const totalSteps = challenge.get("steps").length;
     const badgeFilling = document.getElementById("modal-badge-filling");
-    badgeFilling.style.height = 120*(currentStep/totalSteps) + "px";
-    badgeFilling.style.bottom = 120*(currentStep/totalSteps) + "px";
+    badgeFilling.style.height = 150*(currentStep/totalSteps) + "px";
+    badgeFilling.style.bottom = 150*(currentStep/totalSteps) + "px";
     if (currentStep/totalSteps == 1) {
         badgeFilling.style.borderRadius = "10px 10px 10px 10px";
     }
