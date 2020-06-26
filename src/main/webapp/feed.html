@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>GEN Capstone</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&display=swap" rel="stylesheet">
+  </head>
+  <body onload="loadPage()">
+    <div class="header">
+        <h1 class="title">🌏project title</h1>
+        <div class="tabs">
+            <p class="tab learn-tab">learn</p>
+            <p class="tab assess-tab">assess</p>
+            <p class="tab explore-tab">explore</p>
+        </div>
+    </div>
+    <div id="feed">
+        <div class="feed-heading"><div class="events-searchbar">find local events:<input type="text" id="events-searchbar-input" placeholder="city or zip code"></input></div></div>
+        <div id="events-feed"></div>
+        <div class="feed-right-side">
+            <div class="feed-box create-event-box"><div class="feed-box-content create-event-box-content"><p class="icon">📅</p><p class="create-event-text">create an event</p></div></div>
+            <div class="feed-box challenges-box">
+                <div class="feed-box-content challenges-box-content">
+                    <p class="icon">🌏</p><p class="challenges-text">challenges</p>
+                </div>
+                <div class="challenges-badge" id="challenges-badge"><p class="icon badge-icon" id="challenges-badge-icon"></p><p class="challenge-steps" id="challenge-steps"></p></div>
+            </div>
+        </div>
+    </div>
+
+  </body>
+</html>
