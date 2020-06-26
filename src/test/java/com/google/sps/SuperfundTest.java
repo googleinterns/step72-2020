@@ -60,11 +60,6 @@ public final class SuperfundTest {
 
     @Test
     public void hometownTest(){
-        // HttpServletRequest request = mock(HttpServletRequest.class);       
-        // HttpServletResponse response = mock(HttpServletResponse.class);
-        // when(request.getParameter(AREA_PARAMETER)).thenReturn(ZIP);
-        // when(request.getParameter(ZIP_PARAMETER)).thenReturn("01720");
-
         ArrayList<SuperfundSite> actonSites = new ArrayList<>();
         actonSites.add(new SuperfundSite("W.R. GRACE & CO., INC. (ACTON PLANT)", 0, "MA", "ACTON", "MIDDLESEX", "Currently on the Final NPL", 42.45055, -71.427781));
         actonSites.add(new SuperfundSite("W R GRACE DARAMIC PLANT", 0, "MA", "ACTON", "MIDDLESEX", "Not on the NPL", 0, 0));
