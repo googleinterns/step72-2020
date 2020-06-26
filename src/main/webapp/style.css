@@ -273,13 +273,21 @@ body {
 }
 
 #challenges-modal-step-buttons {
-    display: flex;
-    justify-content: space-between;
     font-size: 20px;
     position: relative;
     bottom: 35px;
     margin: 10px;
     margin-top: 0;
+}
+
+#challenges-modal-next-step-button {
+    position: relative;
+    float: right;
+    bottom: 27px;
+}
+
+#challenges-modal-prev-step-button {
+    width: 200px;
 }
 
 .challenges-main-panel-content {

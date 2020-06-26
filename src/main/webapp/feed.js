@@ -230,7 +230,7 @@ function createChallengeNavBarItem(user, challenge) {
 
     item.addEventListener("click", () => {
         boldCurrentChallengeTitle(item);
-        showChallengeInfo(user, challenge);
+        showChallengeInfo(user, challenge, user.get("challengeStatuses")[challenge.get("id")]+1);
     });
     return item;
 }
@@ -243,37 +243,97 @@ function boldCurrentChallengeTitle(chosenItem) {
     chosenItem.style.fontWeight = "bold";
 }
 
-function showChallengeInfo(user, challenge) {
+function showChallengeInfo(user, challenge, displayedStep) {
+    console.log("user status = " + user.get("challengeStatuses")[challenge.get("id")]);
     const header = document.getElementById("challenges-main-panel-header");
-    let displayedStep = Math.min(user.get("challengeStatuses")[challenge.get("id")]+1, challenge.get("steps").length);
+    if (displayedStep == 0) displayedStep = 1;
+    else if (displayedStep == challenge.get("steps").length) console.log("go to complete page here");
     let stepsText = displayedStep + "/" + challenge.get("steps").length;
     header.innerText = challenge.get("icon") + " " + challenge.get("title") + " " + stepsText;
 
-    const step = document.getElementById("challenges-main-panel-step");
-    step.innerText = challenge.get("steps")[displayedStep-1];
+    const stepText = document.getElementById("challenges-main-panel-step");
+    stepText.innerText = challenge.get("steps")[displayedStep-1];
 
-    if (displayedStep == 1) {
-        const prevButton = document.getElementById("")
-    }
-
+    setPrevButton(displayedStep, user, challenge);
+    setNextButton(displayedStep, user, challenge);
+    
     const description = document.getElementById("challenges-main-panel-description");
     description.innerText = challenge.get("descriptions")[displayedStep-1];
 
     const resources = document.getElementById("challenges-main-panel-resources");
     resources.innerText = challenge.get("resources")[displayedStep-1];
 
-
     createModalChallengesBadge(displayedStep, challenge);
-    setCheckbox(challenge);
+
+    const setChallengeDiv = document.getElementById("challenges-modal-set-challenge-div");
+    if (displayedStep == user.get("challengeStatuses")[challenge.get("id")]+1) {
+        setChallengeDiv.style.display = "flex";
+        setCheckbox(challenge);
+    }
+    else {
+        setChallengeDiv.style.display = "none";
+    }
 }
 
+function setPrevButton(displayedStep, user, challenge) {
+    const prevButton = document.getElementById("challenges-modal-prev-step-button");
+    const nextButton = document.getElementById("challenges-modal-next-step-button");
+    if (displayedStep == 1) {
+        prevButton.style.display = "none";
+        nextButton.style.bottom = 0;
+    }
+    else {
+        prevButton.style.display = "block";
+        nextButton.style.bottom = "27px";
+    }
+
+    prevButton.onclick = ()=> {
+        showChallengeInfo(user, challenge, displayedStep-1);
+    };
+}
+
+
+function setNextButton(displayedStep, user, challenge) {
+    const nextButton = document.getElementById("challenges-modal-next-step-button");
+    if (user.get("currentChallengeId") != challenge.get("id")) {
+        nextButton.style.display = "none";
+    }
+    else if (displayedStep == user.get("challengeStatuses")[challenge.get("id")]+1) {
+        nextButton.style.display = "block";
+        nextButton.innerText = "step complete →";
+    }
+    else if (displayedStep == challenge.get("steps").length+1) {
+        nextButton.style.display = "none";
+    }
+    else {
+        nextButton.style.display = "block";
+        nextButton.innerText = "view next step →";
+    }
+
+    nextButton.onclick = ()=> {
+        let currentStatus = user.get("challengeStatuses")[challenge.get("id")];
+        if (currentStatus+1 == displayedStep) {
+            user.get("challengeStatuses")[challenge.get("id")] = currentStatus+1;
+            console.log("user status set to " + user.get("challengeStatuses")[challenge.get("id")]);
+        }
+        showChallengeInfo(user, challenge, displayedStep+1);
+    };
+
+    
+} 
+
 function setCheckbox(challenge) {
-    if (challenge.get("id") == user.get("currentChallengeId")) checkCheckbox(challenge);
-    else resetCheckbox();
+    if (challenge.get("id") == user.get("currentChallengeId")) {
+        checkCheckbox(challenge);
+    }
+    else {
+        resetCheckbox();
+    }
 
     const checkbox = document.getElementById("challenges-modal-set-challenge-checkbox");
     checkbox.addEventListener("click", () => {
         checkCheckbox(challenge);
+        setNextButton(user.get("challengeStatuses")[challenge.get("id")]+1, user, challenge);
     })
 }
 
@@ -303,7 +363,7 @@ function openChallengesModal() {
     const modal = document.getElementById("challenges-modal");
     modal.style.display = "flex";
     const challenge = challenges[user.get("currentChallengeId")];
-    showChallengeInfo(user, challenge);
+    showChallengeInfo(user, challenge, user.get("challengeStatuses")[user.get("currentChallengeId")]+1);
     
     const navBarItem = document.getElementById("challenges-nav-bar-item-"+user.get("currentChallengeId"));
     navBarItem.style.fontWeight = "bold";
