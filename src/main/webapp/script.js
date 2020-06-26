@@ -252,21 +252,28 @@ function showChallengeInfo(user, challenge) {
     const step = document.getElementById("challenges-main-panel-step");
     step.innerText = challenge.get("steps")[displayedStep-1];
 
+    if (displayedStep == 1) {
+        const prevButton = document.getElementById("")
+    }
+
     const description = document.getElementById("challenges-main-panel-description");
     description.innerText = challenge.get("descriptions")[displayedStep-1];
 
     const resources = document.getElementById("challenges-main-panel-resources");
     resources.innerText = challenge.get("resources")[displayedStep-1];
 
-    createModalChallengesBadge(displayedStep, challenge);
 
+    createModalChallengesBadge(displayedStep, challenge);
+    setCheckbox(challenge);
+}
+
+function setCheckbox(challenge) {
     if (challenge.get("id") == user.get("currentChallengeId")) checkCheckbox(challenge);
     else resetCheckbox();
 
     const checkbox = document.getElementById("challenges-modal-set-challenge-checkbox");
     checkbox.addEventListener("click", () => {
         checkCheckbox(challenge);
-        console.log("current challenge now = " + challenges[user.get("currentChallengeId")]);
     })
 }
 
