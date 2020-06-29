@@ -307,7 +307,7 @@ function showChallengeCompletePage(challenge, newCompletion) {
 
     newCompletion ? showNewChallengeCompletePage(challenge) : showOldChallengeCompletePage(challenge);
 
-    
+    setPrevButton(challenge.get("steps").length+1, user, challenge);
 }
 
 function showNewChallengeCompletePage(challenge) {
