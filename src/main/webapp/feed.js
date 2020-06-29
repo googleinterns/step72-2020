@@ -241,7 +241,6 @@ function createChallengeNavBarItem(user, challenge) {
     item.addEventListener("click", () => {
         boldCurrentChallengeTitle(item);
         const step = user.get("challengeStatuses")[challenge.get("id")]+1;
-        console.log(step);
         if (step < challenge.get("steps").length+1) {
             showChallengeInfo(user, challenge, step);
         }
