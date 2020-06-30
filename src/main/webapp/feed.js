@@ -82,9 +82,13 @@ function loadPage() {
     setChallengesNavBar(mockUser, challenges);
 
     window.onclick = function(event) {
-        const modal = document.getElementById("challenges-modal");
-        if (event.target == modal) {
+        const challengesModal = document.getElementById("challenges-modal");
+        const createEventModal = document.getElementById("create-event-modal");
+        if (event.target == challengesModal) {
             closeChallengesModal();
+        }
+        else if (event.target == createEventModal) {
+            createEventModal.style.display = "none";
         }
     }
 }
@@ -465,4 +469,9 @@ function resetCheckbox() {
     checkbox.style.border = "solid 2.5px #004643";
     const checkmark = document.getElementById("challenges-modal-checkmark");
     checkmark.style.display = "none";
+}
+
+function openCreateEventModal() {
+    const modal = document.getElementById("create-event-modal");
+    modal.style.display = "block";
 }

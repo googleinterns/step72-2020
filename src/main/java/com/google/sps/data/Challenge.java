@@ -14,6 +14,8 @@
 
 package com.google.sps.data;
 
+import java.util.Map;
+
 public final class Challenge {
 
   public static final String DATA_TYPE = "Challenge";
@@ -29,11 +31,11 @@ public final class Challenge {
   private final String icon;
   private final Map<String, String>[] steps;
 
-  public Event(long id, String title, long timestamp, String icon, Map<String, String>[] steps) {
+  public Challenge(long id, String title, long timestamp, String icon, Map<String, String>[] steps) {
     this.id = id;
     this.title = title;
     this.timestamp = timestamp;
-    this.author = author;
+    this.icon = icon;
     this.steps = steps.clone();
   }
 }

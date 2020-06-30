@@ -195,7 +195,7 @@ body {
     margin-top: 15px;
 }
 
-#challenges-modal {
+#challenges-modal, #create-event-modal {
     color: #004643;
     display: none; 
     position: fixed;
