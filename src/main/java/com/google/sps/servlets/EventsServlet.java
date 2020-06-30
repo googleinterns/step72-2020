@@ -76,16 +76,15 @@ public class EventsServlet extends HttpServlet {
 
     List<Event> events = new ArrayList<>();
     for (Entity entity : results) {
-        long id = (long) entity.getProperty("id");
-        // String creator = (String) entity.getProperty("creator");
+        // long id = (long) entity.getProperty("id");
         long timestamp = (long) entity.getProperty("timestamp");
         String summary = (String) entity.getProperty("summary");
         String description = (String) entity.getProperty("description");
-        // String location = (String) entity.getProperty("location");
+        String location = (String) entity.getProperty("location");
 
         Event event = new Event()
             .setSummary(summary)
-            // .setLocation(location)
+            .setLocation(location)
             .setDescription(description);
 
         events.add(event);
@@ -102,6 +101,7 @@ public class EventsServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
       String eventSummary = request.getParameter("summary");
       String eventDescription = request.getParameter("description");
+      String eventLocation = request.getParameter("location");
       long timestamp = System.currentTimeMillis();
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -109,6 +109,7 @@ public class EventsServlet extends HttpServlet {
       Entity eventEntity = new Entity("Event");
       eventEntity.setProperty("summary", eventSummary);
       eventEntity.setProperty("timestamp", timestamp);
+      eventEntity.setProperty("location", eventLocation);
       eventEntity.setProperty("description", eventDescription);
 
       System.out.println("Put event in datastore");
