@@ -93,7 +93,6 @@ public class EventsServlet extends HttpServlet {
         EventDateTime start = new EventDateTime()
             .setDateTime(startDateTime)
             .setTimeZone("UTC");
-        System.out.println("Got start time " + start);
         Event event = new Event()
             .setSummary(summary)
             .setLocation(location)
@@ -117,33 +116,18 @@ public class EventsServlet extends HttpServlet {
       String eventLocation = request.getParameter("location");
       String eventDateString = request.getParameter("date");
       String eventTimeString = request.getParameter("time");
-      String timezone = request.getParameter("timezone");
-    //   java.util.Calendar calendar = java.util.Calendar.getInstance();
-    //   calendar.setTime(eventDateString + " " + eventTimeString);
-    //   SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-
-    //   sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-    //   System.out.println(sdf.format(calendar.getTime()));    
-
-    //   sdf.setTimeZone(TimeZone.getTimeZone(timezone));
-    //   System.out.println(sdf.format(calendar.getTime()));
-
-
+      String timezoneOffset = request.getParameter("timezone");
+  
       Date eventDateTime;
       SimpleDateFormat eventDateTimeFormat;
-    //   Date eventTime;
       try {
           // add opposite of offset to get back to utc
-          System.out.println("timezone offset " + timezone);
-          eventDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm Z").parse(eventDateString + " " + eventTimeString + " -0500");
-            System.out.println("event date with no formatting " + eventDateTime);
-          eventDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm z");
-        //   eventDateTimeFormat.setTimeZone(TimeZone.getTimeZone(timezone));
-          System.out.println("EVENT DATE format 1 " + eventDateTimeFormat.format(eventDateTime));
-
-          eventDateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        //   eventTime = new SimpleDateFormat("HH:mm").parse(eventTimeString);
-        System.out.println("EVENT DATE format 2 " + eventDateTimeFormat.format(eventDateTime));
+          String hrs = String.format("%02d", Integer.parseInt(timezoneOffset) / 60);
+          String min = String.format("%02d", Integer.parseInt(timezoneOffset) % 60);
+          char sign = '-';
+          if (timezoneOffset.charAt(0) == '-') sign = '+';
+          eventDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm Z")
+            .parse(eventDateString + " " + eventTimeString + " " + sign + hrs + min);
       } catch(Exception e) {
           System.out.println(e.getMessage());
           return;
