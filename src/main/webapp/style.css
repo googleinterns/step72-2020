@@ -371,3 +371,13 @@ body {
     right: 15px;
     bottom: 9px;
 }
+
+#create-event-form {
+    background: #fafafa;
+    width: 60%;
+    margin: auto;
+}
+
+#create-event-form > input {
+    margin-left: 20px;
+}

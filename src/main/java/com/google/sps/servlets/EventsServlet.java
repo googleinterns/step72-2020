@@ -53,6 +53,7 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
+import com.google.api.services.calendar.model.EventDateTime;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -60,6 +61,11 @@ import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
+
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.time.*; 
+import java.util.TimeZone;
 
 /** Servlet that returns events sorted by most recent timestamp */
 @WebServlet("/events")
@@ -81,11 +87,18 @@ public class EventsServlet extends HttpServlet {
         String summary = (String) entity.getProperty("summary");
         String description = (String) entity.getProperty("description");
         String location = (String) entity.getProperty("location");
+        Date date = (Date) entity.getProperty("dateTime");
 
+        DateTime startDateTime = new DateTime(date);
+        EventDateTime start = new EventDateTime()
+            .setDateTime(startDateTime)
+            .setTimeZone("UTC");
+        System.out.println("Got start time " + start);
         Event event = new Event()
             .setSummary(summary)
             .setLocation(location)
-            .setDescription(description);
+            .setDescription(description)
+            .setStart(start);
 
         events.add(event);
     }
@@ -102,6 +115,39 @@ public class EventsServlet extends HttpServlet {
       String eventSummary = request.getParameter("summary");
       String eventDescription = request.getParameter("description");
       String eventLocation = request.getParameter("location");
+      String eventDateString = request.getParameter("date");
+      String eventTimeString = request.getParameter("time");
+      String timezone = request.getParameter("timezone");
+    //   java.util.Calendar calendar = java.util.Calendar.getInstance();
+    //   calendar.setTime(eventDateString + " " + eventTimeString);
+    //   SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
+    //   sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+    //   System.out.println(sdf.format(calendar.getTime()));    
+
+    //   sdf.setTimeZone(TimeZone.getTimeZone(timezone));
+    //   System.out.println(sdf.format(calendar.getTime()));
+
+
+      Date eventDateTime;
+      SimpleDateFormat eventDateTimeFormat;
+    //   Date eventTime;
+      try {
+          // add opposite of offset to get back to utc
+          System.out.println("timezone offset " + timezone);
+          eventDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm Z").parse(eventDateString + " " + eventTimeString + " -0500");
+            System.out.println("event date with no formatting " + eventDateTime);
+          eventDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm z");
+        //   eventDateTimeFormat.setTimeZone(TimeZone.getTimeZone(timezone));
+          System.out.println("EVENT DATE format 1 " + eventDateTimeFormat.format(eventDateTime));
+
+          eventDateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        //   eventTime = new SimpleDateFormat("HH:mm").parse(eventTimeString);
+        System.out.println("EVENT DATE format 2 " + eventDateTimeFormat.format(eventDateTime));
+      } catch(Exception e) {
+          System.out.println(e.getMessage());
+          return;
+      }
       long timestamp = System.currentTimeMillis();
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -111,8 +157,7 @@ public class EventsServlet extends HttpServlet {
       eventEntity.setProperty("timestamp", timestamp);
       eventEntity.setProperty("location", eventLocation);
       eventEntity.setProperty("description", eventDescription);
-
-      System.out.println("Put event in datastore");
+      eventEntity.setProperty("dateTime", eventDateTime);
 
       datastore.put(eventEntity);
 

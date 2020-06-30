@@ -73,6 +73,8 @@ eventCategoryIcons.set("food/drink", "🥑🍋🍏");
 eventCategoryIcons.set("nature", "🌲🌱🌳");
 
 async function loadPage() {
+    const timezone = document.getElementById("user-timezone");
+    timezone.value = new Date().getTimezoneOffset();
     const response = await fetch("/events");
     const events = await response.json();
     const feed = document.getElementById("events-feed");
@@ -176,7 +178,9 @@ function addEventInfo(event) {
 
     const eventDate = document.createElement("p");
     eventDate.innerHTML =  "📅&nbsp&nbsp";
-    // eventDate.innerText += event.date;
+    const dateTime = new Date(event.start.dateTime.value);
+    const formattedDate = dateTime.toLocaleString('en-US');
+    eventDate.innerText += formattedDate;
 
     eventInfo.appendChild(eventLocation);
     eventInfo.appendChild(eventDate);

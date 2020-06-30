@@ -68,12 +68,17 @@
     </div>
     <div id="create-event-modal">
         <form id="create-event-form" action="/events" method="POST">
+            <input type="text" id="user-timezone" name="timezone" style="display:none;"></input>
             <label for="event-summary">Event:</label><br>
             <input type="text" id="event-summary" name="summary"><br>
             <label for="event-location">Location:</label><br>
-            <input type="text" id="event-location" name="location">
-            <label for="event-description">Description:</label><br>
-            <input type="text" id="event-description" name="description">
+            <input type="text" id="event-location" name="location"><br>
+            <label for="event-location">Date:</label><br>
+            <input type="date" id="event-date" name="date"><br>
+            <label for="event-date">Time:</label><br>
+            <input type="time" id="event-time" name="time"><br>
+            <label for="event-time">Description:</label><br>
+            <input type="text" id="event-description" name="description"><br>
             <input class="button" id="submit-button" type="submit" />
         </form>
     </div>
