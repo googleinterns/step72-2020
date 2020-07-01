@@ -54,6 +54,7 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.Event.ExtendedProperties;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -61,6 +62,7 @@ import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
@@ -71,10 +73,23 @@ import java.util.TimeZone;
 @WebServlet("/events")
 public class EventsServlet extends HttpServlet {
 
+    static final String EVENT = "Event";
+    static final String TIMESTAMP = "timestamp";
+    static final String SUMMARY = "summary";
+    static final String DESCRIPTION = "description";
+    static final String LOCATION = "location";
+    static final String DATETIME = "date_time";
+    static final String CATEGORY = "category";
+
+    static final List<String> CATEGORIES = new ArrayList<String>(
+        Arrays.asList("food_beverage", "nature", "water", "waste_cleanup", "other")
+    );
+
+    
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     FetchOptions fetchOptions = FetchOptions.Builder.withLimit(10);
-    Query query = new Query("Event").addSort("timestamp", SortDirection.DESCENDING);
+    Query query = new Query(EVENT).addSort(TIMESTAMP, SortDirection.DESCENDING);
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery pq = datastore.prepare(query);
 
@@ -82,12 +97,12 @@ public class EventsServlet extends HttpServlet {
 
     List<Event> events = new ArrayList<>();
     for (Entity entity : results) {
-        // long id = (long) entity.getProperty("id");
-        long timestamp = (long) entity.getProperty("timestamp");
-        String summary = (String) entity.getProperty("summary");
+        long timestamp = (long) entity.getProperty(TIMESTAMP);
+        String summary = (String) entity.getProperty(SUMMARY);
         String description = (String) entity.getProperty("description");
         String location = (String) entity.getProperty("location");
         Date date = (Date) entity.getProperty("dateTime");
+        String category = (String) entity.getProperty("category");
 
         DateTime startDateTime = new DateTime(date);
         EventDateTime start = new EventDateTime()
@@ -99,6 +114,11 @@ public class EventsServlet extends HttpServlet {
             .setDescription(description)
             .setStart(start);
 
+        ExtendedProperties ep = new ExtendedProperties();
+        ep.set("category", category);
+        event.setExtendedProperties(ep);
+        System.out.println("Extended properties " + event.getExtendedProperties());
+    
         events.add(event);
     }
 
@@ -117,21 +137,12 @@ public class EventsServlet extends HttpServlet {
       String eventDateString = request.getParameter("date");
       String eventTimeString = request.getParameter("time");
       String timezoneOffset = request.getParameter("timezone");
+      String category = request.getParameter("category");
+
+      if (!CATEGORIES.contains(category)) category = "other";
   
-      Date eventDateTime;
-      SimpleDateFormat eventDateTimeFormat;
-      try {
-          // add opposite of offset to get back to utc
-          String hrs = String.format("%02d", Integer.parseInt(timezoneOffset) / 60);
-          String min = String.format("%02d", Integer.parseInt(timezoneOffset) % 60);
-          char sign = '-';
-          if (timezoneOffset.charAt(0) == '-') sign = '+';
-          eventDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm Z")
-            .parse(eventDateString + " " + eventTimeString + " " + sign + hrs + min);
-      } catch(Exception e) {
-          System.out.println(e.getMessage());
-          return;
-      }
+      Date eventDateTime = getEventDateTime(eventDateString, eventTimeString, timezoneOffset);
+      if (eventDateTime == null) return;
       long timestamp = System.currentTimeMillis();
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -142,6 +153,7 @@ public class EventsServlet extends HttpServlet {
       eventEntity.setProperty("location", eventLocation);
       eventEntity.setProperty("description", eventDescription);
       eventEntity.setProperty("dateTime", eventDateTime);
+      eventEntity.setProperty("category", category);
 
       datastore.put(eventEntity);
 
@@ -152,5 +164,24 @@ public class EventsServlet extends HttpServlet {
       Gson gson = new Gson();
       String json = gson.toJson(events);
       return json;
+  }
+
+  public Date getEventDateTime(String eventDate, String eventTime, String timezoneOffset) {
+      Date eventDateTime;
+      SimpleDateFormat eventDateTimeFormat;
+      try {
+          // add opposite of offset to get back to utc
+          String hrs = String.format("%02d", Math.abs(Integer.parseInt(timezoneOffset) / 60));
+          String min = String.format("%02d", Integer.parseInt(timezoneOffset) % 60);
+          char sign = '-';
+          if (timezoneOffset.charAt(0) == '-') sign = '+';
+          eventDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm Z")
+            .parse(eventDate + " " + eventTime + " " + sign + hrs + min);
+            
+          return eventDateTime;
+      } catch(Exception e) {
+          System.out.println(e.getMessage());
+          return null;
+      }
   }
 }

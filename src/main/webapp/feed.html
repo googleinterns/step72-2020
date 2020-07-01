@@ -73,12 +73,20 @@
             <input type="text" id="event-summary" name="summary"><br>
             <label for="event-location">Location:</label><br>
             <input type="text" id="event-location" name="location"><br>
-            <label for="event-location">Date:</label><br>
+            <label for="event-date">Date:</label><br>
             <input type="date" id="event-date" name="date"><br>
-            <label for="event-date">Time:</label><br>
+            <label for="event-time">Time:</label><br>
             <input type="time" id="event-time" name="time"><br>
-            <label for="event-time">Description:</label><br>
+            <label for="event-description">Description:</label><br>
             <input type="text" id="event-description" name="description"><br>
+            <label for="event-category">Category:</label><br>
+            <select class="button" name="category" id="event-category">
+                <option value="food_beverage">Food/Beverage</option>
+                <option value="nature">Nature</option>
+                <option value="water">Water</option>
+                <option value="waste_cleanup">Waste/Cleanup</option>
+                <option value="other">Waste/Cleanup</option>
+            </select>
             <input class="button" id="submit-button" type="submit" />
         </form>
     </div>

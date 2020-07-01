@@ -1,23 +1,3 @@
-// will be pulled from backend
-let mockEvent = new Map();
-mockEvent.set("author", "User A");
-mockEvent.set("title", "Farmer's Market");
-mockEvent.set("date", "July 1 2020");
-mockEvent.set("location", "Mountain View, California");
-mockEvent.set("description", "details about event etc etc");
-mockEvent.set("category", "food/drink");
-mockEvent.set("bookmarks", 10);
-
-let mockEvent2 = new Map();
-mockEvent2.set("author", "User B");
-mockEvent2.set("title", "World Rainforest Day");
-mockEvent2.set("date", "July 1 2020");
-mockEvent2.set("location", "Mountain View, California");
-mockEvent2.set("description", "details about event etc etc");
-mockEvent2.set("category", "nature");
-mockEvent2.set("bookmarks", 25);
-
-
 // will move to backend eventually, will make challenge & step classes
 let mockChallenges = [];
 mockChallenges[0] = new Map();
@@ -69,8 +49,11 @@ const user = mockUser;
 const challenges = mockChallenges;
 
 let eventCategoryIcons = new Map();
-eventCategoryIcons.set("food/drink", "🥑🍋🍏");
+eventCategoryIcons.set("food_beverage", "🥑🍋🍏");
 eventCategoryIcons.set("nature", "🌲🌱🌳");
+eventCategoryIcons.set("water", "🌊🐳​🌊​");
+eventCategoryIcons.set("waste_cleanup", "🗑♻️🥤");
+eventCategoryIcons.set("other", "🥑🌲🐢");
 
 async function loadPage() {
     const timezone = document.getElementById("user-timezone");
@@ -148,7 +131,9 @@ function addEventMiddleSection(event) {
 function addEventInnerCard(event) {
     const eventIcon = document.createElement('div');
     eventIcon.className = "event-icon";
-    // eventIcon.innerText = eventCategoryIcons.get(event.get("category"));
+    console.log(event.extendedProperties);
+    console.log(event.extendedProperties.category);
+    eventIcon.innerText = eventCategoryIcons.get(event.extendedProperties.category);
 
     const eventTitle = document.createElement('p');
     eventTitle.className = "event-title";
