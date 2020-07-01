@@ -80,12 +80,15 @@ public class EventsServlet extends HttpServlet {
     static final String LOCATION = "location";
     static final String DATETIME = "date_time";
     static final String CATEGORY = "category";
+    static final String UTC_TIMEZONE = "UTC";
+    static final String DATE = "date";
+    static final String TIME = "time";
+    static final String USER_TIMEZONE = "timezone";
 
     static final List<String> CATEGORIES = new ArrayList<String>(
         Arrays.asList("food_beverage", "nature", "water", "waste_cleanup", "other")
     );
 
-    
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     FetchOptions fetchOptions = FetchOptions.Builder.withLimit(10);
@@ -99,15 +102,15 @@ public class EventsServlet extends HttpServlet {
     for (Entity entity : results) {
         long timestamp = (long) entity.getProperty(TIMESTAMP);
         String summary = (String) entity.getProperty(SUMMARY);
-        String description = (String) entity.getProperty("description");
-        String location = (String) entity.getProperty("location");
-        Date date = (Date) entity.getProperty("dateTime");
-        String category = (String) entity.getProperty("category");
+        String description = (String) entity.getProperty(DESCRIPTION);
+        String location = (String) entity.getProperty(LOCATION);
+        Date date = (Date) entity.getProperty(DATETIME);
+        String category = (String) entity.getProperty(CATEGORY);
 
         DateTime startDateTime = new DateTime(date);
         EventDateTime start = new EventDateTime()
             .setDateTime(startDateTime)
-            .setTimeZone("UTC");
+            .setTimeZone(UTC_TIMEZONE);
         Event event = new Event()
             .setSummary(summary)
             .setLocation(location)
@@ -115,9 +118,8 @@ public class EventsServlet extends HttpServlet {
             .setStart(start);
 
         ExtendedProperties ep = new ExtendedProperties();
-        ep.set("category", category);
+        ep.set(CATEGORY, category);
         event.setExtendedProperties(ep);
-        System.out.println("Extended properties " + event.getExtendedProperties());
     
         events.add(event);
     }
@@ -131,13 +133,13 @@ public class EventsServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      String eventSummary = request.getParameter("summary");
-      String eventDescription = request.getParameter("description");
-      String eventLocation = request.getParameter("location");
-      String eventDateString = request.getParameter("date");
-      String eventTimeString = request.getParameter("time");
-      String timezoneOffset = request.getParameter("timezone");
-      String category = request.getParameter("category");
+      String eventSummary = request.getParameter(SUMMARY);
+      String eventDescription = request.getParameter(DESCRIPTION);
+      String eventLocation = request.getParameter(LOCATION);
+      String eventDateString = request.getParameter(DATE);
+      String eventTimeString = request.getParameter(TIME);
+      String timezoneOffset = request.getParameter(USER_TIMEZONE);
+      String category = request.getParameter(CATEGORY);
 
       if (!CATEGORIES.contains(category)) category = "other";
   
@@ -147,13 +149,13 @@ public class EventsServlet extends HttpServlet {
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-      Entity eventEntity = new Entity("Event");
-      eventEntity.setProperty("summary", eventSummary);
-      eventEntity.setProperty("timestamp", timestamp);
-      eventEntity.setProperty("location", eventLocation);
-      eventEntity.setProperty("description", eventDescription);
-      eventEntity.setProperty("dateTime", eventDateTime);
-      eventEntity.setProperty("category", category);
+      Entity eventEntity = new Entity(EVENT);
+      eventEntity.setProperty(SUMMARY, eventSummary);
+      eventEntity.setProperty(TIMESTAMP, timestamp);
+      eventEntity.setProperty(LOCATION, eventLocation);
+      eventEntity.setProperty(DESCRIPTION, eventDescription);
+      eventEntity.setProperty(DATETIME, eventDateTime);
+      eventEntity.setProperty(CATEGORY, category);
 
       datastore.put(eventEntity);
 
