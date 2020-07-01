@@ -83,7 +83,7 @@ function viewState(){
         }
     }
     addSuperfundMarkers("state", state);
-    console.log(state);
+    console.log("Zoom to state of "+state);
     
 }
 
@@ -112,11 +112,9 @@ function addSuperfundMarkers(areaType, areaCode){
                     infoWindow.close();
                 });
         });
-        console.log(sites);
         console.log("Placed Superfund Markers");
     }).then((sites) => {
         map.fitBounds(bounds);
-        console.log("Zoomed to All Markers");
     });
 }
 
