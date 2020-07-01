@@ -50,6 +50,8 @@ public class SuperfundServlet extends HttpServlet {
 
     private static final String ZIP_PARAMETER = "zip_code";
 
+    public static final int DEFAULT_SCORE = 100;
+
     @Override
     public void init() {
     }
@@ -104,7 +106,7 @@ public class SuperfundServlet extends HttpServlet {
             String cells[] = line.split(SPLITERATOR);
             if(cells.length < TOTAL_CELL_COUNT) continue;
             String name = cells[3];
-            double score = 0;
+            double score = DEFAULT_SCORE;
             String state = cells[7];
             String city = cells[6];
             String county = cells[10];
