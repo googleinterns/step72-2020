@@ -62,7 +62,6 @@ async function loadPage() {
     const events = await response.json();
     const feed = document.getElementById("events-feed");
     for (event of events) {
-        console.log(event);
         feed.appendChild(postEvent(event));
     }
 
@@ -131,8 +130,6 @@ function addEventMiddleSection(event) {
 function addEventInnerCard(event) {
     const eventIcon = document.createElement('div');
     eventIcon.className = "event-icon";
-    console.log(event.extendedProperties);
-    console.log(event.extendedProperties.category);
     eventIcon.innerText = eventCategoryIcons.get(event.extendedProperties.category);
 
     const eventTitle = document.createElement('p');
