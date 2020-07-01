@@ -6,6 +6,7 @@ var lastGeocode = null
 var map;
 var lastInfoWindow = null;
 var bounds;
+var state = "01";
 
 function initMap() {
     var mapOptions = {
@@ -62,6 +63,7 @@ function zoomToArea(areaType, areaCode){
             map.fitBounds(lastGeocode.geometry.viewport);
             bounds.union(lastGeocode.geometry.viewport);
             
+            setGeographicState();
             addSuperfundMarkers(areaType, areaCode);
 
         } else {
@@ -73,15 +75,18 @@ function zoomToArea(areaType, areaCode){
     });
 }
 
-function viewState(){
-    if(lastGeocode === null) return;
-    var state = "01";
+function setGeographicState(){
     for(i in lastGeocode.address_components){
         if(lastGeocode.address_components[i].short_name.length === 2){
             state = lastGeocode.address_components[i].short_name;
             break;
         }
     }
+    document.getElementById("view_state_button").innerText = "View State of "+state;
+}
+
+function viewState(){
+    if(lastGeocode === null) return;
     addSuperfundMarkers("state", state);
     console.log("Zoom to state of "+state);
     
