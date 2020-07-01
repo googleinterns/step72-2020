@@ -72,6 +72,9 @@ let eventCategoryIcons = new Map();
 eventCategoryIcons.set("food/drink", "🥑🍋🍏");
 eventCategoryIcons.set("nature", "🌲🌱🌳");
 
+const badgeHeight = 120;
+let lastBoldedItem;
+
 function loadPage() {
     const feed = document.getElementById("events-feed");
     feed.appendChild(postEvent(mockEvent));
@@ -198,8 +201,8 @@ function setChallengeBox(challengeId) {
 
 function fillBadge(currentStep, totalSteps) {
     const badgeFilling = document.getElementById("feed-badge-filling")
-    badgeFilling.style.height = 120*(currentStep/totalSteps) + "px";
-    badgeFilling.style.bottom = 120*(currentStep/totalSteps) + "px";
+    badgeFilling.style.height = badgeHeight*(currentStep/totalSteps) + "px";
+    badgeFilling.style.bottom = badgeHeight*(currentStep/totalSteps) + "px";
     if (currentStep/totalSteps == 1) {
         badgeFilling.style.borderRadius = "10px 10px 10px 10px";
     }
@@ -253,10 +256,9 @@ function createChallengeNavBarItem(user, challenge) {
 
 function boldCurrentChallengeTitle(chosenItem) {
     const items = document.getElementsByClassName("challenges-nav-bar-item");
-    for (item of items) {
-        item.style.fontWeight = "normal";
-    }
+    if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
     chosenItem.style.fontWeight = "bold";
+    lastBoldedItem = chosenItem;
 }
 
 function showChallengeInfo(user, challenge, displayedStep) {
@@ -434,9 +436,7 @@ function openChallengesModal() {
     modal.style.display = "flex";
 
     const navBarItems = document.getElementsByClassName("challenges-nav-bar-item");
-    for (item of navBarItems) {
-        item.style.fontWeight = "normal";
-    }
+    if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
 
     if (user.get("currentChallengeId") == -1) {
         showChallengeCompletePage(challenges[0], false);
@@ -448,6 +448,7 @@ function openChallengesModal() {
         
         const navBarItem = document.getElementById("challenges-nav-bar-item-"+user.get("currentChallengeId"));
         navBarItem.style.fontWeight = "bold";
+        lastBoldedItem = navBarItem;
     }
 }
 
