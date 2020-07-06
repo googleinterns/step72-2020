@@ -56,6 +56,8 @@ eventCategoryIcons.set("waste_cleanup", "🗑♻️🥤");
 eventCategoryIcons.set("other", "🥑🌲🐢");
 
 async function loadPage() {
+    await checkLoginStatus(); 
+    
     const timezone = document.getElementById("user-timezone");
     timezone.value = new Date().getTimezoneOffset();
     const response = await fetch("/events");
@@ -466,4 +468,26 @@ function resetCheckbox() {
 function openCreateEventModal() {
     const modal = document.getElementById("create-event-modal");
     modal.style.display = "block";
+}
+
+async function checkLoginStatus() {
+    const request = new Request('/login-status', {method: 'GET'});
+    const response = await fetch(request);
+
+    const json = await response.json();
+    const loginBtn = document.getElementById("login-button");
+    const feedRightSide = document.getElementById("feed-right-side");
+
+    if (json["loggedIn"] == "false") {
+        feedRightSide.style.display = "none";
+        loginBtn.innerText = "Login";
+    }
+    else {
+        feedRightSide.style.display = "block";
+        loginBtn.innerText = "Logout";
+    }
+
+    loginBtn.addEventListener("click", () => {
+        window.location = json["url"];
+    });
 }
