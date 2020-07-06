@@ -485,9 +485,17 @@ async function checkLoginStatus() {
     else {
         feedRightSide.style.display = "block";
         loginBtn.innerText = "Logout";
+        if (json["returningUser"] == "false") {
+            openUserInfoModal();
+        }
     }
 
     loginBtn.addEventListener("click", () => {
         window.location = json["url"];
     });
+}
+
+function openUserInfoModal() {
+    const modal = document.getElementById("user-info-modal");
+    modal.style.display = "block";
 }

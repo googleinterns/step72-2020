@@ -107,7 +107,7 @@ body {
     z-index: -1;
 }
 
-#events-searchbar-input {
+#events-searchbar-input, #user-name {
     padding-left: 5px;
     background: transparent;
     border: none;
@@ -115,7 +115,7 @@ body {
     font-size: 20px;
 }
 
-#events-searchbar-input:focus {
+#events-searchbar-input:focus, #user-name:focus {
     background: transparent;
     border: none;
     outline: none;
@@ -196,7 +196,7 @@ body {
     margin-top: 15px;
 }
 
-#challenges-modal, #create-event-modal {
+.modal {
     color: #004643;
     display: none; 
     position: fixed;
@@ -395,7 +395,7 @@ body {
     color: #004643;
 }
 
-#submit-button {
+.submit-button {
     height: 30px;
     width: 112px;
     background: #fafafa;
@@ -418,4 +418,39 @@ body {
     bottom: 55px;
     margin-right: 20px;
     font-size: 16px;
+}
+
+#user-info-form {
+    background: #fafafa;
+    margin: auto;
+    width: 450px;
+    height: 400px;
+    border: 2.5px solid #004643;
+}
+
+#user-info-form > p {
+    text-align: center;
+    font-size: 22px;
+        margin-top: 50px;
+}
+
+#user-info-form input {
+    width: 140px;
+    border-bottom: 1px solid #004643;
+    color: #004643;
+    font-size: 20px;
+    
+}
+
+.user-info-input {
+    margin: auto;
+    width: 90%;
+    margin-top: 70px;
+    text-align: center;
+}
+
+#user-info-submit-button {
+    width: 140px;
+    margin: auto;
+    margin-top: 100px;
 }

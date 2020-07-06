@@ -38,7 +38,7 @@
             </div>
         </div>
     </div>
-    <div id="challenges-modal">
+    <div id="challenges-modal" class="modal">
         <div id="challenges-nav-bar" class="challenges-modal-content">
             <p id="challenges-nav-bar-header">Challenges</p>
         </div>
@@ -71,7 +71,7 @@
             </div>
         </div>
     </div>
-    <div id="create-event-modal">
+    <div id="create-event-modal" class="modal">
         <form id="create-event-form" action="/events" method="POST">
             <input type="text" id="user-timezone" name="timezone" style="display:none;" required></input>
             <label for="event-summary">Event:</label><br>
@@ -94,7 +94,19 @@
                 <option value="waste_cleanup">Waste/Cleanup</option>
                 <option value="other">Other</option>
             </select><br>
-            <input class="button" id="submit-button" type="submit" />
+            <input class="button submit-button" id="create-event-submit-button" type="submit" />
+        </form>
+    </div>
+     <div id="user-info-modal" class="modal">
+        <form id="user-info-form" action="/user" method="POST">
+            <p>Welcome!</p>
+            <div class="user-info-input">
+                <label for="user-name">Enter your name to get started:</label><br>
+                <input type="text" id="user-name" name="name" required><br> 
+            </div>
+            <div id="user-info-submit-button">
+                <input class="button submit-button" type="submit" value="Continue"/>
+            </div>
         </form>
     </div>
   </body>

@@ -26,6 +26,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+
+import com.google.sps.data.User;
+
 @WebServlet("/login-status")
 public class LoginStatusServlet extends HttpServlet {
 
@@ -34,14 +44,30 @@ public class LoginStatusServlet extends HttpServlet {
     response.setContentType("application/json;");
 
     UserService userService = UserServiceFactory.getUserService();
+    List<String> res = new ArrayList<String>();
+
     if (userService.isUserLoggedIn()) {
+      res.add("true");
       String userEmail = userService.getCurrentUser().getEmail();
-      System.out.println(userEmail);
+
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+      Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate("email", FilterOperator.EQUAL, userEmail));
+
+      Entity result = datastore.prepare(query).asSingleEntity();
+      System.out.println("result of query " + result);
+
+      // sends whether user is a returning user so can get info to create user if necessary
+      if (result == null) {
+          res.add("false");
+      }
+      else {
+          res.add("true");
+      }
+
       String urlToRedirectToAfterUserLogsOut = "/feed.html";
       String logoutUrl = userService.createLogoutURL(urlToRedirectToAfterUserLogsOut);
-
-      List<String> res = new ArrayList<String>();
-      res.add("true");
+      
       res.add(logoutUrl);
 
       String json = convertToJson(res);
@@ -50,8 +76,8 @@ public class LoginStatusServlet extends HttpServlet {
       String urlToRedirectToAfterUserLogsIn = "/feed.html";
       String loginUrl = userService.createLoginURL(urlToRedirectToAfterUserLogsIn);
 
-      List<String> res = new ArrayList<String>();
       res.add("false");
+      res.add("n/a");
       res.add(loginUrl);
 
       String json = convertToJson(res);
@@ -63,11 +89,16 @@ public class LoginStatusServlet extends HttpServlet {
     json += "\"loggedIn\": ";
     json += "\"" + info.get(0) + "\"";
     json += ", ";
-    json += "\"url\": ";
+    json += "\"returningUser\": ";
     json += "\"" + info.get(1) + "\"";
+    json += ", ";
+    json += "\"url\": ";
+    json += "\"" + info.get(2) + "\"";
     json += "}";
     return json;
   }
+
+
 }
 
 
