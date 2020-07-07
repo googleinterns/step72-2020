@@ -1,10 +1,17 @@
-body {
+html, body {
+    min-height: 100vh;
     font-family: 'Open Sans', sans-serif;
     background: #fafafa;
 }
 
 #left-side-header {
     display: flex;
+}
+.content {
+    height: 100%;
+    position: absolute;
+    max-height: 95vh;
+    width: 100%;
 }
 
 
@@ -452,4 +459,9 @@ body {
     width: 140px;
     margin: auto;
     margin-top: 100px;
+}
+
+#map {
+    height: 100%;
+    width: 100%;
 }
