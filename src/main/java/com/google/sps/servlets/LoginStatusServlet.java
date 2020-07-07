@@ -34,7 +34,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
-import com.google.sps.data.User;
+import com.google.sps.data.UserInfo;
 
 @WebServlet("/login-status")
 public class LoginStatusServlet extends HttpServlet {
@@ -48,11 +48,11 @@ public class LoginStatusServlet extends HttpServlet {
 
     if (userService.isUserLoggedIn()) {
       res.add("true");
-      String userEmail = userService.getCurrentUser().getEmail();
+      String userId = userService.getCurrentUser().getUserId();
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-      Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate("email", FilterOperator.EQUAL, userEmail));
+      Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate("userId", FilterOperator.EQUAL, userId));
 
       Entity result = datastore.prepare(query).asSingleEntity();
       System.out.println("result of query " + result);

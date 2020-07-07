@@ -17,31 +17,41 @@ package com.google.sps.data;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class User {
+public final class UserInfo {
 
-  public static String DATA_TYPE = "User";
-  public static String EMAIL = "email";
+  public static String DATA_TYPE = "UserInfo";
+  public static String ID = "userId";
   public static String NICKNAME = "nickname";
   public static String CREATED_EVENTS = "created_events";
   public static String BOOKMARKED_EVENTS = "bookmarked_events";
   public static String CURRENT_CHALLENGE = "current_challenge";
   public static String CHALLENGE_STATUSES = "challenge_statuses";
 
-  private final String email;
+  private final String id;
   private final String nickname;
-  private final ArrayList<Long> created_events;
-  private final ArrayList<Long> bookmarked_events;
+  private final List<Long> created_events;
+  private final List<Long> bookmarked_events;
   private int current_challenge_id;
-  private final ArrayList<Integer> challenge_statuses;
+  private final List<Integer> challenge_statuses;
 
 
-  public User(String email, String nickname) {
-    this.email = email;
+  public UserInfo(String id, String nickname) {
+    this.id = id;
     this.nickname = nickname;
     this.created_events = new ArrayList<Long>();
     this.bookmarked_events = new ArrayList<Long>();
     this.current_challenge_id = 0;
     this.challenge_statuses = new ArrayList<Integer>();
+  }
+
+  public UserInfo(String id, String nickname, ArrayList<Long> created_events, 
+    ArrayList<Long> bookmarked_events, int current_challenge_id, ArrayList<Integer> challenge_statuses) {
+    this.id = id;
+    this.nickname = nickname;
+    this.created_events = (ArrayList) created_events.clone();
+    this.bookmarked_events = (ArrayList) bookmarked_events.clone();
+    this.current_challenge_id = current_challenge_id;
+    this.challenge_statuses = (ArrayList) challenge_statuses.clone();
   }
 
   public int getCurrentChallenge() {

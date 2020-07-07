@@ -438,8 +438,6 @@ body {
     width: 140px;
     border-bottom: 1px solid #004643;
     color: #004643;
-    font-size: 20px;
-    
 }
 
 .user-info-input {
@@ -447,6 +445,7 @@ body {
     width: 90%;
     margin-top: 70px;
     text-align: center;
+    font-size: 20px;
 }
 
 #user-info-submit-button {
