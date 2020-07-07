@@ -67,6 +67,9 @@ import com.google.sps.data.UserInfo;
 @WebServlet("/user")
 public class UserServlet extends HttpServlet {
 
+  static final String CHALLENGE_ID_PARAM = "chal";
+  static final String CHALLENGE_STATUS_PARAM = "stat";
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     UserService userService = UserServiceFactory.getUserService();
@@ -116,6 +119,54 @@ public class UserServlet extends HttpServlet {
       datastore.put(userEntity);
 
       response.sendRedirect("/feed.html");
+  }
+
+  @Override
+  public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+      UserService userService = UserServiceFactory.getUserService();
+      String userId = userService.getCurrentUser().getUserId();
+      
+      String challengeIdParam = request.getParameter(CHALLENGE_ID_PARAM);
+      String statusParam = request.getParameter(CHALLENGE_STATUS_PARAM);
+
+      int challengeId = -1;
+      int newStatus = -1;
+
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
+
+      Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate("userId", FilterOperator.EQUAL, userId));
+      Entity entity = datastore.prepare(query).asSingleEntity();
+
+      if (challengeIdParam != null) {
+          try {
+              challengeId = Integer.parseInt(challengeIdParam);
+              if (statusParam != null) {
+                  newStatus = Integer.parseInt(statusParam);
+                  updateChallengeStatus(entity, challengeId, newStatus);
+              } else {
+                  updateCurrentChallenge(entity, challengeId);
+              }
+          } catch (Exception e) {
+              System.out.println(e.getMessage());
+          }
+      }
+    
+      System.out.println("challenge id : " + challengeId);
+      System.out.println("new status : " + newStatus);
+      
+      datastore.put(entity);
+
+      response.sendRedirect("/feed.html");
+  }
+
+  private void updateCurrentChallenge(Entity entity, int id) {
+      entity.setProperty(UserInfo.CURRENT_CHALLENGE, id);
+  }
+
+  private void updateChallengeStatus(Entity entity, int id, int status) {
+      ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(UserInfo.CHALLENGE_STATUSES);
+      challengeStatuses.set(id, status);
+      entity.setProperty(UserInfo.CHALLENGE_STATUSES, challengeStatuses);
   }
 
   private String convertToJson(UserInfo user) {
