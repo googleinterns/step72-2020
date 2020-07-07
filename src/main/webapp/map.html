@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html style="max-height:100vh;">
+  <head>
+    <meta charset="UTF-8">
+    <title>Pollution Map</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUR8-gJeYJOCSDJTP6qgN7FsIDG3u-vgU&callback=initMap"
+  type="text/javascript"></script>
+    <script src="map.js"></script>
+  </head>
+  <body  onload="initMap();">
+    <div class="content">
+      <div>
+          <form id="area_form" onsubmit="loadAreaDataFromForm()">
+              <label for="zip_code">Zip code: </label>
+              <input type="text" id="zip_code" rows="1" cols="5">
+              <input hidden id="area" value="zip">
+              <input type="submit" value="Enter">
+          </form>
+          <button id="view_state_button" onclick="viewState()">View State</button>
+        </div>
+        <div id="map"></div>
+    </div>
+  </body>
+</html>

@@ -1,6 +1,14 @@
-body {
+html, body {
+    min-height: 100vh;
     font-family: 'Open Sans', sans-serif;
     background: #fafafa;
+}
+
+.content {
+    height: 100%;
+    position: absolute;
+    max-height: 95vh;
+    width: 100%;
 }
 
 .header {
@@ -194,5 +202,10 @@ body {
     width: 140px;
     margin: auto;
     margin-top: 15px;
+}
+
+#map {
+    height: 100%;
+    width: 100%;
 }
 
