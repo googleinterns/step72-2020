@@ -123,11 +123,15 @@ function addSuperfundMarkers(areaType, areaCode){
     });
 }
 
+const low_danger = 25;
+const medium_danger = 40;
+const high_danger = 55;
+
 function iconUrl(score){
 	var url = "https://maps.google.com/mapfiles/ms/icons/";
-	if(score < 25) url+= "green";
-	else if(score <40) url += "yellow";
-	else if (score < 55) url +="orange";
+	if(score < low_danger) url+= "green";
+	else if(score < medium_danger) url += "yellow";
+	else if (score < high_danger) url +="orange";
     else url +="red";
 	url += "-dot.png";
 	return url;
