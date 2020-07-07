@@ -48,8 +48,13 @@ public final class UserInfo {
     ArrayList<Long> bookmarked_events, int current_challenge_id, ArrayList<Integer> challenge_statuses) {
     this.id = id;
     this.nickname = nickname;
-    this.created_events = (ArrayList) created_events.clone();
-    this.bookmarked_events = (ArrayList) bookmarked_events.clone();
+    
+    if (created_events == null) this.created_events = new ArrayList<Long>();
+    else this.created_events = (ArrayList) created_events.clone();
+
+    if (bookmarked_events == null) this.bookmarked_events = new ArrayList<Long>();
+    else this.bookmarked_events = (ArrayList) bookmarked_events.clone();
+
     this.current_challenge_id = current_challenge_id;
     this.challenge_statuses = (ArrayList) challenge_statuses.clone();
   }

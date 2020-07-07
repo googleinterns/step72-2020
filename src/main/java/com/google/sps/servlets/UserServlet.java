@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -77,7 +78,7 @@ public class UserServlet extends HttpServlet {
     Entity entity = datastore.prepare(query).asSingleEntity();
 
     String nickname = (String) entity.getProperty(UserInfo.NICKNAME);
-    int currentChallengeId = (int) entity.getProperty(UserInfo.CURRENT_CHALLENGE);
+    int currentChallengeId = ((Long) entity.getProperty(UserInfo.CURRENT_CHALLENGE)).intValue();
     ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(UserInfo.CREATED_EVENTS);
     ArrayList<Long> bookmarkedEvents = (ArrayList<Long>) entity.getProperty(UserInfo.BOOKMARKED_EVENTS);
     ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(UserInfo.CHALLENGE_STATUSES);
@@ -102,13 +103,14 @@ public class UserServlet extends HttpServlet {
 
       ArrayList<Integer> chal = new ArrayList<Integer>();
       chal.add(1); chal.add(2); chal.add(3);
+      int currentChallengeId = 0;
 
       Entity userEntity = new Entity(UserInfo.DATA_TYPE);
       userEntity.setProperty(UserInfo.ID, userId);
       userEntity.setProperty(UserInfo.NICKNAME, userNickname);
-      userEntity.setProperty(UserInfo.CREATED_EVENTS, new ArrayList<Long>());
-      userEntity.setProperty(UserInfo.BOOKMARKED_EVENTS, new ArrayList<Long>());
-      userEntity.setProperty(UserInfo.CURRENT_CHALLENGE, 0);
+      userEntity.setProperty(UserInfo.CREATED_EVENTS, Collections.emptyList());
+      userEntity.setProperty(UserInfo.BOOKMARKED_EVENTS, Collections.emptyList());
+      userEntity.setProperty(UserInfo.CURRENT_CHALLENGE, currentChallengeId);
       userEntity.setProperty(UserInfo.CHALLENGE_STATUSES, chal);
 
       datastore.put(userEntity);
