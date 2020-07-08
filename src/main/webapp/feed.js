@@ -54,8 +54,10 @@ eventCategoryIcons.set("water", "🌊🐳​🌊​");
 eventCategoryIcons.set("waste_cleanup", "🗑♻️🥤");
 eventCategoryIcons.set("other", "🥑🌲🐢");
 
+const badgeHeight = 120;
+let lastBoldedItem;
+
 async function loadPage() {
-    console.log("PAGE LOAD");
     await checkLoginStatus(); 
 
     challenges = createMockChallenges();
@@ -101,7 +103,7 @@ function addEventBookmark(event) {
     const bookmark = document.createElement('img');
     bookmark.className = "event-bookmark";
     // add case for if user has bookmarked this event once users have been created
-    bookmark.src = "../resources/bookmark.png";
+    bookmark.src = "/resources/bookmark.png";
     bookmarkDiv.appendChild(bookmark);
     bookmarkDiv.appendChild(addEventNumBookmarks(event));
     return bookmarkDiv;
@@ -185,7 +187,6 @@ function setChallengeBox(challengeId) {
         fillBadge(1, 1);
     }
     else {
-        console.log("setting challenge box to challenge #" + challengeId);
         icon.innerText = challenges[challengeId].get("icon");
         
         const currentStep = user.challenge_statuses[challengeId];
@@ -199,10 +200,10 @@ function setChallengeBox(challengeId) {
 }
 
 function fillBadge(currentStep, totalSteps) {
-    console.log("filling badge to " + currentStep/totalSteps);
     const badgeFilling = document.getElementById("feed-badge-filling")
-    badgeFilling.style.height = 120*(currentStep/totalSteps) + "px";
-    badgeFilling.style.bottom = 120*(currentStep/totalSteps) + 1.5 + "px";
+    badgeFilling.style.height = badgeHeight*(currentStep/totalSteps) + "px";
+    badgeFilling.style.bottom = badgeHeight*(currentStep/totalSteps) + 1.5 + "px";
+
     if (currentStep/totalSteps == 1) {
         badgeFilling.style.borderRadius = "10px 10px 10px 10px";
     }
@@ -219,7 +220,9 @@ function setChallengesNavBar(challenges) {
         const itemBackground = document.createElement('div');
         itemBackground.id = "challenges-nav-bar-item-background-" + challenge.get("id");
         itemBackground.className = "challenges-nav-bar-item-background";
-        let percentDone = user.challenge_statuses[challenge.get("id")] / challenge.get("steps").length;
+
+        let percentDone = 0;
+        if (challenge.get("steps").length != 0) user.challenge_statuses[challenge.get("id")] / challenge.get("steps").length;
         itemBackground.style.width = percentDone*100+"%";
         navBar.appendChild(itemBackground);
     }
@@ -255,11 +258,11 @@ function createChallengeNavBarItem(challenge) {
 
 function boldCurrentChallengeTitle(chosenItem) {
     const items = document.getElementsByClassName("challenges-nav-bar-item");
-    for (item of items) {
-        item.style.fontWeight = "normal";
-    }
+    if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
     chosenItem.style.fontWeight = "bold";
-} 
+    lastBoldedItem = chosenItem;
+}
+
 
 function showChallengeInfo(challenge, displayedStep) {
     
@@ -385,15 +388,12 @@ function setNextButton(displayedStep, challenge) {
         let currentStatus = user.challenge_statuses[challenge.get("id")];
         if (currentStatus+1 == displayedStep) {
 
-            console.log("statuses before update " + user.challenge_statuses);
             const putRequest = new Request(`/user?chal=${challenge.get("id")}&stat=${currentStatus+1}`, {method: 'PUT'});
             await fetch(putRequest);
 
             const getRequest = new Request('/user', {method: 'GET'});
             const response = await fetch(getRequest);
             user = await response.json();
-
-            console.log("statuses after update " + user.challenge_statuses);
 
             const navBarItemBackground = document.getElementById("challenges-nav-bar-item-background-"+user.current_challenge_id);
             let percentDone = user.challenge_statuses[challenge.get("id")] / challenge.get("steps").length;
@@ -454,9 +454,9 @@ function openChallengesModal() {
     modal.style.display = "flex";
 
     const navBarItems = document.getElementsByClassName("challenges-nav-bar-item");
-    for (item of navBarItems) {
-        item.style.fontWeight = "normal";
-    }
+
+    if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
+
     if (user.current_challenge_id == -1) {
         showChallengeCompletePage(challenges[0], false);
     }
@@ -467,6 +467,7 @@ function openChallengesModal() {
         
         const navBarItem = document.getElementById("challenges-nav-bar-item-"+user.current_challenge_id);
         navBarItem.style.fontWeight = "bold";
+        lastBoldedItem = navBarItem;
     }
 }
 
@@ -478,8 +479,6 @@ function checkCheckbox(challenge) {
 }
 
 async function updateUserCurrentChallenge(id) {
-    console.log("current challenge before update " + JSON.stringify(user.current_challenge_id));
-
     const putRequest = new Request(`/user?chal=${id}`, {method: 'PUT'});
     await fetch(putRequest);
 
@@ -487,8 +486,6 @@ async function updateUserCurrentChallenge(id) {
     const response = await fetch(getRequest);
     user = await response.json();
     
-    console.log("current challenge after update " + JSON.stringify(user.current_challenge_id));
-
     setChallengeBox(id);
 }
 

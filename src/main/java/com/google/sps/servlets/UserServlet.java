@@ -86,8 +86,6 @@ public class UserServlet extends HttpServlet {
     ArrayList<Long> bookmarkedEvents = (ArrayList<Long>) entity.getProperty(UserInfo.BOOKMARKED_EVENTS);
     ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(UserInfo.CHALLENGE_STATUSES);
 
-    System.out.println(challengeStatuses); 
-
     UserInfo user = new UserInfo(userId, nickname, createdEvents, bookmarkedEvents, currentChallengeId, challengeStatuses);
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
@@ -122,8 +120,6 @@ public class UserServlet extends HttpServlet {
 
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      System.out.println("--put--");
-
       UserService userService = UserServiceFactory.getUserService();
       String userId = userService.getCurrentUser().getUserId();
       
@@ -151,9 +147,6 @@ public class UserServlet extends HttpServlet {
               System.out.println(e.getMessage());
           }
       }
-
-      System.out.println("challengeId " + challengeId);
-      System.out.println("new status " + newStatus);
       
       datastore.put(entity);
 
