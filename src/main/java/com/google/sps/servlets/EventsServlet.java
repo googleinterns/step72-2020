@@ -82,7 +82,8 @@ public class EventsServlet extends HttpServlet {
     static final String CATEGORY = "category";
     static final String UTC_TIMEZONE = "UTC";
     static final String DATE = "date";
-    static final String TIME = "time";
+    static final String START_TIME = "start";
+    static final String END_TIME = "end";
     static final String USER_TIMEZONE = "timezone";
 
     static final List<String> CATEGORIES = new ArrayList<String>(
@@ -104,18 +105,24 @@ public class EventsServlet extends HttpServlet {
         String summary = (String) entity.getProperty(SUMMARY);
         String description = (String) entity.getProperty(DESCRIPTION);
         String location = (String) entity.getProperty(LOCATION);
-        Date date = (Date) entity.getProperty(DATETIME);
+        Date startTime = (Date) entity.getProperty(START_TIME);
+        Date endTime = (Date) entity.getProperty(END_TIME);
         String category = (String) entity.getProperty(CATEGORY);
 
-        DateTime startDateTime = new DateTime(date);
+        DateTime startDateTime = new DateTime(startTime);
         EventDateTime start = new EventDateTime()
             .setDateTime(startDateTime)
+            .setTimeZone(UTC_TIMEZONE);
+        DateTime endDateTime = new DateTime(endTime);
+        EventDateTime end = new EventDateTime()
+            .setDateTime(endDateTime)
             .setTimeZone(UTC_TIMEZONE);
         Event event = new Event()
             .setSummary(summary)
             .setLocation(location)
             .setDescription(description)
-            .setStart(start);
+            .setStart(start)
+            .setEnd(end);
 
         ExtendedProperties ep = new ExtendedProperties();
         ep.set(CATEGORY, category);
@@ -137,14 +144,16 @@ public class EventsServlet extends HttpServlet {
       String eventDescription = request.getParameter(DESCRIPTION);
       String eventLocation = request.getParameter(LOCATION);
       String eventDateString = request.getParameter(DATE);
-      String eventTimeString = request.getParameter(TIME);
+      String eventStartTimeString = request.getParameter(START_TIME);
+      String eventEndTimeString = request.getParameter(END_TIME);
       String timezoneOffset = request.getParameter(USER_TIMEZONE);
       String category = request.getParameter(CATEGORY);
 
       if (!CATEGORIES.contains(category)) category = "other";
   
-      Date eventDateTime = getEventDateTime(eventDateString, eventTimeString, timezoneOffset);
-      if (eventDateTime == null) return;
+      Date eventStartDateTime = getEventDateTime(eventDateString, eventStartTimeString, timezoneOffset);
+      Date eventEndDateTime = getEventDateTime(eventDateString, eventEndTimeString, timezoneOffset);
+      if (eventStartDateTime == null || eventEndDateTime == null) return;
       long timestamp = System.currentTimeMillis();
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -154,7 +163,8 @@ public class EventsServlet extends HttpServlet {
       eventEntity.setProperty(TIMESTAMP, timestamp);
       eventEntity.setProperty(LOCATION, eventLocation);
       eventEntity.setProperty(DESCRIPTION, eventDescription);
-      eventEntity.setProperty(DATETIME, eventDateTime);
+      eventEntity.setProperty(START_TIME, eventStartDateTime);
+      eventEntity.setProperty(END_TIME, eventEndDateTime);
       eventEntity.setProperty(CATEGORY, category);
 
       datastore.put(eventEntity);

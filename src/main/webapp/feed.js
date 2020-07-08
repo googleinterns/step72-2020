@@ -55,6 +55,9 @@ eventCategoryIcons.set("water", "🌊🐳​🌊​");
 eventCategoryIcons.set("waste_cleanup", "🗑♻️🥤");
 eventCategoryIcons.set("other", "🥑🌲🐢");
 
+const badgeHeight = 120;
+let lastBoldedItem;
+
 async function loadPage() {
     const timezone = document.getElementById("user-timezone");
     timezone.value = new Date().getTimezoneOffset();
@@ -97,7 +100,7 @@ function addEventBookmark(event) {
     const bookmark = document.createElement('img');
     bookmark.className = "event-bookmark";
     // add case for if user has bookmarked this event once users have been created
-    bookmark.src = "../resources/bookmark.png";
+    bookmark.src = "/resources/bookmark.png";
     bookmarkDiv.appendChild(bookmark);
     bookmarkDiv.appendChild(addEventNumBookmarks(event));
     return bookmarkDiv;
@@ -160,9 +163,13 @@ function addEventInfo(event) {
 
     const eventDate = document.createElement("p");
     eventDate.innerHTML =  "📅&nbsp&nbsp";
-    const dateTime = new Date(event.start.dateTime.value);
-    const formattedDate = dateTime.toLocaleString('en-US');
-    eventDate.innerText += formattedDate;
+
+    const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+
+    const dateTime = new Date(event.start.dateTime.value).toLocaleString([], dateOptions);
+    const endTime = new Date(event.end.dateTime.value).toLocaleTimeString([], timeOptions);
+    eventDate.innerText += dateTime + " - " + endTime;
 
     eventInfo.appendChild(eventLocation);
     eventInfo.appendChild(eventDate);
@@ -170,7 +177,6 @@ function addEventInfo(event) {
 }
 
 function setChallengeBox(challengeId) {
-    const badge = document.getElementById("challenges-badge");
     const icon = document.getElementById("challenges-badge-icon");
     const stepsText = document.getElementById("challenge-steps");
 
@@ -194,8 +200,8 @@ function setChallengeBox(challengeId) {
 
 function fillBadge(currentStep, totalSteps) {
     const badgeFilling = document.getElementById("feed-badge-filling")
-    badgeFilling.style.height = 120*(currentStep/totalSteps) + "px";
-    badgeFilling.style.bottom = 120*(currentStep/totalSteps) + "px";
+    badgeFilling.style.height = badgeHeight*(currentStep/totalSteps) + "px";
+    badgeFilling.style.bottom = badgeHeight*(currentStep/totalSteps) + "px";
     if (currentStep/totalSteps == 1) {
         badgeFilling.style.borderRadius = "10px 10px 10px 10px";
     }
@@ -213,7 +219,8 @@ function setChallengesNavBar(user, challenges) {
         const itemBackground = document.createElement('div');
         itemBackground.id = "challenges-nav-bar-item-background-" + challenge.get("id");
         itemBackground.className = "challenges-nav-bar-item-background";
-        let percentDone = user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
+        let percentDone = 0;
+        if (challenge.get("steps").length != 0) user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
         itemBackground.style.width = percentDone*100+"%";
         navBar.appendChild(itemBackground);
     }
@@ -249,10 +256,9 @@ function createChallengeNavBarItem(user, challenge) {
 
 function boldCurrentChallengeTitle(chosenItem) {
     const items = document.getElementsByClassName("challenges-nav-bar-item");
-    for (item of items) {
-        item.style.fontWeight = "normal";
-    }
+    if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
     chosenItem.style.fontWeight = "bold";
+    lastBoldedItem = chosenItem;
 }
 
 function showChallengeInfo(user, challenge, displayedStep) {
@@ -430,9 +436,7 @@ function openChallengesModal() {
     modal.style.display = "flex";
 
     const navBarItems = document.getElementsByClassName("challenges-nav-bar-item");
-    for (item of navBarItems) {
-        item.style.fontWeight = "normal";
-    }
+    if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
 
     if (user.get("currentChallengeId") == -1) {
         showChallengeCompletePage(challenges[0], false);
@@ -444,6 +448,7 @@ function openChallengesModal() {
         
         const navBarItem = document.getElementById("challenges-nav-bar-item-"+user.get("currentChallengeId"));
         navBarItem.style.fontWeight = "bold";
+        lastBoldedItem = navBarItem;
     }
 }
 
