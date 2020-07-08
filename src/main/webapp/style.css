@@ -400,11 +400,12 @@ html, body {
     border: 2px solid #004643;
     background: #fafafa;
     color: #004643;
+    font-size: 16px;
 }
 
-.submit-button {
+#submit-button {
     height: 30px;
-    width: 112px;
+    width: 133px;
     background: #fafafa;
     border: 2px solid #004643;
     font-size: 16px;

@@ -164,10 +164,10 @@ function addEventInfo(event) {
     const eventDate = document.createElement("p");
     eventDate.innerHTML =  "📅&nbsp&nbsp";
 
-    const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const dateTimeOptions = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     const timeOptions = { hour: '2-digit', minute: '2-digit' };
 
-    const dateTime = new Date(event.start.dateTime.value).toLocaleString([], dateOptions);
+    const dateTime = new Date(event.start.dateTime.value).toLocaleString([], dateTimeOptions);
     const endTime = new Date(event.end.dateTime.value).toLocaleTimeString([], timeOptions);
     eventDate.innerText += dateTime + " - " + endTime;
 
