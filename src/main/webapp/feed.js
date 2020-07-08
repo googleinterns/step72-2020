@@ -108,7 +108,7 @@ function addEventBookmark(event) {
     const bookmark = document.createElement('img');
     bookmark.className = "event-bookmark";
     // add case for if user has bookmarked this event once users have been created
-    bookmark.src = "../resources/bookmark.png";
+    bookmark.src = "/resources/bookmark.png";
     bookmarkDiv.appendChild(bookmark);
     bookmarkDiv.appendChild(addEventNumBookmarks(event));
     return bookmarkDiv;
@@ -220,7 +220,8 @@ function setChallengesNavBar(user, challenges) {
         const itemBackground = document.createElement('div');
         itemBackground.id = "challenges-nav-bar-item-background-" + challenge.get("id");
         itemBackground.className = "challenges-nav-bar-item-background";
-        let percentDone = user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
+        let percentDone = 0;
+        if (challenge.get("steps").length != 0) user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
         itemBackground.style.width = percentDone*100+"%";
         navBar.appendChild(itemBackground);
     }
