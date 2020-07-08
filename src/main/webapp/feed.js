@@ -182,8 +182,10 @@ function setChallengeBox(challengeId) {
         icon.innerText = "✔️";
         stepsText.style.fontSize = "16px";
         stepsText.innerText = "Complete!";
+        fillBadge(1, 1);
     }
     else {
+        console.log("setting challenge box to challenge #" + challengeId);
         icon.innerText = challenges[challengeId].get("icon");
         
         const currentStep = user.challenge_statuses[challengeId];
@@ -197,16 +199,16 @@ function setChallengeBox(challengeId) {
 }
 
 function fillBadge(currentStep, totalSteps) {
+    console.log("filling badge to " + currentStep/totalSteps);
     const badgeFilling = document.getElementById("feed-badge-filling")
     badgeFilling.style.height = 120*(currentStep/totalSteps) + "px";
-    badgeFilling.style.bottom = 120*(currentStep/totalSteps) + "px";
+    badgeFilling.style.bottom = 120*(currentStep/totalSteps) + 1.5 + "px";
     if (currentStep/totalSteps == 1) {
         badgeFilling.style.borderRadius = "10px 10px 10px 10px";
     }
     else {
         badgeFilling.style.borderRadius = "0 0 10px 10px";
     }
-    return badgeFilling;
 }
 
 function setChallengesNavBar(challenges) {
@@ -417,11 +419,11 @@ function setCheckbox(challenge) {
     }
 
     const checkbox = document.getElementById("challenges-modal-set-challenge-checkbox");
-    checkbox.addEventListener("click", async () => {
+    checkbox.onclick =  async () => {
         checkCheckbox(challenge);
         await updateUserCurrentChallenge(challenge.get("id"));
         setNextButton(user.challenge_statuses[challenge.get("id")]+1, challenge);
-    })
+    };
 }
 
 function createModalChallengesBadge(currentStep, challenge) {

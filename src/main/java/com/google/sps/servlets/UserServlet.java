@@ -104,9 +104,8 @@ public class UserServlet extends HttpServlet {
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
 
-      ArrayList<Integer> chal = new ArrayList<Integer>();
-      chal.add(1); chal.add(2); chal.add(3);
       int currentChallengeId = 0;
+      ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
 
       Entity userEntity = new Entity(UserInfo.DATA_TYPE);
       userEntity.setProperty(UserInfo.ID, userId);
@@ -114,7 +113,7 @@ public class UserServlet extends HttpServlet {
       userEntity.setProperty(UserInfo.CREATED_EVENTS, Collections.emptyList());
       userEntity.setProperty(UserInfo.BOOKMARKED_EVENTS, Collections.emptyList());
       userEntity.setProperty(UserInfo.CURRENT_CHALLENGE, currentChallengeId);
-      userEntity.setProperty(UserInfo.CHALLENGE_STATUSES, chal);
+      userEntity.setProperty(UserInfo.CHALLENGE_STATUSES, challengeStatuses);
 
       datastore.put(userEntity);
 
@@ -123,6 +122,8 @@ public class UserServlet extends HttpServlet {
 
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+      System.out.println("--put--");
+
       UserService userService = UserServiceFactory.getUserService();
       String userId = userService.getCurrentUser().getUserId();
       
@@ -150,9 +151,9 @@ public class UserServlet extends HttpServlet {
               System.out.println(e.getMessage());
           }
       }
-    
-      System.out.println("challenge id : " + challengeId);
-      System.out.println("new status : " + newStatus);
+
+      System.out.println("challengeId " + challengeId);
+      System.out.println("new status " + newStatus);
       
       datastore.put(entity);
 
