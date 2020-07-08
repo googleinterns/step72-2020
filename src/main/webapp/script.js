@@ -145,3 +145,7 @@ function setChallenge(challenge) {
     badgeFilling.style.bottom = 120*(currentStep/totalSteps) + "px";
     badge.appendChild(badgeFilling);
 }
+
+function addChallenge() {
+    
+}
