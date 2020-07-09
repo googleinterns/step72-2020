@@ -90,6 +90,8 @@ public class EventsServlet extends HttpServlet {
         Arrays.asList("food_beverage", "nature", "water", "waste_cleanup", "other")
     );
 
+    static final int MAX_STRING_BYTES = 1500;
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     FetchOptions fetchOptions = FetchOptions.Builder.withLimit(10);
@@ -149,11 +151,20 @@ public class EventsServlet extends HttpServlet {
       String timezoneOffset = request.getParameter(USER_TIMEZONE);
       String category = request.getParameter(CATEGORY);
 
+      eventSummary = sanitizeInput(eventSummary);
+      eventDescription = sanitizeInput(eventDescription);
+      eventLocation = sanitizeInput(eventLocation);
+
       if (!CATEGORIES.contains(category)) category = "other";
   
       Date eventStartDateTime = getEventDateTime(eventDateString, eventStartTimeString, timezoneOffset);
       Date eventEndDateTime = getEventDateTime(eventDateString, eventEndTimeString, timezoneOffset);
       if (eventStartDateTime == null || eventEndDateTime == null) return;
+      if (eventEndDateTime.compareTo(eventStartDateTime) < 0) {
+          Date temp = eventStartDateTime;
+          eventStartDateTime = eventEndDateTime;
+          eventEndDateTime = temp;
+      }
       long timestamp = System.currentTimeMillis();
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -178,8 +189,11 @@ public class EventsServlet extends HttpServlet {
       return json;
   }
 
+  // Handles differences in client timexone by converting to UTC timezone. Takes in the event
+  // date and time as well as client timezone offset (in minutes) to convert to UTC. Combines
+  // event date and time to yyyy-MM-dd HH:mm Z format.
   public Date getEventDateTime(String eventDate, String eventTime, String timezoneOffset) {
-      Date eventDateTime;
+      Date eventDateTime; 
       SimpleDateFormat eventDateTimeFormat;
       try {
           // add opposite of offset to get back to utc
@@ -192,8 +206,13 @@ public class EventsServlet extends HttpServlet {
             
           return eventDateTime;
       } catch(Exception e) {
-          System.out.println(e.getMessage());
+          System.err.println(e.getMessage());
           return null;
       }
+  }
+
+  public String sanitizeInput(String input) throws java.io.UnsupportedEncodingException {
+      input = new String( input.getBytes("UTF-8") , 0, Math.min(MAX_STRING_BYTES, input.length()), "UTF-8");
+      return input;
   }
 }

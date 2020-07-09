@@ -61,8 +61,7 @@ let lastBoldedItem;
 async function loadPage() {
     const timezone = document.getElementById("user-timezone");
     timezone.value = new Date().getTimezoneOffset();
-    const response = await fetch("/events");
-    const events = await response.json();
+    const events = await fetch("/events").then(response => response.json());
     const feed = document.getElementById("events-feed");
     for (event of events) {
         feed.appendChild(postEvent(event));

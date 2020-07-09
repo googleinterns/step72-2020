@@ -201,6 +201,8 @@ html, body {
     width: 140px;
     margin: auto;
     margin-top: 15px;
+    overflow: scroll;
+    height: 200px;
 }
 
 #challenges-modal, #create-event-modal {
