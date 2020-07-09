@@ -43,7 +43,7 @@
             <p id="challenges-nav-bar-header">Challenges</p>
         </div>
         <div id="challenges-main-panel" class="challenges-modal-content">
-            <p id="close-modal-button" onclick="closeChallengesModal()">x</p>
+            <p class="close-modal-button" onclick="closeChallengesModal()">x</p>
             <div id="challenges-main-panel-upper-content">
                 <div class="challenges-main-panel-text challenges-main-panel-content">
                     <p id="challenges-main-panel-header"></p>
@@ -71,7 +71,12 @@
             </div>
         </div>
     </div>
+<<<<<<< HEAD
     <div id="create-event-modal" class="modal">
+=======
+    <div id="create-event-modal">
+        <p class="close-modal-button" id="close-create-event-modal-button" onclick="closeCreateEventModal()">x</p>
+>>>>>>> 12eb87aeebc33352942ec7b50fe7ca7864f83155
         <form id="create-event-form" action="/events" method="POST">
             <input type="text" id="user-timezone" name="timezone" style="display:none;" required></input>
             <label for="event-summary">Event:</label><br>

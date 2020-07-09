@@ -205,6 +205,8 @@ html, body {
     width: 140px;
     margin: auto;
     margin-top: 15px;
+    overflow: scroll;
+    height: 200px;
 }
 
 .modal {
@@ -366,13 +368,18 @@ html, body {
     margin-top: 5%;
 }
 
-#close-modal-button {
+.close-modal-button {
     float: right;
     font-size: 32px;
     color: #004643;
     margin: 0;
     margin-right: 10px;
     cursor: pointer;
+}
+
+#close-create-event-modal-button {
+    position: relative;
+    right: 33%;
 }
 
 #challenges-modal-checkmark {
@@ -387,6 +394,7 @@ html, body {
 #create-event-form {
     background: #fafafa;
     width: 33%;
+<<<<<<< HEAD
     margin: auto;
 }
 
@@ -464,6 +472,25 @@ html, body {
     margin: auto;
     margin-top: 100px;
 }
+
+
+#create-event-form {
+    padding: 20px;
+    font-size: 20px;
+}
+
+#create-event-form > * {
+    font-family: 'Open Sans', sans-serif;
+}
+
+#create-event-form > input, #create-event-form > select {
+    margin-bottom: 20px;
+    border: 2px solid #004643;
+    background: #fafafa;
+    color: #004643;
+    font-size: 16px;
+}
+
 
 #map {
     height: 100%;

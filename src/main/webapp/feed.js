@@ -64,8 +64,8 @@ async function loadPage() {
     
     const timezone = document.getElementById("user-timezone");
     timezone.value = new Date().getTimezoneOffset();
-    const response = await fetch("/events");
-    const events = await response.json();
+    const events = await fetch("/events").then(response => response.json());
+
     const feed = document.getElementById("events-feed");
     for (event of events) {
         feed.appendChild(postEvent(event));
@@ -82,7 +82,7 @@ async function loadPage() {
             closeChallengesModal();
         }
         else if (event.target == createEventModal) {
-            createEventModal.style.display = "none";
+            closeCreateEventModal();
         }
     }
 }
@@ -166,9 +166,13 @@ function addEventInfo(event) {
 
     const eventDate = document.createElement("p");
     eventDate.innerHTML =  "📅&nbsp&nbsp";
-    const dateTime = new Date(event.start.dateTime.value);
-    const formattedDate = dateTime.toLocaleString('en-US');
-    eventDate.innerText += formattedDate;
+
+    const dateTimeOptions = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+
+    const dateTime = new Date(event.start.dateTime.value).toLocaleString([], dateTimeOptions);
+    const endTime = new Date(event.end.dateTime.value).toLocaleTimeString([], timeOptions);
+    eventDate.innerText += dateTime + " - " + endTime;
 
     eventInfo.appendChild(eventLocation);
     eventInfo.appendChild(eventDate);
@@ -176,7 +180,6 @@ function addEventInfo(event) {
 }
 
 function setChallengeBox(challengeId) {
-    const badge = document.getElementById("challenges-badge");
     const icon = document.getElementById("challenges-badge-icon");
     const stepsText = document.getElementById("challenge-steps");
 
@@ -501,6 +504,11 @@ function openCreateEventModal() {
     modal.style.display = "block";
 }
 
+function closeCreateEventModal() {
+    const modal = document.getElementById("create-event-modal");
+    modal.style.display = "none";
+}
+
 async function checkLoginStatus() {
     const request = new Request('/login-status', {method: 'GET'});
     const response = await fetch(request);
@@ -539,3 +547,5 @@ async function getUserInfo() {
     const userInfo = await response.json();
     user = userInfo;
 }
+
+
