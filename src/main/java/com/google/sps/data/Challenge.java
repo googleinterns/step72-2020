@@ -6,10 +6,12 @@ import java.util.List;
 
 public class Challenge {
   private String challenge_type;
+  private String name;
   private List <String> steps;
 
   public Challenge(String type, String name, List steps){  
     this.challenge_type = type;
+    this.name = name;
     this.steps = new ArrayList <>(steps);
   }
 
