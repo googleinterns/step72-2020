@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package com.google.sps.servlets;
+
 import com.google.gson.Gson;
 import com.google.sps.data.Challenges;
 import java.io.IOException;
@@ -29,17 +31,15 @@ public class ChallengesServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      
-
       String json = convertToJsonUsingGson();
       response.setContentType("application/json;");
       response.getWriter().println(json);
     }
 
-    @Override
+   /* @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-    }
+    } */
 
     private String convertToJsonUsingGson(){
       String json = new Gson().toJson(Challenges.challenges);

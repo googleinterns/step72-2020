@@ -1,21 +1,17 @@
-
 package com.google.sps;
 
-import java.util.List;
 import com.google.sps.data.Challenge;
-import org.junit.Assert;
-import java.util.Arrays;
 import com.google.sps.data.Challenges;
+import java.util.Arrays;
+import java.util.List;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito.*;
-
 
 @RunWith(JUnit4.class)
 public final class ChallengeTest {
-
-  //private Challenge challenge;
   private static final List<String> STEPS = Arrays.asList("step 1", "step 2", "step 3");
   private List<Challenge> challengeList = Arrays.asList(
     new Challenge("Gardening","Environmentally friendly fertilizer!", STEPS),
