@@ -36,5 +36,6 @@ public final class Challenges {
     };
 
     private Challenges() {
+     //To prevent initialization
     }
 }
