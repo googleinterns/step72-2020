@@ -222,7 +222,7 @@ function setChallengesNavBar(challenges) {
         itemBackground.className = "challenges-nav-bar-item-background";
 
         let percentDone = 0;
-        if (challenge.get("steps").length != 0) user.challenge_statuses[challenge.get("id")] / challenge.get("steps").length;
+        if (challenge.get("steps").length != 0) percentDone = user.challenge_statuses[challenge.get("id")] / challenge.get("steps").length;
         itemBackground.style.width = percentDone*100+"%";
         navBar.appendChild(itemBackground);
     }
