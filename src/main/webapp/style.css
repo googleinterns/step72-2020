@@ -362,13 +362,18 @@ html, body {
     margin-top: 5%;
 }
 
-#close-modal-button {
+.close-modal-button {
     float: right;
     font-size: 32px;
     color: #004643;
     margin: 0;
     margin-right: 10px;
     cursor: pointer;
+}
+
+#close-create-event-modal-button {
+    position: relative;
+    right: 33%;
 }
 
 #challenges-modal-checkmark {

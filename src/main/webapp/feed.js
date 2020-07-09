@@ -79,7 +79,7 @@ async function loadPage() {
             closeChallengesModal();
         }
         else if (event.target == createEventModal) {
-            createEventModal.style.display = "none";
+            closeCreateEventModal();
         }
     }
 }
@@ -471,4 +471,9 @@ function resetCheckbox() {
 function openCreateEventModal() {
     const modal = document.getElementById("create-event-modal");
     modal.style.display = "block";
+}
+
+function closeCreateEventModal() {
+    const modal = document.getElementById("create-event-modal");
+    modal.style.display = "none";
 }
