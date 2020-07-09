@@ -20,7 +20,7 @@
         <div class="feed-heading"><div class="events-searchbar">find local events:<input type="text" id="events-searchbar-input" placeholder="city or zip code"></input></div></div>
         <div id="events-feed"></div>
         <div class="feed-right-side">
-            <div class="feed-box create-event-box"><div class="feed-box-content create-event-box-content"><p class="icon">📅</p><p class="create-event-text">create an event</p></div></div>
+            <div class="feed-box create-event-box" onclick="openCreateEventModal()"><div class="feed-box-content create-event-box-content"><p class="icon">📅</p><p class="create-event-text">create an event</p></div></div>
             <div class="feed-box challenges-box" onclick="openChallengesModal()">
                 <div class="feed-box-content challenges-box-content">
                     <p class="icon">🌏</p><p class="challenges-text">challenges</p>
@@ -38,7 +38,7 @@
             <p id="challenges-nav-bar-header">Challenges</p>
         </div>
         <div id="challenges-main-panel" class="challenges-modal-content">
-            <p id="close-modal-button" onclick="closeChallengesModal()">x</p>
+            <p class="close-modal-button" onclick="closeChallengesModal()">x</p>
             <div id="challenges-main-panel-upper-content">
                 <div class="challenges-main-panel-text challenges-main-panel-content">
                     <p id="challenges-main-panel-header"></p>
@@ -66,6 +66,32 @@
             </div>
         </div>
     </div>
-
+    <div id="create-event-modal">
+        <p class="close-modal-button" id="close-create-event-modal-button" onclick="closeCreateEventModal()">x</p>
+        <form id="create-event-form" action="/events" method="POST">
+            <input type="text" id="user-timezone" name="timezone" style="display:none;" required></input>
+            <label for="event-summary">Event:</label><br>
+            <input type="text" id="event-summary" name="summary" required><br>
+            <label for="event-location">Location:</label><br>
+            <input type="text" id="event-location" name="location" required><br>
+            <label for="event-date">Date:</label><br>
+            <input type="date" id="event-date" name="date" required><br>
+            <label for="event-start-time">Start:</label><br>
+            <input type="time" id="event-start-time" name="start" required><br>
+            <label for="event-end-time">End:</label><br>
+            <input type="time" id="event-end-time" name="end" required><br>
+            <label for="event-description">Description:</label><br>
+            <input type="text" id="event-description" name="description" required><br>
+            <label for="event-category">Category:</label><br>
+            <select class="button" name="category" id="event-category">
+                <option value="food_beverage">Food/Beverage</option>
+                <option value="nature">Nature</option>
+                <option value="water">Water</option>
+                <option value="waste_cleanup">Waste/Cleanup</option>
+                <option value="other">Other</option>
+            </select><br>
+            <input class="button" id="submit-button" type="submit" />
+        </form>
+    </div>
   </body>
 </html>
