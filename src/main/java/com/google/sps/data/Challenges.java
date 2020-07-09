@@ -28,6 +28,8 @@ public final class Challenges {
     private static final List WASTE_STEPS_0 = Arrays.asList("step 1", "step 2", "step 3");
 
 
+     //might want to consider using map/hashset organize data by type
+     //then in the servlet pass one from each set
 
     public static final Challenge[] challenges = {
         new Challenge(GARDENING_TYPE, GARDENING_CHALLENGE_0, GARDENING_STEPS_0),

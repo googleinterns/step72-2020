@@ -82,7 +82,7 @@ function loadPage() {
 
     setChallengeBox(user.get("currentChallengeId"));
 
-    setChallengesNavBar(mockUser, challenges);
+    setChallengesNavBar(user, challenges);
 
     window.onclick = function(event) {
         const modal = document.getElementById("challenges-modal");
@@ -212,6 +212,7 @@ function fillBadge(currentStep, totalSteps) {
     return badgeFilling;
 }
 
+//start here to implement (note for me)
 function setChallengesNavBar(user, challenges) {
     const navBar = document.getElementById("challenges-nav-bar");
     for (challenge of challenges) {
@@ -253,6 +254,33 @@ function createChallengeNavBarItem(user, challenge) {
         }    
     });
     return item;
+}
+
+let myChallenges = []
+
+async function getServerChallenges(){
+    const response = await fetch('/data');
+    const challengeJson= await response.json();
+
+    var i;
+    let 
+    for(i =0; i <challengeJson.length; i++) {
+        myChallenges[i] = new Map();
+        myChallenges[i].set("id", i);
+        myChallenges[i].set("title", challengeJson[i].challenge_type);
+
+        switch (myChallenges.get("title")) {
+          case("Recycle"):
+            myChallenges[i].set("icon", "♻️");
+            break;
+          case("Gardening"):
+            myChallenges[i].set("icon", "🌱");
+            break;
+          case("Old Electronics"):
+            myChallenges[i].set("icon", "🗑");
+            break;
+        }
+    }
 }
 
 function boldCurrentChallengeTitle(chosenItem) {

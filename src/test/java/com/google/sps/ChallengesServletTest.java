@@ -39,8 +39,8 @@ public final class ChallengesServletTest {
       servlet.doGet(request, response);
       pw.flush();
 
-      //System.out.println(new Gson().toJson(Challenges.challenges));
-      //System.out.println(writer.toString());
+      System.out.println(new Gson().toJson(Challenges.challenges));
+      System.out.println(writer.toString());
       Assert.assertEquals(new Gson().toJson(Challenges.challenges),
                           writer.toString().trim());
 
