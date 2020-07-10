@@ -201,9 +201,11 @@ html, body {
     width: 140px;
     margin: auto;
     margin-top: 15px;
+    overflow: scroll;
+    height: 200px;
 }
 
-#challenges-modal {
+#challenges-modal, #create-event-modal {
     color: #004643;
     display: none; 
     position: fixed;
@@ -362,13 +364,18 @@ html, body {
     margin-top: 5%;
 }
 
-#close-modal-button {
+.close-modal-button {
     float: right;
     font-size: 32px;
     color: #004643;
     margin: 0;
     margin-right: 10px;
     cursor: pointer;
+}
+
+#close-create-event-modal-button {
+    position: relative;
+    right: 33%;
 }
 
 #challenges-modal-checkmark {
@@ -378,6 +385,38 @@ html, body {
     position: relative;
     right: 15px;
     bottom: 9px;
+}
+
+#create-event-form {
+    background: #fafafa;
+    width: 33%;
+    margin: auto;
+}
+
+#create-event-form {
+    padding: 20px;
+    font-size: 20px;
+}
+
+#create-event-form > * {
+    font-family: 'Open Sans', sans-serif;
+}
+
+#create-event-form > input, #create-event-form > select {
+    margin-bottom: 20px;
+    border: 2px solid #004643;
+    background: #fafafa;
+    color: #004643;
+    font-size: 16px;
+}
+
+#submit-button {
+    height: 30px;
+    width: 133px;
+    background: #fafafa;
+    border: 2px solid #004643;
+    font-size: 16px;
+    color: #004643;
 }
 
 #map {

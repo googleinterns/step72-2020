@@ -1,23 +1,3 @@
-// will be pulled from backend
-let mockEvent = new Map();
-mockEvent.set("author", "User A");
-mockEvent.set("title", "Farmer's Market");
-mockEvent.set("date", "July 1 2020");
-mockEvent.set("location", "Mountain View, California");
-mockEvent.set("description", "details about event etc etc");
-mockEvent.set("category", "food/drink");
-mockEvent.set("bookmarks", 10);
-
-let mockEvent2 = new Map();
-mockEvent2.set("author", "User B");
-mockEvent2.set("title", "World Rainforest Day");
-mockEvent2.set("date", "July 1 2020");
-mockEvent2.set("location", "Mountain View, California");
-mockEvent2.set("description", "details about event etc etc");
-mockEvent2.set("category", "nature");
-mockEvent2.set("bookmarks", 25);
-
-
 // will move to backend eventually, will make challenge & step classes
 let mockChallenges = [];
 mockChallenges[0] = new Map();
@@ -69,25 +49,36 @@ const user = mockUser;
 const challenges = mockChallenges;
 
 let eventCategoryIcons = new Map();
-eventCategoryIcons.set("food/drink", "🥑🍋🍏");
+eventCategoryIcons.set("food_beverage", "🥑🍋🍏");
 eventCategoryIcons.set("nature", "🌲🌱🌳");
+eventCategoryIcons.set("water", "🌊🐳​🌊​");
+eventCategoryIcons.set("waste_cleanup", "🗑♻️🥤");
+eventCategoryIcons.set("other", "🥑🌲🐢");
 
 const badgeHeight = 120;
 let lastBoldedItem;
 
-function loadPage() {
+async function loadPage() {
+    const timezone = document.getElementById("user-timezone");
+    timezone.value = new Date().getTimezoneOffset();
+    const events = await fetch("/events").then(response => response.json());
     const feed = document.getElementById("events-feed");
-    feed.appendChild(postEvent(mockEvent));
-    feed.appendChild(postEvent(mockEvent2));
+    for (event of events) {
+        feed.appendChild(postEvent(event));
+    }
 
     setChallengeBox(user.get("currentChallengeId"));
 
     setChallengesNavBar(user, challenges);
 
     window.onclick = function(event) {
-        const modal = document.getElementById("challenges-modal");
-        if (event.target == modal) {
+        const challengesModal = document.getElementById("challenges-modal");
+        const createEventModal = document.getElementById("create-event-modal");
+        if (event.target == challengesModal) {
             closeChallengesModal();
+        }
+        else if (event.target == createEventModal) {
+            closeCreateEventModal();
         }
     }
 }
@@ -96,7 +87,7 @@ function postEvent(event) {
     const eventEl = document.createElement('div');
     eventEl.className = "event-post";
     eventEl.appendChild(addEventUserText(event));
-    eventEl.appendChild(addEventBookmark(event));
+    // eventEl.appendChild(addEventBookmark(event));
     eventEl.appendChild(addEventMiddleSection(event));
     eventEl.appendChild(addEventInfo(event));
     return eventEl;
@@ -124,7 +115,9 @@ function addEventNumBookmarks(event) {
 function addEventUserText(event) {
     const eventUser = document.createElement('p');
     eventUser.className = "event-info";
-    eventUser.innerText = event.get("author") + " posted an event:";
+    // eventUser.innerText = event.creator + " posted an event:";
+    eventUser.innerText = "USER" + " posted an event:";
+
     return eventUser;
 }
 
@@ -139,11 +132,11 @@ function addEventMiddleSection(event) {
 function addEventInnerCard(event) {
     const eventIcon = document.createElement('div');
     eventIcon.className = "event-icon";
-    eventIcon.innerText = eventCategoryIcons.get(event.get("category"));
+    eventIcon.innerText = eventCategoryIcons.get(event.extendedProperties.category);
 
     const eventTitle = document.createElement('p');
     eventTitle.className = "event-title";
-    eventTitle.innerText = event.get("title");
+    eventTitle.innerText = event.summary;
 
     const eventInnerCard = document.createElement('div');
     eventInnerCard.className = "event-inner-card";
@@ -155,7 +148,7 @@ function addEventInnerCard(event) {
 function addEventDescription(event) {
     const eventDescription = document.createElement("p");
     eventDescription.className = "event-description";
-    eventDescription.innerText = "description:\n\n" + event.get("description");
+    eventDescription.innerText = "description:\n\n" + event.description;
     return eventDescription;
 }
 
@@ -165,11 +158,17 @@ function addEventInfo(event) {
 
     const eventLocation = document.createElement("p");
     eventLocation.innerHTML =  "📍&nbsp&nbsp";
-    eventLocation.innerText += event.get("location");
+    eventLocation.innerText += event.location;
 
     const eventDate = document.createElement("p");
     eventDate.innerHTML =  "📅&nbsp&nbsp";
-    eventDate.innerText += event.get("date");
+
+    const dateTimeOptions = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const timeOptions = { hour: '2-digit', minute: '2-digit' };
+
+    const dateTime = new Date(event.start.dateTime.value).toLocaleString([], dateTimeOptions);
+    const endTime = new Date(event.end.dateTime.value).toLocaleTimeString([], timeOptions);
+    eventDate.innerText += dateTime + " - " + endTime;
 
     eventInfo.appendChild(eventLocation);
     eventInfo.appendChild(eventDate);
@@ -177,7 +176,6 @@ function addEventInfo(event) {
 }
 
 function setChallengeBox(challengeId) {
-    const badge = document.getElementById("challenges-badge");
     const icon = document.getElementById("challenges-badge-icon");
     const stepsText = document.getElementById("challenge-steps");
 
@@ -222,7 +220,7 @@ function setChallengesNavBar(user, challenges) {
         itemBackground.id = "challenges-nav-bar-item-background-" + challenge.get("id");
         itemBackground.className = "challenges-nav-bar-item-background";
         let percentDone = 0;
-        if (challenge.get("steps").length != 0) user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
+        if (challenge.get("steps").length != 0) percentDone = user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
         itemBackground.style.width = percentDone*100+"%";
         navBar.appendChild(itemBackground);
     }
@@ -507,4 +505,14 @@ function resetCheckbox() {
     checkbox.style.border = "solid 2.5px #004643";
     const checkmark = document.getElementById("challenges-modal-checkmark");
     checkmark.style.display = "none";
+}
+
+function openCreateEventModal() {
+    const modal = document.getElementById("create-event-modal");
+    modal.style.display = "block";
+}
+
+function closeCreateEventModal() {
+    const modal = document.getElementById("create-event-modal");
+    modal.style.display = "none";
 }
