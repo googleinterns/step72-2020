@@ -31,7 +31,7 @@ public final class UserInfo {
   private final String nickname;
   private final List<Long> created_events;
   private final List<Long> bookmarked_events;
-  private int current_challenge_id;
+  private Long current_challenge_id;
   private final List<Integer> challenge_statuses;
 
 
@@ -40,12 +40,12 @@ public final class UserInfo {
     this.nickname = nickname;
     this.created_events = new ArrayList<Long>();
     this.bookmarked_events = new ArrayList<Long>();
-    this.current_challenge_id = 0;
+    this.current_challenge_id = 0L;
     this.challenge_statuses = new ArrayList<Integer>();
   }
 
   public UserInfo(String id, String nickname, ArrayList<Long> created_events, 
-    ArrayList<Long> bookmarked_events, int current_challenge_id, ArrayList<Integer> challenge_statuses) {
+    ArrayList<Long> bookmarked_events, Long current_challenge_id, ArrayList<Integer> challenge_statuses) {
     this.id = id;
     this.nickname = nickname;
     
@@ -59,11 +59,11 @@ public final class UserInfo {
     this.challenge_statuses = (ArrayList) challenge_statuses.clone();
   }
 
-  public int getCurrentChallenge() {
+  public Long getCurrentChallenge() {
       return this.current_challenge_id;
   }
 
-  public void setCurrentChallenge(int chal_id) {
+  public void setCurrentChallenge(Long chal_id) {
       this.current_challenge_id = chal_id;
   }
 }

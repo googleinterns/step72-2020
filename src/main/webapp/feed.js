@@ -205,7 +205,9 @@ function setChallengeBox(challengeId) {
 function fillBadge(currentStep, totalSteps) {
     const badgeFilling = document.getElementById("feed-badge-filling")
     badgeFilling.style.height = badgeHeight*(currentStep/totalSteps) + "px";
-    badgeFilling.style.bottom = badgeHeight*(currentStep/totalSteps) + 1.5 + "px";
+    let offset = 1.5;
+    if (currentStep/totalSteps == 1) offset = -1.5;
+    badgeFilling.style.bottom = badgeHeight*(currentStep/totalSteps) + offset + "px";
 
     if (currentStep/totalSteps == 1) {
         badgeFilling.style.borderRadius = "10px 10px 10px 10px";
@@ -216,7 +218,6 @@ function fillBadge(currentStep, totalSteps) {
 }
 
 function setChallengesNavBar(challenges) {
-    console.log("Resetting nav bar");
     const navBar = document.getElementById("challenges-nav-bar");
     for (challenge of challenges) {
         navBar.appendChild(createChallengeNavBarItem(challenge));
@@ -328,12 +329,9 @@ async function showNewChallengeCompletePage(challenge) {
     else {
         text.innerHTML = `${challenge.get("title")} challenge complete!<br>Next up is the <b>${challenges[newChallengeId].get("title")}</b> challenge`;
     }
-    const putRequest = new Request(`/user?chal=${newChallengeId}`, {method: 'PUT'});
-    await fetch(putRequest);
 
-    const getRequest = new Request('/user', {method: 'GET'});
-    const response = await fetch(getRequest);
-    user = await response.json();
+    const putRequest = new Request(`/user?chal=${newChallengeId}`, {method: 'PUT'});
+    user = await fetch(putRequest).then(response => response.json());
 }
 
 function findNextUncompletedChallenge(prevChallengeId) {
@@ -389,17 +387,11 @@ function setNextButton(displayedStep, challenge) {
     }
 
     nextButton.onclick = async ()=> {
-        console.log("Clicked next button");
         let currentStatus = user.challenge_statuses[challenge.get("id")];
         if (currentStatus+1 == displayedStep) {
-
             const putRequest = new Request(`/user?chal=${challenge.get("id")}&stat=${currentStatus+1}`, {method: 'PUT'});
-            await fetch(putRequest);
+            user = await fetch(putRequest).then(response => response.json());
 
-            const getRequest = new Request('/user', {method: 'GET'});
-            const response = await fetch(getRequest);
-            user = await response.json();
-            console.log("Updating nav bar item");
             const navBarItemBackground = document.getElementById("challenges-nav-bar-item-background-"+user.current_challenge_id);
             let percentDone = user.challenge_statuses[challenge.get("id")] / challenge.get("steps").length;
             navBarItemBackground.style.width = percentDone*100+"%";
@@ -485,12 +477,8 @@ function checkCheckbox(challenge) {
 
 async function updateUserCurrentChallenge(id) {
     const putRequest = new Request(`/user?chal=${id}`, {method: 'PUT'});
-    await fetch(putRequest);
+    user = await fetch(putRequest).then(response => response.json());
 
-    const getRequest = new Request('/user', {method: 'GET'});
-    const response = await fetch(getRequest);
-    user = await response.json();
-    
     setChallengeBox(id);
 }
 
@@ -513,9 +501,8 @@ function closeCreateEventModal() {
 
 async function checkLoginStatus() {
     const request = new Request('/login-status', {method: 'GET'});
-    const response = await fetch(request);
+    const json = await fetch(request).then(response => response.json());
 
-    const json = await response.json();
     const loginBtn = document.getElementById("login-button");
     const feedRightSide = document.getElementById("feed-right-side");
 
@@ -529,12 +516,12 @@ async function checkLoginStatus() {
         if (json["returningUser"] == "false") {
             openUserInfoModal();
         }
-        await getUserInfo();
+        else await getUserInfo();
     }
 
-    loginBtn.addEventListener("click", () => {
+    loginBtn.onclick = () => {
         window.location = json["url"];
-    });
+    };
 }
 
 function openUserInfoModal() {
@@ -544,10 +531,7 @@ function openUserInfoModal() {
 
 async function getUserInfo() {
     const request = new Request('/user', {method: 'GET'});
-    const response = await fetch(request);
-
-    const userInfo = await response.json();
-    user = userInfo;
+    user = await fetch(request).then(response => response.json());
 }
 
 

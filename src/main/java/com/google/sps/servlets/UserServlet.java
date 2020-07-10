@@ -80,13 +80,8 @@ public class UserServlet extends HttpServlet {
     Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate("userId", FilterOperator.EQUAL, userId));
     Entity entity = datastore.prepare(query).asSingleEntity();
 
-    String nickname = (String) entity.getProperty(UserInfo.NICKNAME);
-    int currentChallengeId = ((Long) entity.getProperty(UserInfo.CURRENT_CHALLENGE)).intValue();
-    ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(UserInfo.CREATED_EVENTS);
-    ArrayList<Long> bookmarkedEvents = (ArrayList<Long>) entity.getProperty(UserInfo.BOOKMARKED_EVENTS);
-    ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(UserInfo.CHALLENGE_STATUSES);
+    UserInfo user = convertEntitytoUserInfo(entity, userId);
 
-    UserInfo user = new UserInfo(userId, nickname, createdEvents, bookmarkedEvents, currentChallengeId, challengeStatuses);
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 
@@ -102,7 +97,7 @@ public class UserServlet extends HttpServlet {
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
 
-      int currentChallengeId = 0;
+      Long currentChallengeId = 0L;
       ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
 
       Entity userEntity = new Entity(UserInfo.DATA_TYPE);
@@ -126,8 +121,8 @@ public class UserServlet extends HttpServlet {
       String challengeIdParam = request.getParameter(CHALLENGE_ID_PARAM);
       String statusParam = request.getParameter(CHALLENGE_STATUS_PARAM);
 
-      int challengeId = -1;
-      int newStatus = -1;
+      Long challengeId = -1L;
+      Integer newStatus = -1;
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
 
@@ -136,7 +131,7 @@ public class UserServlet extends HttpServlet {
 
       if (challengeIdParam != null) {
           try {
-              challengeId = Integer.parseInt(challengeIdParam);
+              challengeId = Long.parseLong(challengeIdParam);
               if (statusParam != null) {
                   newStatus = Integer.parseInt(statusParam);
                   updateChallengeStatus(entity, challengeId, newStatus);
@@ -150,22 +145,41 @@ public class UserServlet extends HttpServlet {
       
       datastore.put(entity);
 
-      response.sendRedirect("/feed.html");
+      UserInfo user = convertEntitytoUserInfo(entity, userId);
+    
+      response.setContentType("application/json; charset=UTF-8");
+      response.setCharacterEncoding("UTF-8");
+
+      String json = convertToJson(user);
+      response.getWriter().println(json);
   }
 
-  private void updateCurrentChallenge(Entity entity, int id) {
+  private void updateCurrentChallenge(Entity entity, Long id) {
+      System.out.println("updating current challenge to " + id);
       entity.setProperty(UserInfo.CURRENT_CHALLENGE, id);
   }
 
-  private void updateChallengeStatus(Entity entity, int id, int status) {
+  private void updateChallengeStatus(Entity entity, Long id, int status) {
       ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(UserInfo.CHALLENGE_STATUSES);
-      challengeStatuses.set(id, status);
+      challengeStatuses.set(id.intValue(), status);
       entity.setProperty(UserInfo.CHALLENGE_STATUSES, challengeStatuses);
+      System.out.println("updating current statuses to " + challengeStatuses);
   }
 
   private String convertToJson(UserInfo user) {
       Gson gson = new Gson();
       String json = gson.toJson(user);
       return json;
+  }
+
+  private UserInfo convertEntitytoUserInfo(Entity entity, String userId) {
+    String nickname = (String) entity.getProperty(UserInfo.NICKNAME);
+    Long currentChallengeId = (Long) entity.getProperty(UserInfo.CURRENT_CHALLENGE);
+    ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(UserInfo.CREATED_EVENTS);
+    ArrayList<Long> bookmarkedEvents = (ArrayList<Long>) entity.getProperty(UserInfo.BOOKMARKED_EVENTS);
+    ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(UserInfo.CHALLENGE_STATUSES);
+
+    UserInfo user = new UserInfo(userId, nickname, createdEvents, bookmarkedEvents, currentChallengeId, challengeStatuses);
+    return user;
   }
 }

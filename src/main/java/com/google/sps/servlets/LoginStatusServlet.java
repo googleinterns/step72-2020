@@ -55,12 +55,15 @@ public class LoginStatusServlet extends HttpServlet {
       Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate("userId", FilterOperator.EQUAL, userId));
 
       Entity result = datastore.prepare(query).asSingleEntity();
+      
 
       // sends whether user is a returning user so can get info to create user if necessary
       if (result == null) {
+          System.out.println("Not returning user");
           res.add("false");
       }
       else {
+          System.out.println("Returning user");
           res.add("true");
       }
 
