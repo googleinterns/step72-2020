@@ -216,6 +216,7 @@ function fillBadge(currentStep, totalSteps) {
 }
 
 function setChallengesNavBar(challenges) {
+    console.log("Resetting nav bar");
     const navBar = document.getElementById("challenges-nav-bar");
     for (challenge of challenges) {
         navBar.appendChild(createChallengeNavBarItem(challenge));
@@ -388,6 +389,7 @@ function setNextButton(displayedStep, challenge) {
     }
 
     nextButton.onclick = async ()=> {
+        console.log("Clicked next button");
         let currentStatus = user.challenge_statuses[challenge.get("id")];
         if (currentStatus+1 == displayedStep) {
 
@@ -397,7 +399,7 @@ function setNextButton(displayedStep, challenge) {
             const getRequest = new Request('/user', {method: 'GET'});
             const response = await fetch(getRequest);
             user = await response.json();
-
+            console.log("Updating nav bar item");
             const navBarItemBackground = document.getElementById("challenges-nav-bar-item-background-"+user.current_challenge_id);
             let percentDone = user.challenge_statuses[challenge.get("id")] / challenge.get("steps").length;
             navBarItemBackground.style.width = percentDone*100+"%";
