@@ -256,20 +256,29 @@ function createChallengeNavBarItem(user, challenge) {
     return item;
 }
 
-let myChallenges = []
+
 
 async function getServerChallenges(){
     const response = await fetch('/data');
     const challengeJson= await response.json();
 
     var i;
-    let 
+    let myChallenges = [];
     for(i =0; i <challengeJson.length; i++) {
         myChallenges[i] = new Map();
         myChallenges[i].set("id", i);
-        myChallenges[i].set("title", challengeJson[i].challenge_type);
+        myChallenges[i].set("title", challengeJson[i].name);
+        myChallenges[i].set("type", challengeJson[i].challenge_type);
+        myChallenges[i].set("steps", challengeJson[i].steps); //*/
 
-        switch (myChallenges.get("title")) {
+        /*myChallenges[i] = {
+            id: i,
+            title: challengeJson[i].name,
+            type: challengeJson[i].challenge_type,
+            steps: challengeJson[i].steps,
+        }; */
+
+        switch (myChallenges[i].get("type")) {
           case("Recycle"):
             myChallenges[i].set("icon", "♻️");
             break;
@@ -278,6 +287,9 @@ async function getServerChallenges(){
             break;
           case("Old Electronics"):
             myChallenges[i].set("icon", "🗑");
+            break;
+          default:
+            myChallenges[i].set("icon", "⚠");
             break;
         }
     }
