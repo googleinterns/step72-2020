@@ -46,7 +46,10 @@ mockUser.set("currentChallengeId", 1);
 mockUser.set("challengeStatuses", [1, 0, 2]);
 
 const user = mockUser;
-const challenges = mockChallenges;
+//const challenges = mockChallenges;
+
+let challenges = [];
+
 
 let eventCategoryIcons = new Map();
 eventCategoryIcons.set("food_beverage", "🥑🍋🍏");
@@ -58,6 +61,8 @@ eventCategoryIcons.set("other", "🥑🌲🐢");
 const badgeHeight = 120;
 let lastBoldedItem;
 
+//let myChallenges = [];
+
 async function loadPage() {
     const timezone = document.getElementById("user-timezone");
     timezone.value = new Date().getTimezoneOffset();
@@ -66,6 +71,8 @@ async function loadPage() {
     for (event of events) {
         feed.appendChild(postEvent(event));
     }
+    
+    await getServerChallenges();
 
     setChallengeBox(user.get("currentChallengeId"));
 
@@ -185,6 +192,7 @@ function setChallengeBox(challengeId) {
         stepsText.innerText = "Complete!";
     }
     else {
+        console.log("challenges length = " + challenges.length) ;
         icon.innerText = challenges[challengeId].get("icon");
 
         const currentStep = user.get("challengeStatuses")[challengeId];
@@ -213,6 +221,7 @@ function fillBadge(currentStep, totalSteps) {
 //start here to implement (note for me)
 function setChallengesNavBar(user, challenges) {
     const navBar = document.getElementById("challenges-nav-bar");
+
     for (challenge of challenges) {
         navBar.appendChild(createChallengeNavBarItem(user, challenge));
 
@@ -233,7 +242,7 @@ function createChallengeNavBarItem(user, challenge) {
 
     const title = document.createElement('p');
     title.className = "challenges-nav-bar-item-title";
-    title.innerText = challenge.get("title");
+    title.innerText = challenge.get("type");
     item.appendChild(title);
 
     const icon = document.createElement('p');
@@ -257,17 +266,18 @@ function createChallengeNavBarItem(user, challenge) {
 
 
 async function getServerChallenges(){
-    const response = await fetch('/data');
-    const challengeJson= await response.json();
+    const response = await fetch('/challenges');
+    const challengeJson = await response.json();
 
     var i;
-    let myChallenges = [];
-    for(i =0; i <challengeJson.length; i++) {
-        myChallenges[i] = new Map();
-        myChallenges[i].set("id", i);
-        myChallenges[i].set("title", challengeJson[i].name);
-        myChallenges[i].set("type", challengeJson[i].challenge_type);
-        myChallenges[i].set("steps", challengeJson[i].steps); //*/
+    for(i = 0; i < challengeJson.length; i++) {
+        //consol.log("Challenge #:" + i);
+        challenges[i] = new Map();
+        challenges[i].set("id", i);
+        challenges[i].set("title", challengeJson[i].name);
+        challenges[i].set("type", challengeJson[i].challenge_type);
+        challenges[i].set("steps", challengeJson[i].steps);
+        challenges[i].set("") //*/
 
         /*myChallenges[i] = {
             id: i,
@@ -276,18 +286,18 @@ async function getServerChallenges(){
             steps: challengeJson[i].steps,
         }; */
 
-        switch (myChallenges[i].get("type")) {
+        switch (challenges[i].get("type")) {
           case("Recycle"):
-            myChallenges[i].set("icon", "♻️");
+            challenges[i].set("icon", "♻️");
             break;
           case("Gardening"):
-            myChallenges[i].set("icon", "🌱");
+            challenges[i].set("icon", "🌱");
             break;
-          case("Old Electronics"):
-            myChallenges[i].set("icon", "🗑");
+          case("Waste"):
+            challenges[i].set("icon", "🗑");
             break;
           default:
-            myChallenges[i].set("icon", "⚠");
+            challenges[i].set("icon", "⚠");
             break;
         }
     }
