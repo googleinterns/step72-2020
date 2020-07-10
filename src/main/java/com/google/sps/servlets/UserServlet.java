@@ -139,7 +139,7 @@ public class UserServlet extends HttpServlet {
                   updateCurrentChallenge(entity, challengeId);
               }
           } catch (Exception e) {
-              System.out.println(e.getMessage());
+              System.err.println(e.getMessage());
           }
       }
       
@@ -155,7 +155,6 @@ public class UserServlet extends HttpServlet {
   }
 
   private void updateCurrentChallenge(Entity entity, Long id) {
-      System.out.println("updating current challenge to " + id);
       entity.setProperty(UserInfo.CURRENT_CHALLENGE, id);
   }
 
@@ -163,7 +162,6 @@ public class UserServlet extends HttpServlet {
       ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(UserInfo.CHALLENGE_STATUSES);
       challengeStatuses.set(id.intValue(), status);
       entity.setProperty(UserInfo.CHALLENGE_STATUSES, challengeStatuses);
-      System.out.println("updating current statuses to " + challengeStatuses);
   }
 
   private String convertToJson(UserInfo user) {

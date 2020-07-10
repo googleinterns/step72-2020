@@ -59,11 +59,9 @@ public class LoginStatusServlet extends HttpServlet {
 
       // sends whether user is a returning user so can get info to create user if necessary
       if (result == null) {
-          System.out.println("Not returning user");
           res.add("false");
       }
       else {
-          System.out.println("Returning user");
           res.add("true");
       }
 
