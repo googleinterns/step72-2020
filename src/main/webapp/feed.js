@@ -277,7 +277,7 @@ async function getServerChallenges(){
         challenges[i].set("title", challengeJson[i].name);
         challenges[i].set("type", challengeJson[i].challenge_type);
         challenges[i].set("steps", challengeJson[i].steps);
-        challenges[i].set("") //*/
+        //challenges[i].set("description", challengeJson[i].steps) //*/
 
         /*myChallenges[i] = {
             id: i,
@@ -322,13 +322,13 @@ function showChallengeInfo(user, challenge, displayedStep) {
     header.innerText = challenge.get("icon") + " " + challenge.get("title") + " " + stepsText;
 
     const stepText = document.getElementById("challenges-main-panel-step");
-    stepText.innerText = challenge.get("steps")[displayedStep-1];
+    stepText.innerText = challenge.get("steps")[displayedStep-1].key;
 
     setPrevButton(displayedStep, user, challenge);
     setNextButton(displayedStep, user, challenge);
     
     const description = document.getElementById("challenges-main-panel-description");
-    description.innerText = challenge.get("descriptions")[displayedStep-1];
+    description.innerText = challenge.get("steps")[displayedStep-1].value;
 
     const resources = document.getElementById("challenges-main-panel-resources");
     resources.innerText = challenge.get("resources")[displayedStep-1];

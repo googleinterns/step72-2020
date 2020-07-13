@@ -14,14 +14,14 @@ import org.junit.runner.RunWith;
 @RunWith(JUnit4.class)
 public final class ChallengeTest {
   private List<Pair<String,String>> step_desc_pairs;
-  private static List<Challenge> challenge_list;
+  private List<Challenge> challenge_list;
 
   @Before
   public void setup(){
     step_desc_pairs = Arrays.asList(
       new Pair<String, String>("step 1", "Use a reusable bag for Gro"),
       new Pair<String, String>("step 2", "Reduce..."),
-      new Pair<String, String>("step 3", "Recylce")) ;
+      new Pair<String, String>("step 3", "Recylce"));
 
     challenge_list = Arrays.asList(
       new Challenge("Gardening","Environmentally friendly fertilizer!", step_desc_pairs),

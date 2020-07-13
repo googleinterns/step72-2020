@@ -23,11 +23,6 @@ public final class Challenges {
     private static final String WASTE_CHALLENGE_0 = "Create your own compost";
     //private static final String WASTE_CHALLENGE_1 = "Avoid disposable goods";
 
-    //Challenge steps
-    private static final List GARDENING_STEPS_0 = Arrays.asList("step 1", "step 2", "step 3");
-    private static final List RECYCLE_STEPS_0 = Arrays.asList("Use a reusable bag for Groceries", "Reduce ", "step 3");
-    private static final List WASTE_STEPS_0 = Arrays.asList("step 1", "step 2", "step 3");
-
 
     /* Note: step 1, step 2, step 3 are place holders */
     private static final List GARDENING_STEPS_PAIR_0 =
@@ -44,11 +39,6 @@ public final class Challenges {
       Arrays.asList(new Pair<String, String>("step 1", "Find a nice dry, shady place near water for your compost"),
       new Pair<String, String>("step 2", "Add chopped/shredded brown and green materials"),
       new Pair<String, String>("step 3", "Mix Grass clippings and green waste into the pile. Also bury fruit and vegetable waste under 10 inches"));
-
-   /* //Step descriptions
-    private static final List GARDENING_DESC_0 = Arrays.asList();
-    private static final List RECYCLE_DESC_0 = Arrays.asList();
-    private static final List WASTE_DESC_0 = Arrays.asList(); */
 
      //might want to consider using map/hashset organize data by type
      //then in the servlet pass one from each set
