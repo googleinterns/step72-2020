@@ -20,20 +20,17 @@ public class Challenge {
   } */
 
   public boolean isEqual(Challenge object) {
-    if (this == object){
-      return true;
-    }else if (object instanceof Challenge){
-
+    if (object instanceof Challenge){
       Challenge otherChallenge = (Challenge) object;
       if (challenge_type.equals(object.challenge_type) &&
-        steps.equals(object.steps))
+        steps.equals(object.steps) && name.equals(object.name))
          return true;
       }
      return false; 
   }
 
   public String toString() {
-      return challenge_type;
+      return "Challenge Type: " + challenge_type + ", Name: " + name;
   }
 
 }

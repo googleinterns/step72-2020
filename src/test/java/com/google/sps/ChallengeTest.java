@@ -20,13 +20,17 @@ public final class ChallengeTest {
   public void setup(){
     challenge_list = Arrays.asList(
       new Challenge("Gardening","Environmentally friendly fertilizer!", STEPS),
-      new Challenge("Recycle","Create your own compost" ,STEPS),
-      new Challenge("Waste","Old Electronics", STEPS));
+      new Challenge("Recycle", "Old Electronics" ,STEPS),
+      new Challenge("Waste", "Create your own compost", STEPS));
   }
   
   @Test
-  public void isEqualValid(){
-    Assert.assertTrue(challenge_list.get(0).isEqual(challenge_list.get(0)));
+  public void isEqualValidSameInstance(){
+    Assert.assertTrue(challenge_list.get(2).isEqual(challenge_list.get(2)));
+  }
+
+  @Test
+  public void isEqualValidDiffInstance(){
     Assert.assertTrue(Challenges.challenges[1].isEqual(challenge_list.get(1)));
   }
 
@@ -37,7 +41,6 @@ public final class ChallengeTest {
 
   @Test
   public void toStringTestValid(){
-    Assert.assertTrue(challenge_list.get(2).toString().equals("Waste"));
-    Assert.assertTrue(Challenges.challenges[1].toString().equals("Recycle"));
+    Assert.assertTrue(challenge_list.get(1).toString().equals("Challenge Type: Recycle, Name: Old Electronics"));
   }
 }
