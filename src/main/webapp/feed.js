@@ -547,7 +547,9 @@ gapi.client.calendar.calendarList.list().then(function(response) {
                 'summary': 'GEN Capstone'
             });
 
-            calendarRequest.execute(function(event) {
+            calendarRequest.execute(function(response) {
+                calendarId = response.id;
+                console.log(calendarId);
             appendPre('calendar created');
             });
         }
