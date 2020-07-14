@@ -19,9 +19,9 @@ public final class ChallengeTest {
   @Before
   public void setup(){
     challenge_list = Arrays.asList(
-      new Challenge("Gardening","Environmentally friendly fertilizer!", STEPS),
-      new Challenge("Recycle", "Old Electronics" ,STEPS),
-      new Challenge("Waste", "Create your own compost", STEPS));
+      new Challenge(Challenge.Type.GARDENING,"Environmentally friendly fertilizer!", STEPS),
+      new Challenge(Challenge.Type.RECYCLE, "Old Electronics" ,STEPS),
+      new Challenge(Challenge.Type.WASTE, "Create your own compost", STEPS));
   }
   
   @Test
@@ -41,6 +41,7 @@ public final class ChallengeTest {
 
   @Test
   public void toStringTestValid(){
-    Assert.assertTrue(challenge_list.get(1).toString().equals("Challenge Type: Recycle, Name: Old Electronics"));
+    System.out.println(challenge_list.get(1).toString());
+    Assert.assertTrue(challenge_list.get(1).toString().equals("Challenge Type: RECYCLE, Name: Old Electronics"));
   }
 }

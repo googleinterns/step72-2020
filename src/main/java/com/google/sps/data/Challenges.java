@@ -27,12 +27,10 @@ public final class Challenges {
     private static final List RECYCLE_STEPS_0 = Arrays.asList("step 1", "step 2", "step 3");
     private static final List WASTE_STEPS_0 = Arrays.asList("step 1", "step 2", "step 3");
 
-
-
     public static final Challenge[] challenges = {
-        new Challenge(GARDENING_TYPE, GARDENING_CHALLENGE_0, GARDENING_STEPS_0),
-        new Challenge(RECYCLE_TYPE, RECYCLE_CHALLENGE_0, RECYCLE_STEPS_0),
-        new Challenge(WASTE_TYPE, WASTE_CHALLENGE_0, WASTE_STEPS_0)
+        new Challenge(Challenge.Type.GARDENING, GARDENING_CHALLENGE_0, GARDENING_STEPS_0),
+        new Challenge(Challenge.Type.RECYCLE, RECYCLE_CHALLENGE_0, RECYCLE_STEPS_0),
+        new Challenge(Challenge.Type.WASTE, WASTE_CHALLENGE_0, WASTE_STEPS_0)
     };
 
     private Challenges() {
