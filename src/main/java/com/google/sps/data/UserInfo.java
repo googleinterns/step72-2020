@@ -19,13 +19,13 @@ import java.util.List;
 
 public final class UserInfo {
 
-  public static String DATA_TYPE = "UserInfo";
-  public static String ID = "userId";
-  public static String NICKNAME = "nickname";
-  public static String CREATED_EVENTS = "created_events";
-  public static String BOOKMARKED_EVENTS = "bookmarked_events";
-  public static String CURRENT_CHALLENGE = "current_challenge";
-  public static String CHALLENGE_STATUSES = "challenge_statuses";
+  public static final String DATA_TYPE = "UserInfo";
+  public static final String ID = "userId";
+  public static final String NICKNAME = "nickname";
+  public static final String CREATED_EVENTS = "created_events";
+  public static final String BOOKMARKED_EVENTS = "bookmarked_events";
+  public static final String CURRENT_CHALLENGE = "current_challenge";
+  public static final String CHALLENGE_STATUSES = "challenge_statuses";
 
   private final String id;
   private final String nickname;
