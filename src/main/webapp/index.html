@@ -1,2 +1,269 @@
-<a href="/feed.html">Click here for feed</a>
-<a href="/map.html"><button>Click here for the pollution map</button></a>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>GEN Capstone</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="feed.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&display=swap" rel="stylesheet">
+
+    <!-- <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js" async defer></script> -->
+
+  </head>
+  <body onload="loadPage()">
+      <div class="header">
+          <div id="left-side-header">
+            <h1 class="title">🌏project title</h1>
+            <div class="tabs">
+                <a class="tab" href="/index.html">Feed</a>
+                <a class="tab" href="/map.html">Pollution Map</a>
+            </div>
+          </div>
+          <div id="right-side-header">
+            <button id="authorize-button" style="display: none;">Authorize</button>
+            <button id="signout-button" style="display: none;">Sign Out</button>  
+          </div>
+    </div>
+    <pre id="content" style="white-space: pre-wrap;"></pre>
+    <div id="feed">
+        <div class="feed-heading"><div class="events-searchbar">find local events:<input type="text" id="events-searchbar-input" placeholder="city or zip code"></input></div></div>
+        <div id="events-feed"></div>
+        <div class="feed-right-side">
+            <div class="feed-box create-event-box" onclick="openCreateEventModal()"><div class="feed-box-content create-event-box-content"><p class="icon">📅</p><p class="create-event-text">create an event</p></div></div>
+            <div class="feed-box challenges-box" onclick="openChallengesModal()">
+                <div class="feed-box-content challenges-box-content">
+                    <p class="icon">🌏</p><p class="challenges-text">challenges</p>
+                </div>
+                <div class="challenges-badge" id="challenges-badge">
+                    <p class="icon badge-icon" id="challenges-badge-icon"></p>
+                    <p class="challenge-steps" id="challenge-steps"></p>
+                    <div class="badge-filling" id="feed-badge-filling"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="challenges-modal">
+        <div id="challenges-nav-bar" class="challenges-modal-content">
+            <p id="challenges-nav-bar-header">Challenges</p>
+        </div>
+        <div id="challenges-main-panel" class="challenges-modal-content">
+            <p class="close-modal-button" onclick="closeChallengesModal()">x</p>
+            <div id="challenges-main-panel-upper-content">
+                <div class="challenges-main-panel-text challenges-main-panel-content">
+                    <p id="challenges-main-panel-header"></p>
+                    <p id="challenges-main-panel-step"></p>
+                    <p id="challenges-main-panel-description"></p>
+                    <p id="challenges-main-panel-resources"></p>
+                    <div id="challenges-modal-set-challenge-div" class="challenges-main-panel-content">
+                        <p id="challenges-modal-set-challenge-text">Set as current challenge</p>
+                        <div id="challenges-modal-set-challenge-checkbox">
+                            <img id="challenges-modal-checkmark" src="/resources/greencheckmark.png" alt="checkmark"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="challenges-badge" id="modal-challenges-badge">
+                    <p class="icon badge-icon" id="modal-challenges-badge-icon"></p>
+                    <div class="badge-filling" id="modal-badge-filling"></div>
+                </div>
+            </div>
+            <div id="challenge-complete-content">
+                <p id="challenge-complete-text"></p>
+            </div>
+            <div id="challenges-modal-step-buttons">
+                <div id="challenges-modal-prev-step-button">← view previous step</div>
+                <div id="challenges-modal-next-step-button">step complete →</div>
+            </div>
+        </div>
+    </div>
+    <div id="create-event-modal">
+        <p class="close-modal-button" id="close-create-event-modal-button" onclick="closeCreateEventModal()">x</p>
+        <form id="create-event-form" action="/events" method="POST">
+            <input type="text" id="user-timezone" name="timezone" style="display:none;" required></input>
+            <label for="event-summary">Event:</label><br>
+            <input type="text" id="event-summary" name="summary" required><br>
+            <label for="event-location">Location:</label><br>
+            <input type="text" id="event-location" name="location" required><br>
+            <label for="event-date">Date:</label><br>
+            <input type="date" id="event-date" name="date" required><br>
+            <label for="event-start-time">Start:</label><br>
+            <input type="time" id="event-start-time" name="start" required><br>
+            <label for="event-end-time">End:</label><br>
+            <input type="time" id="event-end-time" name="end" required><br>
+            <label for="event-description">Description:</label><br>
+            <input type="text" id="event-description" name="description" required><br>
+            <label for="event-category">Category:</label><br>
+            <select class="button" name="category" id="event-category">
+                <option value="food_beverage">Food/Beverage</option>
+                <option value="nature">Nature</option>
+                <option value="water">Water</option>
+                <option value="waste_cleanup">Waste/Cleanup</option>
+                <option value="other">Other</option>
+            </select><br>
+            <input class="button" id="submit-button" type="submit" />
+        </form>
+    </div>
+
+<!-- <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+      <script>
+      function onSignIn(googleUser) {
+        // Useful data for your client-side scripts:
+        var profile = googleUser.getBasicProfile();
+        console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+        console.log('Full Name: ' + profile.getName());
+        console.log('Given Name: ' + profile.getGivenName());
+        console.log('Family Name: ' + profile.getFamilyName());
+        console.log("Image URL: " + profile.getImageUrl());
+        console.log("Email: " + profile.getEmail());
+
+        // The ID token you need to pass to your backend:
+        var id_token = googleUser.getAuthResponse().id_token;
+        console.log("ID Token: " + id_token);
+
+        const options = new gapi.auth2.SigninOptionsBuilder();
+        options.setScope('email https://www.googleapis.com/auth/calendar.app.created');
+
+        var auth2 = gapi.auth2.init();
+        googleUser = auth2.currentUser.get();
+        googleUser.grant(options).then(
+            function(success){
+            console.log(JSON.stringify({message: "success", value: success}));
+            },
+            function(fail){
+            alert(JSON.stringify({message: "fail", value: fail}));
+            });
+      }
+    </script> -->
+    <script>
+    const CLIENT_ID = '605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com';
+    const API_KEY = 'AIzaSyAUR8-gJeYJOCSDJTP6qgN7FsIDG3u-vgU';
+    const SCOPES  = "https://www.googleapis.com/auth/calendar.app.created https://www.googleapis.com/auth/calendar.readonly";
+    var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+    var authorizeButton = document.getElementById('authorize-button');
+    var signoutButton = document.getElementById('signout-button');
+
+      /**
+       *  On load, called to load the auth2 library and API client library.
+       */
+      function handleClientLoad() {
+        gapi.load('client:auth2', initClient);
+      }
+
+      /**
+       *  Initializes the API client library and sets up sign-in state
+       *  listeners.
+       */
+      function initClient() {
+        gapi.client.init({
+          apiKey: API_KEY,
+          clientId: CLIENT_ID,
+          discoveryDocs: DISCOVERY_DOCS,
+          scope: SCOPES
+        }).then(function () {
+          // Listen for sign-in state changes.
+          gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+
+          // Handle the initial sign-in state.
+          updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+          authorizeButton.onclick = handleAuthClick;
+          signoutButton.onclick = handleSignoutClick;
+        }, function(error) {
+          appendPre(JSON.stringify(error, null, 2));
+        });
+      }
+
+      /**
+       *  Called when the signed in status changes, to update the UI
+       *  appropriately. After a sign-in, the API is called.
+       */
+      function updateSigninStatus(isSignedIn) {
+        if (isSignedIn) {
+          authorizeButton.style.display = 'none';
+          signoutButton.style.display = 'block';
+          showAddToCalendarButtons();
+       //   listUpcomingEvents();
+        } else {
+          authorizeButton.style.display = 'block';
+          signoutButton.style.display = 'none';
+          hideAddToCalendarButtons();
+        }
+      }
+
+      /**
+       *  Sign in the user upon button click.
+       */
+      function handleAuthClick(event) {
+        gapi.auth2.getAuthInstance().signIn();
+      }
+
+      /**
+       *  Sign out the user upon button click.
+       */
+      function handleSignoutClick(event) {
+        gapi.auth2.getAuthInstance().signOut();
+      }
+
+       /**
+       * Append a pre element to the body containing the given message
+       * as its text node. Used to display the results of the API call.
+       *
+       * @param {string} message Text to be placed in pre element.
+       */
+      function appendPre(message) {
+        var pre = document.getElementById('content');
+        var textContent = document.createTextNode(message + '\n');
+        pre.appendChild(textContent);
+      } 
+
+      function showAddToCalendarButtons() {
+          const buttons = document.getElementsByClassName("add-to-calendar-div");
+          for (btn of buttons) btn.style.display = "block";
+      }
+
+      function hideAddToCalendarButtons() {
+          const buttons = document.getElementsByClassName("add-to-calendar-div");
+          for (btn of buttons) btn.style.display = "none";
+      }
+`
+   
+      /**
+       * Print the summary and start datetime/date of the next ten events in
+       * the authorized user's calendar. If no events are found an
+       * appropriate message is printed.
+       */
+      function listUpcomingEvents() {
+        gapi.client.calendar.events.list({
+          'calendarId': 'primary',
+          'timeMin': (new Date()).toISOString(),
+          'showDeleted': false,
+          'singleEvents': true,
+          'maxResults': 10,
+          'orderBy': 'startTime'
+        }).then(function(response) {
+          var events = response.result.items;
+          appendPre('Upcoming events:');
+
+          if (events.length > 0) {
+            for (i = 0; i < events.length; i++) {
+              var event = events[i];
+              var when = event.start.dateTime;
+              if (!when) {
+                when = event.start.date;
+              }
+              appendPre(event.summary + ' (' + when + ')')
+            }
+          } else {
+            appendPre('No upcoming events found.');
+          }
+        });
+      }
+`
+    </script>
+
+    <script async defer src="https://apis.google.com/js/api.js"
+      onload="this.onload=function(){};handleClientLoad()"
+      onreadystatechange="if (this.readyState === 'complete') this.onload()">
+    </script>
+    </body>
+</html>

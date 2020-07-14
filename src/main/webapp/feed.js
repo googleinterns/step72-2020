@@ -87,10 +87,20 @@ function postEvent(event) {
     const eventEl = document.createElement('div');
     eventEl.className = "event-post";
     eventEl.appendChild(addEventUserText(event));
+    eventEl.appendChild(addEventAddToCalendarButton(event));
     // eventEl.appendChild(addEventBookmark(event));
     eventEl.appendChild(addEventMiddleSection(event));
     eventEl.appendChild(addEventInfo(event));
     return eventEl;
+}
+
+function addEventAddToCalendarButton(event) {
+    const addToCalDiv = document.createElement('div');
+    addToCalDiv.style.height = 10;
+    addToCalDiv.className = "add-to-calendar-div";
+    addToCalDiv.innerText = "+";
+    addToCalDiv.onclick = addEventToCalendar;
+    return addToCalDiv;
 }
 
 function addEventBookmark(event) {
@@ -475,4 +485,83 @@ function openCreateEventModal() {
 function closeCreateEventModal() {
     const modal = document.getElementById("create-event-modal");
     modal.style.display = "none";
+}
+
+function addEventToCalendar() {
+ 
+
+    var event = {
+  'summary': 'Google I/O 2015',
+  'location': '800 Howard St., San Francisco, CA 94103',
+  'description': 'A chance to hear more about Google\'s developer products.',
+  'start': {
+    'dateTime': '2020-07-12T09:00:00-07:00',
+    'timeZone': 'America/Los_Angeles'
+  },
+  'end': {
+    'dateTime': '2020-07-28T17:00:00-07:00',
+    'timeZone': 'America/Los_Angeles'
+  },
+  'recurrence': [
+    'RRULE:FREQ=DAILY;COUNT=2'
+  ],
+  'attendees': [
+    {'email': 'lpage@example.com'},
+    {'email': 'sbrin@example.com'}
+  ],
+  'reminders': {
+    'useDefault': false,
+    'overrides': [
+      {'method': 'email', 'minutes': 24 * 60},
+      {'method': 'popup', 'minutes': 10}
+    ]
+  }
+};
+
+//     var calendarRequest = gapi.client.calendar.calendars.insert({
+//   'summary': 'GEN Capstone'
+// });
+
+// calendarRequest.execute(function(event) {
+//   appendPre('calendar created');
+// });
+
+console.log("ok");
+
+let calendarId = null; 
+
+gapi.client.calendar.calendarList.list().then(function(response) {
+          var calendars = response.result.items;
+          appendPre("got calendars list");
+          for (calendar of calendars) {
+              if (calendar.summary == "GEN Capstone") {
+                  console.log(calendar);
+                  calendarId = calendar.id;
+              }
+
+          }
+
+          console.log(calendarId);
+        if (calendarId == null) {
+            var calendarRequest = gapi.client.calendar.calendars.insert({
+                'summary': 'GEN Capstone'
+            });
+
+            calendarRequest.execute(function(event) {
+            appendPre('calendar created');
+            });
+        }
+        else console.log("Already exists");
+});
+
+//     var request = gapi.client.calendar.events.insert({
+//   'calendarId': 'GEN Capstone',
+//   'resource': event
+// });
+
+
+// request.execute(function(event) {
+//   appendPre('Event created: ' + event.htmlLink);
+// });
+
 }
