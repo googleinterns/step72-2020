@@ -501,26 +501,26 @@ function closeCreateEventModal() {
 
 async function checkLoginStatus() {
     const request = new Request('/login-status', {method: 'GET'});
-    const json = await fetch(request).then(response => response.json());
+    const loginStatus = await fetch(request).then(response => response.json());
 
     const loginBtn = document.getElementById("login-button");
     const feedRightSide = document.getElementById("feed-right-side");
 
-    if (json["loggedIn"] == "false") {
+    if (loginStatus["loggedIn"] == "false") {
         feedRightSide.style.display = "none";
         loginBtn.innerText = "Login";
     }
     else {
         feedRightSide.style.display = "block";
         loginBtn.innerText = "Logout";
-        if (json["returningUser"] == "false") {
+        if (loginStatus["returningUser"] == "false") {
             openUserInfoModal();
         }
         else await getUserInfo();
     }
 
     loginBtn.onclick = () => {
-        window.location = json["url"];
+        window.location = loginStatus["url"];
     };
 }
 
