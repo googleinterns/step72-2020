@@ -6,11 +6,6 @@ import java.util.List;
 
 
 public final class Challenges {
-    
-    //Challenge types
-    private static final String GARDENING_TYPE = "Gardening";
-    private static final String RECYCLE_TYPE = "Recycle";
-    private static final String WASTE_TYPE = "Waste";
 
     //Challenge names
     private static final String GARDENING_CHALLENGE_0 = "Environmentally friendly fertilizer!";
