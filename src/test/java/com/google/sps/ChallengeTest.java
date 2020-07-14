@@ -1,11 +1,12 @@
 package com.google.sps;
 
 import com.google.sps.data.Challenge;
-import com.google.sps.data.Challenges;
+import com.google.sps.data.ChallengeData;
 import java.util.Arrays;
 import java.util.List;
 import javafx.util.Pair;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.Before;
 import org.junit.runners.JUnit4;
@@ -24,25 +25,24 @@ public final class ChallengeTest {
       new Pair<String, String>("step 3", "Recylce"));
 
     challenge_list = Arrays.asList(
-      new Challenge("Gardening","Environmentally friendly fertilizer!", step_desc_pairs),
-      new Challenge("Recycle","Create your own compost" ,step_desc_pairs),
-      new Challenge("Waste","Old Electronics", step_desc_pairs));
+      new Challenge(Challenge.Type.GARDENING,"Environmentally friendly fertilizer!", step_desc_pairs),
+      new Challenge(Challenge.Type.RECYCLE,"Recycle","Create your own compost" ,step_desc_pairs),
+      new Challenge(Challenge.Type.WASTE,"Old Electronics", step_desc_pairs));
   }
   
   @Test
-  public void isEqualValid(){
-    Assert.assertTrue(challenge_list.get(0).isEqual(challenge_list.get(0)));
-    Assert.assertTrue(Challenges.challenges[1].isEqual(challenge_list.get(1)));
+  public void isEqualValidSameInstance(){
+    Assert.assertTrue(challenge_list.get(2).isEqual(challenge_list.get(2)));
   }
 
   @Test
-  public void isEqualInvalid(){
-    Assert.assertFalse(challenge_list.get(0).isEqual(challenge_list.get(1)));
+  public void isEqualValidDiffInstance(){
+    Assert.assertTrue(ChallengeData.challenges[1].isEqual(challenge_list.get(1)));
   }
 
   @Test
   public void toStringTestValid(){
-    Assert.assertTrue(challenge_list.get(2).toString().equals("Waste"));
-    Assert.assertTrue(Challenges.challenges[1].toString().equals("Recycle"));
+    System.out.println(challenge_list.get(1).toString());
+    Assert.assertTrue(challenge_list.get(1).toString().equals("Challenge Type: RECYCLE, Name: Old Electronics"));
   }
 }

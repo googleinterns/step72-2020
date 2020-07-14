@@ -6,12 +6,7 @@ import java.util.List;
 import javafx.util.Pair;
 
 
-public final class Challenges {
-    
-    //Challenge types
-    private static final String GARDENING_TYPE = "Gardening";
-    private static final String RECYCLE_TYPE = "Recycle";
-    private static final String WASTE_TYPE = "Waste";
+public final class ChallengeData {
 
     //Challenge names
     private static final String GARDENING_CHALLENGE_0 = "Environmentally friendly fertilizer!";
@@ -24,6 +19,7 @@ public final class Challenges {
     //private static final String WASTE_CHALLENGE_1 = "Avoid disposable goods";
 
 
+<<<<<<< HEAD:src/main/java/com/google/sps/data/Challenges.java
     /* Note: step 1, step 2, step 3 are place holders */
     private static final List GARDENING_STEPS_PAIR_0 =
       Arrays.asList(new Pair<String, String>("step 1", "plant the seed"),
@@ -47,9 +43,15 @@ public final class Challenges {
         new Challenge(GARDENING_TYPE, GARDENING_CHALLENGE_0, GARDENING_STEPS_PAIR_0),
         new Challenge(RECYCLE_TYPE, RECYCLE_CHALLENGE_0, RECYCLE_STEPS_PAIR_0),
         new Challenge(WASTE_TYPE, WASTE_CHALLENGE_0, WASTE_STEPS_PAIR_0)
+=======
+    public static final Challenge[] challenges = {
+        new Challenge(Challenge.Type.GARDENING, GARDENING_CHALLENGE_0, GARDENING_STEPS_0),
+        new Challenge(Challenge.Type.RECYCLE, RECYCLE_CHALLENGE_0, RECYCLE_STEPS_0),
+        new Challenge(Challenge.Type.WASTE, WASTE_CHALLENGE_0, WASTE_STEPS_0)
+>>>>>>> 05cf327ee4f17ba7c23f39ad63f821b8b6be3787:src/main/java/com/google/sps/data/ChallengeData.java
     };
 
-    private Challenges() {
+    private ChallengeData() {
      //To prevent initialization
     }
 }
