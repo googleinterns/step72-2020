@@ -1,7 +1,7 @@
 package com.google.sps;
 
 import com.google.sps.data.Challenge;
-import com.google.sps.data.Challenges;
+import com.google.sps.data.ChallengeData;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Assert;
@@ -31,7 +31,7 @@ public final class ChallengeTest {
 
   @Test
   public void isEqualValidDiffInstance(){
-    Assert.assertTrue(Challenges.challenges[1].isEqual(challenge_list.get(1)));
+    Assert.assertTrue(ChallengeData.challenges[1].isEqual(challenge_list.get(1)));
   }
 
   @Test

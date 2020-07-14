@@ -15,7 +15,7 @@
 package com.google.sps.servlets;
 
 import com.google.gson.Gson;
-import com.google.sps.data.Challenges;
+import com.google.sps.data.ChallengeData;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class ChallengesServlet extends HttpServlet {
     } */
 
     private String convertToJsonUsingGson(){
-      String json = new Gson().toJson(Challenges.challenges);
+      String json = new Gson().toJson(ChallengeData.challenges);
       return json;
   }
 }

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public final class Challenges {
+public final class ChallengeData {
 
     //Challenge names
     private static final String GARDENING_CHALLENGE_0 = "Environmentally friendly fertilizer!";
@@ -28,7 +28,7 @@ public final class Challenges {
         new Challenge(Challenge.Type.WASTE, WASTE_CHALLENGE_0, WASTE_STEPS_0)
     };
 
-    private Challenges() {
+    private ChallengeData() {
      //To prevent initialization
     }
 }

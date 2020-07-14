@@ -4,7 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.Gson;
-import com.google.sps.data.Challenges;
+import com.google.sps.data.ChallengeData;
 import com.google.sps.servlets.ChallengesServlet;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -41,7 +41,7 @@ public final class ChallengesServletTest {
 
       //System.out.println(new Gson().toJson(Challenges.challenges));
       //System.out.println(writer.toString());
-      Assert.assertEquals(new Gson().toJson(Challenges.challenges),
+      Assert.assertEquals(new Gson().toJson(ChallengeData.challenges),
                           writer.toString().trim());
 
     } catch (IOException e) {}
