@@ -18,8 +18,6 @@ public final class ChallengeData {
     private static final String WASTE_CHALLENGE_0 = "Create your own compost";
     //private static final String WASTE_CHALLENGE_1 = "Avoid disposable goods";
 
-
-<<<<<<< HEAD:src/main/java/com/google/sps/data/Challenges.java
     /* Note: step 1, step 2, step 3 are place holders */
     private static final List GARDENING_STEPS_PAIR_0 =
       Arrays.asList(new Pair<String, String>("step 1", "plant the seed"),
@@ -36,19 +34,13 @@ public final class ChallengeData {
       new Pair<String, String>("step 2", "Add chopped/shredded brown and green materials"),
       new Pair<String, String>("step 3", "Mix Grass clippings and green waste into the pile. Also bury fruit and vegetable waste under 10 inches"));
 
-     //might want to consider using map/hashset organize data by type
-     //then in the servlet pass one from each set
+    //might want to consider using map/hashset organize data by type
+    //then in the servlet pass one from each set
 
     public static final Challenge[] challenges = {
-        new Challenge(GARDENING_TYPE, GARDENING_CHALLENGE_0, GARDENING_STEPS_PAIR_0),
-        new Challenge(RECYCLE_TYPE, RECYCLE_CHALLENGE_0, RECYCLE_STEPS_PAIR_0),
-        new Challenge(WASTE_TYPE, WASTE_CHALLENGE_0, WASTE_STEPS_PAIR_0)
-=======
-    public static final Challenge[] challenges = {
-        new Challenge(Challenge.Type.GARDENING, GARDENING_CHALLENGE_0, GARDENING_STEPS_0),
-        new Challenge(Challenge.Type.RECYCLE, RECYCLE_CHALLENGE_0, RECYCLE_STEPS_0),
-        new Challenge(Challenge.Type.WASTE, WASTE_CHALLENGE_0, WASTE_STEPS_0)
->>>>>>> 05cf327ee4f17ba7c23f39ad63f821b8b6be3787:src/main/java/com/google/sps/data/ChallengeData.java
+        new Challenge(Challenge.Type.GARDENING, GARDENING_CHALLENGE_0, GARDENING_STEPS_PAIR_0),
+        new Challenge(Challenge.Type.RECYCLE, RECYCLE_CHALLENGE_0, RECYCLE_STEPS_PAIR_0),
+        new Challenge(Challenge.Type.WASTE, WASTE_CHALLENGE_0, WASTE_STEPS_PAIR_0)
     };
 
     private ChallengeData() {

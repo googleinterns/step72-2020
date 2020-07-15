@@ -26,8 +26,8 @@ public final class ChallengeTest {
 
     challenge_list = Arrays.asList(
       new Challenge(Challenge.Type.GARDENING,"Environmentally friendly fertilizer!", step_desc_pairs),
-      new Challenge(Challenge.Type.RECYCLE,"Recycle","Create your own compost" ,step_desc_pairs),
-      new Challenge(Challenge.Type.WASTE,"Old Electronics", step_desc_pairs));
+      new Challenge(Challenge.Type.RECYCLE,"Old Electronics",step_desc_pairs),
+      new Challenge(Challenge.Type.WASTE,"Create your own compost", step_desc_pairs));
   }
   
   @Test

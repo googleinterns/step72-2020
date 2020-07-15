@@ -287,13 +287,13 @@ async function getServerChallenges(){
         }; */
 
         switch (challenges[i].get("type")) {
-          case("Recycle"):
+          case("RECYCLE"):
             challenges[i].set("icon", "♻️");
             break;
-          case("Gardening"):
+          case("GARDENING"):
             challenges[i].set("icon", "🌱");
             break;
-          case("Waste"):
+          case("WASTE"):
             challenges[i].set("icon", "🗑");
             break;
           default:
