@@ -106,6 +106,8 @@ html, body {
 .badge-icon {
     text-align: center;
     margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
 }
 
 .challenge-steps {
@@ -119,10 +121,11 @@ html, body {
 
 .badge-filling {
     border-radius: 0 0 10px 10px;
-    width: 80px;
+    width: 78.8px;
     background: #e5ecec;
     position: relative;
-    z-index: -1;
+    z-index: 0;
+    left: 1px;
 }
 
 #events-searchbar-input {
@@ -370,7 +373,7 @@ html, body {
 
 #modal-badge-filling {
     z-index: 1;
-    width: 100px;
+    width: 98px;
 }
 
 #challenges-modal-set-challenge-div {
@@ -415,9 +418,7 @@ html, body {
     background: #fafafa;
     width: 33%;
     margin: auto;
-}
-
-#create-event-form {
+    border: 2.5px solid #004643;
     padding: 20px;
     font-size: 20px;
 }
