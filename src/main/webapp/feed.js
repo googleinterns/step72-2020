@@ -331,7 +331,7 @@ function showChallengeInfo(user, challenge, displayedStep) {
     description.innerText = challenge.get("steps")[displayedStep-1].value;
 
     const resources = document.getElementById("challenges-main-panel-resources");
-    resources.innerText = challenge.get("resources")[displayedStep-1];
+    //resources.innerText = challenge.get("resources")[displayedStep-1];
 
     createModalChallengesBadge(displayedStep, challenge);
 

@@ -16,9 +16,11 @@ package com.google.sps.servlets;
 
 import com.google.gson.Gson;
 import com.google.sps.data.ChallengeData;
+import com.google.sps.data.Challenge;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -31,7 +33,7 @@ public class ChallengesServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      String json = convertToJsonUsingGson();
+      String json = convertToJsonUsingGson(ChallengeData.challenges);
       response.setContentType("application/json;");
       response.getWriter().println(json);
     }
@@ -41,8 +43,8 @@ public class ChallengesServlet extends HttpServlet {
 
     } */
 
-    private String convertToJsonUsingGson(){
-      String json = new Gson().toJson(ChallengeData.challenges);
+    private String convertToJsonUsingGson(Challenge [] challenge_list){
+      String json = new Gson().toJson(challenge_list);
       return json;
   }
 }
