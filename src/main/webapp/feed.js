@@ -109,7 +109,20 @@ function addEventAddToCalendarButton(event) {
     addToCalDiv.className = "add-to-calendar-div";
     addToCalDiv.innerText = "+";
     addToCalDiv.onclick = () => { updateCalendar(event); };
+    addToCalDiv.onmouseover = () => { addToCalDiv.appendChild(createAddToCalendarPopup()); };
+    addToCalDiv.onmouseout = () => { addToCalDiv.removeChild(addToCalDiv.childNodes[1]); };
+    
     return addToCalDiv;
+}
+
+function createAddToCalendarPopup() {
+    const popup = document.createElement('div');
+    popup.className = "add-to-calendar-popup";
+    
+    popup.innerHTML += `<p class="add-to-calendar-popup-text">Add to Google Calendar</p>
+    <div class="popup-triangle"></div>`;
+    
+    return popup;
 }
 
 function addEventBookmark(event) {
