@@ -37,7 +37,7 @@ public final class ChallengeTest {
 
   @Test
   public void isEqualValidDiffInstance(){
-    Assert.assertTrue(ChallengeData.challenges[1].isEqual(challenge_list.get(1)));
+    Assert.assertTrue(ChallengeData.CHALLENGES[1].isEqual(challenge_list.get(1)));
   }
 
   @Test

@@ -62,6 +62,7 @@ const badgeHeight = 120;
 let lastBoldedItem;
 
 //let myChallenges = [];
+const defaultNumChallenges = 3;
 
 async function loadPage() {
     const timezone = document.getElementById("user-timezone");
@@ -72,7 +73,7 @@ async function loadPage() {
         feed.appendChild(postEvent(event));
     }
     
-    await getServerChallenges();
+    await getServerChallenges(defaultNumChallenges);
 
     setChallengeBox(user.get("currentChallengeId"));
 
@@ -264,8 +265,8 @@ function createChallengeNavBarItem(user, challenge){
 
 
 
-async function getServerChallenges(){
-  const response = await fetch('/challenges');
+async function getServerChallenges(numChallenges){
+  const response = await fetch('/challenges?num-challenges=' + numChallenges);
   const challengeJson = await response.json();
 
   var i;
@@ -355,11 +356,22 @@ function showNewChallengeCompletePage(challenge) {
     let newChallengeId = findNextUncompletedChallenge(challenge.get("id"));
     if (newChallengeId == -1) {
         text.innerHTML = "All challenges complete!";
+        getServerChallenges(3);
     }
     else {
         text.innerHTML = `${challenge.get("title")} challenge complete!<br>Next up is the <b>${challenges[newChallengeId].get("title")}</b> challenge`;
     }
     user.set("currentChallengeId", newChallengeId);
+}
+
+/*async function setnewChallenges(){
+    fetch('/challenges?num-challenges=' + 3);
+
+}
+ */ 
+async function sendcompletedChallenges() {
+    fetch('/challenges', {methdo:'POST'});
+  
 }
 
 function findNextUncompletedChallenge(prevChallengeId) {

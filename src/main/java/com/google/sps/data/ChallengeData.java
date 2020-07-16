@@ -36,7 +36,7 @@ public final class ChallengeData {
     //might want to consider using map/hashset organize data by type
     //then in the servlet pass one from each set
 
-    public static final Challenge[] challenges = {
+    public static final Challenge[] CHALLENGES = {
         new Challenge(Challenge.Type.GARDENING, GARDENING_CHALLENGE_0, GARDENING_STEPS_PAIR_0),
         new Challenge(Challenge.Type.RECYCLE, RECYCLE_CHALLENGE_0, RECYCLE_STEPS_PAIR_0),
         new Challenge(Challenge.Type.WASTE, WASTE_CHALLENGE_0, WASTE_STEPS_PAIR_0)
