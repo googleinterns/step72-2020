@@ -41,9 +41,9 @@ mockChallenges[2].set("resources", mockFoodStepResources);
 
 let mockUser = new Map();
 mockUser.set("name", "User A");
-mockUser.set("currentChallengeId", 1); //
+mockUser.set("currentChallengeId", 1);
 // array where indices correspond to challenge id and value = how many steps have been completed
-mockUser.set("challengeStatuses", [0, 0, 0]); //[1,0,2]
+mockUser.set("challengeStatuses", [0, 0, 0]);
 
 const user = mockUser;
 //const challenges = mockChallenges;
