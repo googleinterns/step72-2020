@@ -17,7 +17,6 @@ package com.google.sps.servlets;
 import com.google.gson.Gson;
 import com.google.sps.data.Challenge;
 import com.google.sps.data.ChallengeData;
-import com.google.sps.data.Challenge;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;

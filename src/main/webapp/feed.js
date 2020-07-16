@@ -41,9 +41,9 @@ mockChallenges[2].set("resources", mockFoodStepResources);
 
 let mockUser = new Map();
 mockUser.set("name", "User A");
-mockUser.set("currentChallengeId", 1);
+mockUser.set("currentChallengeId", 1); //
 // array where indices correspond to challenge id and value = how many steps have been completed
-mockUser.set("challengeStatuses", [1, 0, 2]);
+mockUser.set("challengeStatuses", [0, 0, 0]); //[1,0,2]
 
 const user = mockUser;
 //const challenges = mockChallenges;
@@ -183,81 +183,80 @@ function addEventInfo(event) {
 }
 
 function setChallengeBox(challengeId) {
-    const icon = document.getElementById("challenges-badge-icon");
-    const stepsText = document.getElementById("challenge-steps");
+  const icon = document.getElementById("challenges-badge-icon");
+  const stepsText = document.getElementById("challenge-steps");
 
-    if (challengeId == -1) {
-        icon.innerText = "✔️";
-        stepsText.style.fontSize = "16px";
-        stepsText.innerText = "Complete!";
-    }
-    else {
-        console.log("challenges length = " + challenges.length) ;
-        icon.innerText = challenges[challengeId].get("icon");
+  if (challengeId == -1) {
+    icon.innerText = "✔️";
+    stepsText.style.fontSize = "16px";
+    stepsText.innerText = "Complete!";
+  }else {
+    console.log("challenges length = " + challenges.length) ;
+    icon.innerText = challenges[challengeId].get("icon");
 
-        const currentStep = user.get("challengeStatuses")[challengeId];
-        const totalSteps = challenges[challengeId].get("steps").length;
+    const currentStep = user.get("challengeStatuses")[challengeId];
+    const totalSteps = challenges[challengeId].get("steps").length;
+   
+    stepsText.style.fontSize = "20px";
+    stepsText.innerText = currentStep + "/" + totalSteps;
         
-        stepsText.style.fontSize = "20px";
-        stepsText.innerText = currentStep + "/" + totalSteps;
-        
-        fillBadge(currentStep, totalSteps);
+    fillBadge(currentStep, totalSteps);
     }
 }
 
 function fillBadge(currentStep, totalSteps) {
-    const badgeFilling = document.getElementById("feed-badge-filling")
-    badgeFilling.style.height = badgeHeight*(currentStep/totalSteps) + "px";
-    badgeFilling.style.bottom = badgeHeight*(currentStep/totalSteps) + "px";
-    if (currentStep/totalSteps == 1) {
-        badgeFilling.style.borderRadius = "10px 10px 10px 10px";
+  const badgeFilling = document.getElementById("feed-badge-filling")
+  badgeFilling.style.height = badgeHeight*(currentStep/totalSteps) + "px";
+  badgeFilling.style.bottom = badgeHeight*(currentStep/totalSteps) + "px";
+  if (currentStep/totalSteps == 1) {
+    badgeFilling.style.borderRadius = "10px 10px 10px 10px";
+  }else {
+    badgeFilling.style.borderRadius = "0 0 10px 10px";
     }
-    else {
-        badgeFilling.style.borderRadius = "0 0 10px 10px";
-    }
-    return badgeFilling;
+  return badgeFilling;
 }
 
 //start here to implement (note for me)
 function setChallengesNavBar(user, challenges) {
-    const navBar = document.getElementById("challenges-nav-bar");
+  const navBar = document.getElementById("challenges-nav-bar");
 
-    for (challenge of challenges) {
-        navBar.appendChild(createChallengeNavBarItem(user, challenge));
+  for (challenge of challenges) {
+    navBar.appendChild(createChallengeNavBarItem(user, challenge));
 
-        const itemBackground = document.createElement('div');
-        itemBackground.id = "challenges-nav-bar-item-background-" + challenge.get("id");
-        itemBackground.className = "challenges-nav-bar-item-background";
-        let percentDone = 0;
-        if (challenge.get("steps").length != 0) percentDone = user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
-        itemBackground.style.width = percentDone*100+"%";
-        navBar.appendChild(itemBackground);
-    }
+    const itemBackground = document.createElement('div');
+    itemBackground.id = "challenges-nav-bar-item-background-" + challenge.get("id");
+    itemBackground.className = "challenges-nav-bar-item-background";
+    let percentDone = 0;
+    if (challenge.get("steps").length != 0) percentDone = user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
+    itemBackground.style.width = percentDone*100+"%";
+    navBar.appendChild(itemBackground);
+  }
 }
 
-function createChallengeNavBarItem(user, challenge) {
-    const item = document.createElement('div');
-    item.className = "challenges-nav-bar-item";
-    item.id = "challenges-nav-bar-item-" + challenge.get("id");
+function createChallengeNavBarItem(user, challenge){
+  const item = document.createElement('div');
+  item.className = "challenges-nav-bar-item";
+  item.id = "challenges-nav-bar-item-" + challenge.get("id");
 
-    const title = document.createElement('p');
-    title.className = "challenges-nav-bar-item-title";
-    title.innerText = challenge.get("type");
-    item.appendChild(title);
+  const title = document.createElement('p');
+  title.className = "challenges-nav-bar-item-title";
+  title.innerText = challenge.get("type");
+  item.appendChild(title);
 
-    const icon = document.createElement('p');
-    icon.className = "challenges-nav-bar-item-icon";
-    icon.innerText = challenge.get("icon");
-    item.appendChild(icon);
+  const icon = document.createElement('p');
+  icon.className = "challenges-nav-bar-item-icon";
+  icon.innerText = challenge.get("icon");
+  item.appendChild(icon);
 
-    item.addEventListener("click", () => {
-        boldCurrentChallengeTitle(item);
-        const step = user.get("challengeStatuses")[challenge.get("id")]+1;
-        if (step < challenge.get("steps").length+1) {
-            showChallengeInfo(user, challenge, step);
-        }
-        else {
-            showChallengeCompletePage(challenge, false);
+  item.addEventListener("click", () => {
+    boldCurrentChallengeTitle(item);
+
+    const step = user.get("challengeStatuses")[challenge.get("id")]+1;
+    if (step < challenge.get("steps").length+1) {
+       showChallengeInfo(user, challenge, step);
+    }
+    else {
+      showChallengeCompletePage(challenge, false);
         }    
     });
     return item;
@@ -266,48 +265,39 @@ function createChallengeNavBarItem(user, challenge) {
 
 
 async function getServerChallenges(){
-    const response = await fetch('/challenges');
-    const challengeJson = await response.json();
+  const response = await fetch('/challenges');
+  const challengeJson = await response.json();
 
-    var i;
-    for(i = 0; i < challengeJson.length; i++) {
-        //consol.log("Challenge #:" + i);
-        challenges[i] = new Map();
-        challenges[i].set("id", i);
-        challenges[i].set("title", challengeJson[i].name);
-        challenges[i].set("type", challengeJson[i].challenge_type);
-        challenges[i].set("steps", challengeJson[i].steps);
-        //challenges[i].set("description", challengeJson[i].steps) //*/
+  var i;
+  for(i = 0; i < challengeJson.length; i++){
+    challenges[i] = new Map();
+    challenges[i].set("id", i);
+    challenges[i].set("title", challengeJson[i].name);
+    challenges[i].set("type", challengeJson[i].challenge_type);
+    challenges[i].set("steps", challengeJson[i].steps);
 
-        /*myChallenges[i] = {
-            id: i,
-            title: challengeJson[i].name,
-            type: challengeJson[i].challenge_type,
-            steps: challengeJson[i].steps,
-        }; */
-
-        switch (challenges[i].get("type")) {
-          case("RECYCLE"):
-            challenges[i].set("icon", "♻️");
-            break;
-          case("GARDENING"):
-            challenges[i].set("icon", "🌱");
-            break;
-          case("WASTE"):
-            challenges[i].set("icon", "🗑");
-            break;
-          default:
-            challenges[i].set("icon", "⚠");
-            break;
+    switch (challenges[i].get("type")) {
+      case("RECYCLE"):
+        challenges[i].set("icon", "♻️");
+        break;
+      case("GARDENING"):
+        challenges[i].set("icon", "🌱");
+        break;
+      case("WASTE"):
+        challenges[i].set("icon", "🗑");
+        break;
+      default:
+        challenges[i].set("icon", "⚠");
+        break;
         }
     }
 }
 
 function boldCurrentChallengeTitle(chosenItem) {
-    const items = document.getElementsByClassName("challenges-nav-bar-item");
-    if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
-    chosenItem.style.fontWeight = "bold";
-    lastBoldedItem = chosenItem;
+  const items = document.getElementsByClassName("challenges-nav-bar-item");
+  if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
+  chosenItem.style.fontWeight = "bold";
+  lastBoldedItem = chosenItem;
 }
 
 function showChallengeInfo(user, challenge, displayedStep) {
@@ -373,73 +363,69 @@ function showNewChallengeCompletePage(challenge) {
 }
 
 function findNextUncompletedChallenge(prevChallengeId) {
-    for (i = 1; i < challenges.length; i++) {
-        let id = (prevChallengeId+i) % challenges.length;
-        let status = user.get("challengeStatuses")[id];
-        if (status < challenges[id].get("steps").length) {
-            return id;
-        }
+  for (i = 1; i < challenges.length; i++) {
+    let id = (prevChallengeId+i) % challenges.length;
+    let status = user.get("challengeStatuses")[id];
+    if (status < challenges[id].get("steps").length) {
+      return id;
     }
-    return -1;
+  }
+  return -1;
 }
 
 function showOldChallengeCompletePage(challenge) {
-    const text = document.getElementById("challenge-complete-text");
-    text.innerHTML = `${challenge.get("title")} challenge complete!`;
+  const text = document.getElementById("challenge-complete-text");
+  text.innerHTML = `${challenge.get("title")} challenge complete!`;
 }
 
 function setPrevButton(displayedStep, user, challenge) {
-    const prevButton = document.getElementById("challenges-modal-prev-step-button");
-    const nextButton = document.getElementById("challenges-modal-next-step-button");
-    if (displayedStep == 1) {
-        prevButton.style.display = "none";
-        nextButton.style.bottom = 0;
-    }
-    else {
-        prevButton.style.display = "block";
-        nextButton.style.bottom = "27px";
-    }
+  const prevButton = document.getElementById("challenges-modal-prev-step-button");
+  const nextButton = document.getElementById("challenges-modal-next-step-button");
+  if (displayedStep == 1) {
+    prevButton.style.display = "none";
+    nextButton.style.bottom = 0;
+  }else {
+    prevButton.style.display = "block";
+    nextButton.style.bottom = "27px";
+  }
 
-    prevButton.onclick = ()=> {
-        showChallengeInfo(user, challenge, displayedStep-1);
-    };
+  prevButton.onclick = ()=> {
+    showChallengeInfo(user, challenge, displayedStep-1);
+  };
 }
 
 
 function setNextButton(displayedStep, user, challenge) {
-    const nextButton = document.getElementById("challenges-modal-next-step-button");
-    
-    if (displayedStep == user.get("challengeStatuses")[challenge.get("id")]+1) {
-        if (user.get("currentChallengeId") != challenge.get("id")) {
-            nextButton.style.display = "none";
-        }
-        else {
-            nextButton.style.display = "block";
-            nextButton.innerText = "step complete →";
-        }
+  const nextButton = document.getElementById("challenges-modal-next-step-button");  
+  if (displayedStep == user.get("challengeStatuses")[challenge.get("id")]+1) {
+    if (user.get("currentChallengeId") != challenge.get("id")) {
+      nextButton.style.display = "none";
+    }else {
+      nextButton.style.display = "block";
+      nextButton.innerText = "step complete →";
     }
-    else {
-        nextButton.style.display = "block";
-        nextButton.innerText = "view next step →";
+  }else {
+    nextButton.style.display = "block";
+    nextButton.innerText = "view next step →";
+  }
+
+  nextButton.onclick = ()=> {
+    let currentStatus = user.get("challengeStatuses")[challenge.get("id")];
+    if (currentStatus+1 == displayedStep) {
+      user.get("challengeStatuses")[challenge.get("id")] = currentStatus+1;
+      const navBarItemBackground = document.getElementById("challenges-nav-bar-item-background-"+user.get("currentChallengeId"));
+      let percentDone = user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
+      navBarItemBackground.style.width = percentDone*100+"%";
+      setChallengeBox(challenge.get("id"));
     }
 
-    nextButton.onclick = ()=> {
-        let currentStatus = user.get("challengeStatuses")[challenge.get("id")];
-        if (currentStatus+1 == displayedStep) {
-            user.get("challengeStatuses")[challenge.get("id")] = currentStatus+1;
-            const navBarItemBackground = document.getElementById("challenges-nav-bar-item-background-"+user.get("currentChallengeId"));
-            let percentDone = user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
-            navBarItemBackground.style.width = percentDone*100+"%";
-            setChallengeBox(challenge.get("id"));
-        }
-        if (displayedStep < challenge.get("steps").length) {
-            showChallengeInfo(user, challenge, displayedStep+1);
-        }
-        else {
-            const newCompletion = user.get("challengeStatuses")[challenge.get("id")] == challenge.get("steps").length;
-            showChallengeCompletePage(challenge, newCompletion);
-        }    
-    }; 
+    if (displayedStep < challenge.get("steps").length) {
+      showChallengeInfo(user, challenge, displayedStep+1);
+    }else {
+      const newCompletion = user.get("challengeStatuses")[challenge.get("id")] == challenge.get("steps").length;
+      showChallengeCompletePage(challenge, newCompletion);
+    }    
+  }; 
 } 
 
 function setCheckbox(challenge) {

@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import javafx.util.Pair;
 
-
 public final class ChallengeData {
 
     //Challenge names
