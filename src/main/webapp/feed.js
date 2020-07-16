@@ -50,6 +50,7 @@ var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/
 
 let user;
 let challenges;
+let events;
 
 const projectTitle = "GEN Capstone";
 let calendarId = null; 
@@ -69,7 +70,7 @@ async function loadPage() {
 
     const timezone = document.getElementById("user-timezone");
     timezone.value = new Date().getTimezoneOffset();
-    const events = await fetch("/events").then(response => response.json());
+    events = await fetch("/events").then(response => response.json());
     const feed = document.getElementById("events-feed");
     for (event of events) {
         feed.appendChild(postEvent(event));
@@ -107,7 +108,7 @@ function addEventAddToCalendarButton(event) {
     addToCalDiv.style.height = 10;
     addToCalDiv.className = "add-to-calendar-div";
     addToCalDiv.innerText = "+";
-    addToCalDiv.onclick = updateCalendar;
+    addToCalDiv.onclick = () => { updateCalendar(event); };
     return addToCalDiv;
 }
 
@@ -134,7 +135,7 @@ function addEventUserText(event) {
     const eventUser = document.createElement('p');
     eventUser.className = "event-info";
     // eventUser.innerText = event.creator + " posted an event:";
-    eventUser.innerText = "USER" + " posted an event:";
+    eventUser.innerText = event.extendedProperties.creator + " posted an event:";
 
     return eventUser;
 }
@@ -507,7 +508,7 @@ function closeCreateEventModal() {
     modal.style.display = "none";
 }
 
-function updateCalendar() {
+function updateCalendar(event) {
     gapi.client.calendar.calendarList.list().then(function(response) {
           var calendars = response.result.items;
           for (calendar of calendars) {
@@ -523,44 +524,22 @@ function updateCalendar() {
 
             calendarRequest.execute(function(response) {
                 calendarId = response.id;
-            addEventToCalendar();
+            addEventToCalendar(event);
             });
         }
         else {
-            addEventToCalendar();
+            addEventToCalendar(event);
         };    
     });
-
 }
 
-function addEventToCalendar() {
-    var event = {
-        'summary': 'Google I/O 2015',
-        'location': '800 Howard St., San Francisco, CA 94103',
-        'description': 'A chance to hear more about Google\'s developer products.',
-        'start': {
-            'dateTime': '2020-07-12T09:00:00-07:00',
-            'timeZone': 'America/Los_Angeles'
-        },
-       'end': {
-          'dateTime': '2020-07-12T17:00:00-07:00',
-          'timeZone': 'America/Los_Angeles'
-        },
-        'recurrence': [
-            'RRULE:FREQ=DAILY;COUNT=2'
-        ],
-        'attendees': [
-            {'email': 'lpage@example.com'},
-            {'email': 'sbrin@example.com'}
-        ],
-        'reminders': {
-            'useDefault': false,
-            'overrides': [
-            {'method': 'email', 'minutes': 24 * 60},
-            {'method': 'popup', 'minutes': 10}
-            ]
-        }
-    };
+function addEventToCalendar(event) {
+    console.log(event);
+    let start = moment(event.start.dateTime.value).format('YYYY-MM-DD[T]HH:mm:ssZZ');
+    event.start.dateTime = start;
+    let end = moment(event.end.dateTime.value).format('YYYY-MM-DD[T]HH:mm:ssZZ');
+    event.end.dateTime = end;
+    console.log(event);
 
     var request = gapi.client.calendar.events.insert({
             'calendarId': calendarId,
@@ -617,20 +596,20 @@ async function updateSigninStatus(isSignedIn) {
     const authorizeButton = document.getElementById('authorize-button');
     const signoutButton = document.getElementById('signout-button');
     const feedRightSide = document.getElementById("feed-right-side");
-if (isSignedIn) {
-    authorizeButton.style.display = 'none';
-    signoutButton.style.display = 'block';
-    feedRightSide.style.display = "block";  
-    await getUserInfo();
-    await loadPage();
-    showAddToCalendarButtons();
-} else {
-    authorizeButton.style.display = 'block';
-    signoutButton.style.display = 'none';
-    feedRightSide.style.display = "none";
-    await loadPage();
-    hideAddToCalendarButtons();
-}
+    if (isSignedIn) {
+        authorizeButton.style.display = 'none';
+        signoutButton.style.display = 'block';
+        feedRightSide.style.display = "block";  
+        await getUserInfo();
+        await loadPage();
+        showAddToCalendarButtons();
+    } else {
+        authorizeButton.style.display = 'block';
+        signoutButton.style.display = 'none';
+        feedRightSide.style.display = "none";
+        await loadPage();
+        hideAddToCalendarButtons();
+    }
 }
 
 /**

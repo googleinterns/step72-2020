@@ -156,6 +156,10 @@ html, body {
     margin-bottom: 30px;
 }
 
+.event-post:hover {
+    box-shadow: 0 0 8px grey;
+}
+
 .event-bookmark {
     height: 40px;
     width: 28px;
@@ -178,6 +182,7 @@ html, body {
     height: 30px;
     color: #004643;
 }
+
 
 .event-bookmark-num {
     width: 30px;

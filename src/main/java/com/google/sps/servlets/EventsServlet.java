@@ -24,10 +24,13 @@ import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.User;
+import com.google.sps.data.UserInfo;
 
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
@@ -85,6 +88,8 @@ public class EventsServlet extends HttpServlet {
     static final String START_TIME = "start";
     static final String END_TIME = "end";
     static final String USER_TIMEZONE = "timezone";
+    static final String USER_ID = "userId";
+    static final String CREATOR = "creator";
 
     static final List<String> CATEGORIES = new ArrayList<String>(
         Arrays.asList("food_beverage", "nature", "water", "waste_cleanup", "other")
@@ -110,6 +115,11 @@ public class EventsServlet extends HttpServlet {
         Date startTime = (Date) entity.getProperty(START_TIME);
         Date endTime = (Date) entity.getProperty(END_TIME);
         String category = (String) entity.getProperty(CATEGORY);
+        String userId = (String) entity.getProperty(CREATOR);
+
+        Query userQuery = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(USER_ID, FilterOperator.EQUAL, userId));
+        Entity creator = datastore.prepare(userQuery).asSingleEntity();
+        String nickname = (String) creator.getProperty(UserInfo.NICKNAME);
 
         DateTime startDateTime = new DateTime(startTime);
         EventDateTime start = new EventDateTime()
@@ -128,6 +138,7 @@ public class EventsServlet extends HttpServlet {
 
         ExtendedProperties ep = new ExtendedProperties();
         ep.set(CATEGORY, category);
+        ep.set(CREATOR, nickname);
         event.setExtendedProperties(ep);
     
         events.add(event);
@@ -165,7 +176,11 @@ public class EventsServlet extends HttpServlet {
           eventStartDateTime = eventEndDateTime;
           eventEndDateTime = temp;
       }
+
       long timestamp = System.currentTimeMillis();
+
+      UserService userService = UserServiceFactory.getUserService();
+      String userId = userService.getCurrentUser().getUserId();
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -177,10 +192,11 @@ public class EventsServlet extends HttpServlet {
       eventEntity.setProperty(START_TIME, eventStartDateTime);
       eventEntity.setProperty(END_TIME, eventEndDateTime);
       eventEntity.setProperty(CATEGORY, category);
+      eventEntity.setProperty(CREATOR, userId);
 
       datastore.put(eventEntity);
 
-      response.sendRedirect("/feed.html");
+      response.sendRedirect("/index.html");
   }
 
   private String convertToJson(List<Event> events) {
