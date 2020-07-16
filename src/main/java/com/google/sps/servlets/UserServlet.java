@@ -115,7 +115,7 @@ public class UserServlet extends HttpServlet {
 
       datastore.put(userEntity);
 
-      response.sendRedirect("/feed.html");
+      response.sendRedirect("/index.html");
   }
 
   @Override

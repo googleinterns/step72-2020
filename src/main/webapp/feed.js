@@ -110,18 +110,30 @@ function addEventAddToCalendarButton(event) {
     const addToCalDiv = document.createElement('div');
     addToCalDiv.style.height = 10;
     addToCalDiv.className = "add-to-calendar-div";
-    // addToCalDiv.id = `add-to-calendar-div-${event.extendedProperties.id}`;
     addToCalDiv.innerText = "+";
-    addToCalDiv.onclick = () => { clickAddToCalendar(event); };
+    addToCalDiv.onclick = () => { clickAddToCalendar(addToCalDiv, event); };
     addToCalDiv.onmouseover = () => { addToCalDiv.appendChild(createAddToCalendarPopup()); };
     addToCalDiv.onmouseout = () => { addToCalDiv.removeChild(addToCalDiv.childNodes[1]); };
     
     return addToCalDiv;
 }
 
-async function clickAddToCalendar(event) {
+async function clickAddToCalendar(addToCalDiv, event) {
+    const checkmark = document.createElement('img');
+    checkmark.className = "added-to-calendar-checkmark";
+    checkmark.src = "/resources/greencheckmark.png";
+    addToCalDiv.innerHTML = "";
+    addToCalDiv.appendChild(checkmark);
+    addToCalDiv.style.marginRight = "8px";
+    addToCalDiv.style.cursor = "auto";
+
+    addToCalDiv.onclick = () => {};
+    addToCalDiv.onmouseover = () => {};
+    addToCalDiv.onmouseout = () => {};
+
     const putRequest = new Request(`/user?add=${event.extendedProperties.event_id}`, {method: 'PUT'});
     user = await fetch(putRequest).then(response => response.json());
+
     updateCalendar(event);
 }
 
