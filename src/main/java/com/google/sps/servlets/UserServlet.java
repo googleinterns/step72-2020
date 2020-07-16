@@ -108,8 +108,6 @@ public class UserServlet extends HttpServlet {
       Entity userEntity = new Entity(UserInfo.DATA_TYPE);
       userEntity.setProperty(UserInfo.ID, userId);
       userEntity.setProperty(UserInfo.NICKNAME, userNickname);
-      userEntity.setProperty(UserInfo.CREATED_EVENTS, Collections.emptyList());
-      userEntity.setProperty(UserInfo.BOOKMARKED_EVENTS, Collections.emptyList());
       userEntity.setProperty(UserInfo.CURRENT_CHALLENGE, currentChallengeId);
       userEntity.setProperty(UserInfo.CHALLENGE_STATUSES, challengeStatuses);
 
@@ -126,8 +124,8 @@ public class UserServlet extends HttpServlet {
       String challengeIdParam = request.getParameter(CHALLENGE_ID_PARAM);
       String statusParam = request.getParameter(CHALLENGE_STATUS_PARAM);
 
-      Long challengeId = -1L;
-      Integer newStatus = -1;
+      Long challengeId;
+      Integer newStatus;
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
 
