@@ -159,12 +159,10 @@ public class UserServlet extends HttpServlet {
           }
       }
       else if (addedToCalendarParam != null) {
-          System.out.println("Adding to calendar update");
           try {
               eventId = Long.parseLong(addedToCalendarParam);
               updateAddedToCalendarEvents(entity, eventId);
           } catch (Exception e) {
-              System.out.println("error");
               System.err.println(e.getMessage());
           }
       }
@@ -200,7 +198,6 @@ public class UserServlet extends HttpServlet {
   }
 
   private void updateAddedToCalendarEvents(Entity user, Long eventId) {
-      System.out.println("Reached update method");
       ArrayList<Long> addedEvents =(ArrayList<Long>) user.getProperty(UserInfo.ADDED_TO_CALENDAR_EVENTS);
       if (addedEvents == null) addedEvents = new ArrayList<Long>();
       addedEvents.add(eventId);

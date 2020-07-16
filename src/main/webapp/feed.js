@@ -110,7 +110,6 @@ function addEventAddToCalendarButton(event) {
     const addToCalDiv = document.createElement('div');
     addToCalDiv.style.height = 10;
     addToCalDiv.className = "add-to-calendar-div";
-    console.log(user);
     if (user.added_to_calendar_events.includes(event.extendedProperties.event_id)) checkAddToCalendarButton(addToCalDiv);
     else {
         addToCalDiv.innerText = "+";
@@ -578,12 +577,10 @@ function updateCalendar(event) {
 }
 
 function addEventToCalendar(event) {
-    console.log(event);
     let start = moment(event.start.dateTime.value).format('YYYY-MM-DD[T]HH:mm:ssZZ');
     event.start.dateTime = start;
     let end = moment(event.end.dateTime.value).format('YYYY-MM-DD[T]HH:mm:ssZZ');
     event.end.dateTime = end;
-    console.log(event);
 
     var request = gapi.client.calendar.events.insert({
             'calendarId': calendarId,
