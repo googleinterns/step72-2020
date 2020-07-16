@@ -24,6 +24,7 @@ public final class UserInfo {
   public static final String NICKNAME = "nickname";
   public static final String CREATED_EVENTS = "created_events";
   public static final String BOOKMARKED_EVENTS = "bookmarked_events";
+  public static final String ADDED_TO_CALENDAR_EVENTS = "added_to_calendar_events";
   public static final String CURRENT_CHALLENGE = "current_challenge";
   public static final String CHALLENGE_STATUSES = "challenge_statuses";
 
@@ -31,6 +32,7 @@ public final class UserInfo {
   private final String nickname;
   private final List<Long> created_events;
   private final List<Long> bookmarked_events;
+  private final List<Long> added_to_calendar_events;
   private Long current_challenge_id;
   private final List<Integer> challenge_statuses;
 
@@ -40,12 +42,14 @@ public final class UserInfo {
     this.nickname = nickname;
     this.created_events = new ArrayList<Long>();
     this.bookmarked_events = new ArrayList<Long>();
+    this.added_to_calendar_events = new ArrayList<Long>();
     this.current_challenge_id = 0L;
     this.challenge_statuses = new ArrayList<Integer>();
   }
 
-  public UserInfo(String id, String nickname, ArrayList<Long> created_events, 
-    ArrayList<Long> bookmarked_events, Long current_challenge_id, ArrayList<Integer> challenge_statuses) {
+  public UserInfo(String id, String nickname, ArrayList<Long> created_events, ArrayList<Long> bookmarked_events, 
+    ArrayList<Long> added_to_calendar_events, Long current_challenge_id, ArrayList<Integer> challenge_statuses) {
+
     this.id = id;
     this.nickname = nickname;
 
@@ -54,6 +58,9 @@ public final class UserInfo {
 
     if (bookmarked_events == null) this.bookmarked_events = new ArrayList<Long>();
     else this.bookmarked_events = (ArrayList) bookmarked_events.clone();
+
+    if (added_to_calendar_events == null) this.added_to_calendar_events = new ArrayList<Long>();
+    else this.added_to_calendar_events = (ArrayList) added_to_calendar_events.clone();
 
     this.current_challenge_id = current_challenge_id;
     this.challenge_statuses = (ArrayList) challenge_statuses.clone();

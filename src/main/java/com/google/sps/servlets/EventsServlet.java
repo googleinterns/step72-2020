@@ -88,8 +88,10 @@ public class EventsServlet extends HttpServlet {
     static final String START_TIME = "start";
     static final String END_TIME = "end";
     static final String USER_TIMEZONE = "timezone";
-    static final String USER_ID = "userId";
     static final String CREATOR = "creator";
+    static final String EVENT_NUM = "EventNum";
+    static final String EVENT_NUM_VALUE = "value";
+    static final String EVENT_ID = "event_id";
 
     static final List<String> CATEGORIES = new ArrayList<String>(
         Arrays.asList("food_beverage", "nature", "water", "waste_cleanup", "other")
@@ -97,11 +99,12 @@ public class EventsServlet extends HttpServlet {
 
     static final int MAX_STRING_BYTES = 1500;
 
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     FetchOptions fetchOptions = FetchOptions.Builder.withLimit(10);
     Query query = new Query(EVENT).addSort(TIMESTAMP, SortDirection.DESCENDING);
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery pq = datastore.prepare(query);
 
     QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
@@ -116,8 +119,9 @@ public class EventsServlet extends HttpServlet {
         Date endTime = (Date) entity.getProperty(END_TIME);
         String category = (String) entity.getProperty(CATEGORY);
         String userId = (String) entity.getProperty(CREATOR);
+        long eventId = (long) entity.getProperty(EVENT_ID);
 
-        Query userQuery = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(USER_ID, FilterOperator.EQUAL, userId));
+        Query userQuery = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
         Entity creator = datastore.prepare(userQuery).asSingleEntity();
         String nickname = (String) creator.getProperty(UserInfo.NICKNAME);
 
@@ -139,6 +143,7 @@ public class EventsServlet extends HttpServlet {
         ExtendedProperties ep = new ExtendedProperties();
         ep.set(CATEGORY, category);
         ep.set(CREATOR, nickname);
+        ep.set(EVENT_ID, eventId);
         event.setExtendedProperties(ep);
     
         events.add(event);
@@ -182,9 +187,11 @@ public class EventsServlet extends HttpServlet {
       UserService userService = UserServiceFactory.getUserService();
       String userId = userService.getCurrentUser().getUserId();
 
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      long eventId = getEventId();
+      updateUserCreatedEvents(userId, eventId);
 
       Entity eventEntity = new Entity(EVENT);
+      eventEntity.setProperty(EVENT_ID, eventId);
       eventEntity.setProperty(SUMMARY, eventSummary);
       eventEntity.setProperty(TIMESTAMP, timestamp);
       eventEntity.setProperty(LOCATION, eventLocation);
@@ -230,5 +237,38 @@ public class EventsServlet extends HttpServlet {
   public String sanitizeInput(String input) throws java.io.UnsupportedEncodingException {
       input = new String( input.getBytes("UTF-8") , 0, Math.min(MAX_STRING_BYTES, input.length()), "UTF-8");
       return input;
+  }
+
+  public long getEventId() {
+      Query query = new Query(EVENT_NUM);
+      PreparedQuery pq = datastore.prepare(query);
+      QueryResultList<Entity> eventNumResult = pq.asQueryResultList(FetchOptions.Builder.withDefaults());
+
+      Entity eventNumEntity;
+      long eventNumValue;
+      if (eventNumResult.size() == 0) {
+          eventNumEntity = new Entity(EVENT_NUM);
+          eventNumValue = 0;
+          eventNumEntity.setProperty(EVENT_NUM_VALUE, eventNumValue);
+          datastore.put(eventNumEntity);      
+      }
+      else {
+          eventNumEntity = eventNumResult.get(0);
+          eventNumValue = (long)eventNumEntity.getProperty(EVENT_NUM_VALUE)+1;
+          eventNumEntity.setProperty(EVENT_NUM_VALUE, eventNumValue);
+          datastore.put(eventNumEntity);
+      }
+
+      return eventNumValue;
+  }
+
+  public void updateUserCreatedEvents(String userId, long eventId) {
+      Query userQuery = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
+      Entity entity = datastore.prepare(userQuery).asSingleEntity();
+      ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(UserInfo.CREATED_EVENTS);
+      if (createdEvents == null) createdEvents = new ArrayList<Long>();
+      createdEvents.add(eventId);
+      entity.setProperty(UserInfo.CREATED_EVENTS, createdEvents);
+      datastore.put(entity);
   }
 }

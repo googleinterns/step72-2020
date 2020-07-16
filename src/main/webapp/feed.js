@@ -50,7 +50,6 @@ var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/
 
 let user;
 let challenges;
-let events;
 
 const projectTitle = "GEN Capstone";
 let calendarId = null; 
@@ -65,16 +64,9 @@ eventCategoryIcons.set("other", "🥑🌲🐢");
 const badgeHeight = 120;
 let lastBoldedItem;
 
-async function loadPage() {
-    challenges = createMockChallenges();
 
-    const timezone = document.getElementById("user-timezone");
-    timezone.value = new Date().getTimezoneOffset();
-    events = await fetch("/events").then(response => response.json());
-    const feed = document.getElementById("events-feed");
-    for (event of events) {
-        feed.appendChild(postEvent(event));
-    }
+function loadChallenges() {
+    challenges = createMockChallenges();
 
     setChallengeBox(user.current_challenge_id);
 
@@ -89,6 +81,17 @@ async function loadPage() {
         else if (event.target == createEventModal) {
             closeCreateEventModal();
         }
+    }
+}
+
+async function loadEvents() {
+    const timezone = document.getElementById("user-timezone");
+    timezone.value = new Date().getTimezoneOffset();
+    let events = await fetch("/events").then(response => response.json());
+    const feed = document.getElementById("events-feed");
+    feed.innerHTML = "";
+    for (event of events) {
+        feed.appendChild(postEvent(event));
     }
 }
 
@@ -107,12 +110,19 @@ function addEventAddToCalendarButton(event) {
     const addToCalDiv = document.createElement('div');
     addToCalDiv.style.height = 10;
     addToCalDiv.className = "add-to-calendar-div";
+    // addToCalDiv.id = `add-to-calendar-div-${event.extendedProperties.id}`;
     addToCalDiv.innerText = "+";
-    addToCalDiv.onclick = () => { updateCalendar(event); };
+    addToCalDiv.onclick = () => { clickAddToCalendar(event); };
     addToCalDiv.onmouseover = () => { addToCalDiv.appendChild(createAddToCalendarPopup()); };
     addToCalDiv.onmouseout = () => { addToCalDiv.removeChild(addToCalDiv.childNodes[1]); };
     
     return addToCalDiv;
+}
+
+async function clickAddToCalendar(event) {
+    const putRequest = new Request(`/user?add=${event.extendedProperties.event_id}`, {method: 'PUT'});
+    user = await fetch(putRequest).then(response => response.json());
+    updateCalendar(event);
 }
 
 function createAddToCalendarPopup() {
@@ -522,6 +532,7 @@ function closeCreateEventModal() {
 }
 
 function updateCalendar(event) {
+
     gapi.client.calendar.calendarList.list().then(function(response) {
           var calendars = response.result.items;
           for (calendar of calendars) {
@@ -614,13 +625,14 @@ async function updateSigninStatus(isSignedIn) {
         signoutButton.style.display = 'block';
         feedRightSide.style.display = "block";  
         await getUserInfo();
-        await loadPage();
+        await loadEvents();
+        loadChallenges();
         showAddToCalendarButtons();
     } else {
         authorizeButton.style.display = 'block';
         signoutButton.style.display = 'none';
         feedRightSide.style.display = "none";
-        await loadPage();
+        await loadEvents();
         hideAddToCalendarButtons();
     }
 }

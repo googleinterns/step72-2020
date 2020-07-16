@@ -69,6 +69,8 @@ public class UserServlet extends HttpServlet {
 
   static final String CHALLENGE_ID_PARAM = "chal";
   static final String CHALLENGE_STATUS_PARAM = "stat";
+  static final String BOOKMARKED_EVENT_PARAM = "book";
+  static final String ADDED_TO_CALENDAR_PARAM = "add";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -108,8 +110,6 @@ public class UserServlet extends HttpServlet {
       Entity userEntity = new Entity(UserInfo.DATA_TYPE);
       userEntity.setProperty(UserInfo.ID, userId);
       userEntity.setProperty(UserInfo.NICKNAME, userNickname);
-      userEntity.setProperty(UserInfo.CREATED_EVENTS, Collections.emptyList());
-      userEntity.setProperty(UserInfo.BOOKMARKED_EVENTS, Collections.emptyList());
       userEntity.setProperty(UserInfo.CURRENT_CHALLENGE, currentChallengeId);
       userEntity.setProperty(UserInfo.CHALLENGE_STATUSES, challengeStatuses);
 
@@ -125,13 +125,16 @@ public class UserServlet extends HttpServlet {
 
       String challengeIdParam = request.getParameter(CHALLENGE_ID_PARAM);
       String statusParam = request.getParameter(CHALLENGE_STATUS_PARAM);
+      String bookmarkedEventParam = request.getParameter(BOOKMARKED_EVENT_PARAM);
+      String addedToCalendarParam = request.getParameter(ADDED_TO_CALENDAR_PARAM);
 
-      Long challengeId = -1L;
-      Integer newStatus = -1;
+      Long challengeId;
+      Integer newStatus;
+      Long eventId;
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
 
-      Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate("userId", FilterOperator.EQUAL, userId));
+      Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(query).asSingleEntity();
 
       if (challengeIdParam != null) {
@@ -144,6 +147,24 @@ public class UserServlet extends HttpServlet {
                   updateCurrentChallenge(entity, challengeId);
               }
           } catch (Exception e) {
+              System.err.println(e.getMessage());
+          }
+      } 
+      else if (bookmarkedEventParam != null) {
+          try {
+              eventId = Long.parseLong(bookmarkedEventParam);
+              updateBookmarkedEvents(entity, eventId);
+          } catch (Exception e) {
+              System.err.println(e.getMessage());
+          }
+      }
+      else if (addedToCalendarParam != null) {
+          System.out.println("Adding to calendar update");
+          try {
+              eventId = Long.parseLong(addedToCalendarParam);
+              updateAddedToCalendarEvents(entity, eventId);
+          } catch (Exception e) {
+              System.out.println("error");
               System.err.println(e.getMessage());
           }
       }
@@ -160,15 +181,30 @@ public class UserServlet extends HttpServlet {
   }
 
   // @Erick If challenge id structure is changed, update this method
-  private void updateCurrentChallenge(Entity entity, Long id) {
-      entity.setProperty(UserInfo.CURRENT_CHALLENGE, id);
+  private void updateCurrentChallenge(Entity user, Long challengeId) {
+      user.setProperty(UserInfo.CURRENT_CHALLENGE, challengeId);
   }
   
   // @Erick If challenge id structure is changed, update this method
-  private void updateChallengeStatus(Entity entity, Long id, int status) {
-      ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(UserInfo.CHALLENGE_STATUSES);
-      challengeStatuses.set(id.intValue(), status);
-      entity.setProperty(UserInfo.CHALLENGE_STATUSES, challengeStatuses);
+  private void updateChallengeStatus(Entity user, Long challengeId, int status) {
+      ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) user.getProperty(UserInfo.CHALLENGE_STATUSES);
+      challengeStatuses.set(challengeId.intValue(), status);
+      user.setProperty(UserInfo.CHALLENGE_STATUSES, challengeStatuses);
+  }
+
+  private void updateBookmarkedEvents(Entity user, Long eventId) {
+      ArrayList<Long> bookmarkedEvents =(ArrayList<Long>) user.getProperty(UserInfo.BOOKMARKED_EVENTS);
+      if (bookmarkedEvents == null) bookmarkedEvents = new ArrayList<Long>();
+      bookmarkedEvents.add(eventId);
+      user.setProperty(UserInfo.BOOKMARKED_EVENTS, bookmarkedEvents);
+  }
+
+  private void updateAddedToCalendarEvents(Entity user, Long eventId) {
+      System.out.println("Reached update method");
+      ArrayList<Long> addedEvents =(ArrayList<Long>) user.getProperty(UserInfo.ADDED_TO_CALENDAR_EVENTS);
+      if (addedEvents == null) addedEvents = new ArrayList<Long>();
+      addedEvents.add(eventId);
+      user.setProperty(UserInfo.ADDED_TO_CALENDAR_EVENTS, addedEvents);
   }
 
   private String convertToJson(UserInfo user) {
@@ -182,9 +218,10 @@ public class UserServlet extends HttpServlet {
     Long currentChallengeId = (Long) entity.getProperty(UserInfo.CURRENT_CHALLENGE);
     ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(UserInfo.CREATED_EVENTS);
     ArrayList<Long> bookmarkedEvents = (ArrayList<Long>) entity.getProperty(UserInfo.BOOKMARKED_EVENTS);
+    ArrayList<Long> addedEvents = (ArrayList<Long>) entity.getProperty(UserInfo.ADDED_TO_CALENDAR_EVENTS);
     ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(UserInfo.CHALLENGE_STATUSES);
 
-    UserInfo user = new UserInfo(userId, nickname, createdEvents, bookmarkedEvents, currentChallengeId, challengeStatuses);
+    UserInfo user = new UserInfo(userId, nickname, createdEvents, bookmarkedEvents, addedEvents, currentChallengeId, challengeStatuses);
     return user;
   }
 } 
