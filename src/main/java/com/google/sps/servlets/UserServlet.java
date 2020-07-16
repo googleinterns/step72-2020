@@ -77,7 +77,7 @@ public class UserServlet extends HttpServlet {
     String userId = userService.getCurrentUser().getUserId();
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-    Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate("userId", FilterOperator.EQUAL, userId));
+    Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
     Entity entity = datastore.prepare(query).asSingleEntity();
 
     if (entity == null) {
