@@ -92,6 +92,7 @@ public class EventsServlet extends HttpServlet {
     static final String EVENT_NUM = "EventNum";
     static final String EVENT_NUM_VALUE = "value";
     static final String EVENT_ID = "event_id";
+    static final String BOOKMARKS = "bookmarks";
 
     static final List<String> CATEGORIES = new ArrayList<String>(
         Arrays.asList("food_beverage", "nature", "water", "waste_cleanup", "other")
@@ -120,6 +121,7 @@ public class EventsServlet extends HttpServlet {
         String category = (String) entity.getProperty(CATEGORY);
         String userId = (String) entity.getProperty(CREATOR);
         long eventId = (long) entity.getProperty(EVENT_ID);
+        long bookmarks = (long) entity.getProperty(BOOKMARKS);
 
         Query userQuery = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
         Entity creator = datastore.prepare(userQuery).asSingleEntity();
@@ -144,6 +146,7 @@ public class EventsServlet extends HttpServlet {
         ep.set(CATEGORY, category);
         ep.set(CREATOR, nickname);
         ep.set(EVENT_ID, eventId);
+        ep.set(BOOKMARKS, bookmarks);
         event.setExtendedProperties(ep);
     
         events.add(event);
@@ -200,6 +203,7 @@ public class EventsServlet extends HttpServlet {
       eventEntity.setProperty(END_TIME, eventEndDateTime);
       eventEntity.setProperty(CATEGORY, category);
       eventEntity.setProperty(CREATOR, userId);
+      eventEntity.setProperty(BOOKMARKS, 0);
 
       datastore.put(eventEntity);
 

@@ -100,7 +100,7 @@ function postEvent(event) {
     eventEl.className = "event-post";
     eventEl.appendChild(addEventUserText(event));
     eventEl.appendChild(addEventAddToCalendarButton(event));
-    // eventEl.appendChild(addEventBookmark(event));
+    eventEl.appendChild(addEventBookmark(event));
     eventEl.appendChild(addEventMiddleSection(event));
     eventEl.appendChild(addEventInfo(event));
     return eventEl;
@@ -169,14 +169,15 @@ function addEventBookmark(event) {
 function addEventNumBookmarks(event) {
     const bookmarkNum = document.createElement('p');
     bookmarkNum.className = "event-bookmark-num";
-    bookmarkNum.innerText = event.get("bookmarks");
+    const bookmarks = event.extendedProperties.bookmarks;
+    if (bookmarks > 99) bookmarkNum.innerText = "99+";
+    else bookmarkNum.innerText = bookmarks;
     return bookmarkNum;
 }
 
 function addEventUserText(event) {
     const eventUser = document.createElement('p');
     eventUser.className = "event-info";
-    // eventUser.innerText = event.creator + " posted an event:";
     eventUser.innerText = event.extendedProperties.creator + " posted an event:";
 
     return eventUser;
