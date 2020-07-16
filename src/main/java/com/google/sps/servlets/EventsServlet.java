@@ -180,7 +180,7 @@ public class EventsServlet extends HttpServlet {
 
       datastore.put(eventEntity);
 
-      response.sendRedirect("/feed.html");
+      response.sendRedirect("/index.html");
   }
 
   private String convertToJson(List<Event> events) {

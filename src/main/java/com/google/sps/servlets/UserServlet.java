@@ -159,10 +159,12 @@ public class UserServlet extends HttpServlet {
       response.getWriter().println(json);
   }
 
+  // @Erick If challenge id structure changes, update this method
   private void updateCurrentChallenge(Entity entity, Long id) {
       entity.setProperty(UserInfo.CURRENT_CHALLENGE, id);
   }
 
+  // @Erick If challenge id structure changes, update this method
   private void updateChallengeStatus(Entity entity, Long id, int status) {
       ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(UserInfo.CHALLENGE_STATUSES);
       challengeStatuses.set(id.intValue(), status);
