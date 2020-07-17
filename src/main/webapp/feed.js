@@ -275,6 +275,7 @@ function fillBadge(currentStep, totalSteps) {
 
 function setChallengesNavBar(challenges) {
     const navBar = document.getElementById("challenges-nav-bar");
+    navBar.innerHTML = "<p id='challenges-nav-bar-header'>Challenges</p>";
     for (challenge of challenges) {
         navBar.appendChild(createChallengeNavBarItem(challenge));
 
@@ -592,8 +593,14 @@ function addEventToCalendar(event) {
 async function getUserInfo() {
     let auth2 = gapi.auth2.getAuthInstance();
     let profile = auth2.currentUser.get().getBasicProfile();
-    let name = profile.getName();
-    user = await fetch(`/user?nickname=${name}`).then(response => response.json());
+    let response = await fetch("/user");
+    if (response.status == 404) {
+        let name = profile.getName();
+        const postRequest = new Request(`/user?nickname=${name}`, {method: "POST"});
+        await fetch(postRequest);
+        response = await fetch("/user")
+    }
+    user = await response.json();
 }
 
 /**
