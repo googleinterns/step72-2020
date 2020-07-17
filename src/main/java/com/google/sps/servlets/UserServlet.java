@@ -81,8 +81,8 @@ public class UserServlet extends HttpServlet {
     Entity entity = datastore.prepare(query).asSingleEntity();
 
     if (entity == null) {
-        doPost(request, response);
-        entity = datastore.prepare(query).asSingleEntity();
+        response.setStatus(404);
+        return;
     }
 
     UserInfo user = convertEntitytoUserInfo(entity, userId);
