@@ -61,8 +61,6 @@ eventCategoryIcons.set("other", "🥑🌲🐢");
 const badgeHeight = 120;
 let lastBoldedItem;
 
-//let myChallenges = [];
-
 async function loadPage() {
     const timezone = document.getElementById("user-timezone");
     timezone.value = new Date().getTimezoneOffset();
@@ -312,7 +310,7 @@ function showChallengeInfo(user, challenge, displayedStep) {
     header.innerText = challenge.get("icon") + " " + challenge.get("title") + " " + stepsText;
 
     const stepText = document.getElementById("challenges-main-panel-step");
-    stepText.innerText = challenge.get("steps")[displayedStep-1].key;
+    stepText.innerText = challenge.get("steps")[displayedStep-1].key; //"Step " + (displayedStep);
 
     setPrevButton(displayedStep, user, challenge);
     setNextButton(displayedStep, user, challenge);
