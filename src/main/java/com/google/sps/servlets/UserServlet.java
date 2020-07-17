@@ -50,8 +50,14 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
+import com.google.api.client.json.gson.GsonFactory;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -69,6 +75,11 @@ public class UserServlet extends HttpServlet {
 
   static final String CHALLENGE_ID_PARAM = "chal";
   static final String CHALLENGE_STATUS_PARAM = "stat";
+  static final String ID_TOKEN_PARAM = "id_token";
+  private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
+
+  static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
+  static final JsonFactory JSON_FACTORY = new GsonFactory();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -96,6 +107,50 @@ public class UserServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+    GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
+        .setAudience(Collections.singletonList(CLIENT_ID))
+        .build();
+    
+    String idTokenString = request.getParameter(ID_TOKEN_PARAM);
+
+    GoogleIdToken idToken = null;
+    try {
+        idToken = verifier.verify(idTokenString);
+    } catch (Exception e) {
+        System.err.println(e.getMessage());
+    }
+
+    if (idToken != null) {
+        Payload payload = idToken.getPayload();
+
+        // Print user identifier
+        String userId = payload.getSubject();
+        System.out.println("User ID: " + userId);
+
+        // Get profile information from payload
+        String email = payload.getEmail();
+        boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
+        String name = (String) payload.get("name");
+        String pictureUrl = (String) payload.get("picture");
+        String locale = (String) payload.get("locale");
+        String familyName = (String) payload.get("family_name");
+        String givenName = (String) payload.get("given_name");
+
+        System.out.println(email);
+        System.out.println(emailVerified);
+        System.out.println(name);
+        System.out.println(locale);
+        System.out.println(familyName);
+        System.out.println(givenName);
+
+        // Use or store profile information
+        // ...
+
+    } else {
+        System.out.println("Invalid ID token.");
+    }
+    
       UserService userService = UserServiceFactory.getUserService();
       String userId = userService.getCurrentUser().getUserId();
       String userNickname = request.getParameter(UserInfo.NICKNAME);

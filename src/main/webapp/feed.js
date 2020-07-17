@@ -573,10 +573,12 @@ function addEventToCalendar() {
 async function getUserInfo() {
     let auth2 = gapi.auth2.getAuthInstance();
     let profile = auth2.currentUser.get().getBasicProfile();
+    let id_token = auth2.currentUser.get().getAuthResponse().id_token;
+    console.log(id_token);
     let response = await fetch("/user");
     if (response.status == 404) {
         let name = profile.getName();
-        const postRequest = new Request(`/user?nickname=${name}`, {method: "POST"});
+        const postRequest = new Request(`/user?id_token=${id_token}&nickname=${name}`, {method: "POST"});
         await fetch(postRequest);
         response = await fetch("/user")
     }
