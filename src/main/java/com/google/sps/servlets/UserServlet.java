@@ -85,7 +85,7 @@ public class UserServlet extends HttpServlet {
         return;
     }
 
-    UserInfo user = convertEntitytoUserInfo(entity, userId);
+    UserInfo user = UserInfo.convertEntitytoUserInfo(entity, userId);
 
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
@@ -105,13 +105,7 @@ public class UserServlet extends HttpServlet {
       Long currentChallengeId = 0L;
       ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
 
-      Entity userEntity = new Entity(UserInfo.DATA_TYPE);
-      userEntity.setProperty(UserInfo.ID, userId);
-      userEntity.setProperty(UserInfo.NICKNAME, userNickname);
-      userEntity.setProperty(UserInfo.CURRENT_CHALLENGE, currentChallengeId);
-      userEntity.setProperty(UserInfo.CHALLENGE_STATUSES, challengeStatuses);
-
-      datastore.put(userEntity);
+      datastore.put(new UserInfo(userId, userNickname, null, null, currentChallengeId, challengeStatuses).toEntity());
 
       response.sendRedirect("/feed.html");
   }
@@ -129,26 +123,26 @@ public class UserServlet extends HttpServlet {
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
 
-      Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate("userId", FilterOperator.EQUAL, userId));
+      Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(query).asSingleEntity();
+      UserInfo user = UserInfo.convertEntitytoUserInfo(entity, userId);
+      datastore.delete(entity.getKey());
 
       if (challengeIdParam != null) {
           try {
               challengeId = Long.parseLong(challengeIdParam);
               if (statusParam != null) {
                   newStatus = Integer.parseInt(statusParam);
-                  updateChallengeStatus(entity, challengeId, newStatus);
+                  updateChallengeStatus(user, challengeId, newStatus);
               } else {
-                  updateCurrentChallenge(entity, challengeId);
+                  updateCurrentChallenge(user, challengeId);
               }
           } catch (Exception e) {
               System.err.println(e.getMessage());
           }
       }
 
-      datastore.put(entity);
-
-      UserInfo user = convertEntitytoUserInfo(entity, userId);
+      datastore.put(user.toEntity());
 
       response.setContentType("application/json; charset=UTF-8");
       response.setCharacterEncoding("UTF-8");
@@ -158,31 +152,20 @@ public class UserServlet extends HttpServlet {
   }
 
   // @Erick If challenge id structure changes, update this method
-  private void updateCurrentChallenge(Entity entity, Long id) {
-      entity.setProperty(UserInfo.CURRENT_CHALLENGE, id);
+  private void updateCurrentChallenge(UserInfo user, Long id) {
+      user.setCurrentChallenge(id);
   }
 
-  // @Erick If challenge id structure changes, update this method
-  private void updateChallengeStatus(Entity entity, Long id, int status) {
-      ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(UserInfo.CHALLENGE_STATUSES);
+  // @Erick If challenge status structure changes, update this method
+  private void updateChallengeStatus(UserInfo user, Long id, int status) {
+      ArrayList<Integer> challengeStatuses = user.getChallengeStatuses();
       challengeStatuses.set(id.intValue(), status);
-      entity.setProperty(UserInfo.CHALLENGE_STATUSES, challengeStatuses);
+      user.setChallengeStatuses(challengeStatuses);
   }
 
   private String convertToJson(UserInfo user) {
       Gson gson = new Gson();
       String json = gson.toJson(user);
       return json;
-  }
-
-  private UserInfo convertEntitytoUserInfo(Entity entity, String userId) {
-    String nickname = (String) entity.getProperty(UserInfo.NICKNAME);
-    Long currentChallengeId = (Long) entity.getProperty(UserInfo.CURRENT_CHALLENGE);
-    ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(UserInfo.CREATED_EVENTS);
-    ArrayList<Long> bookmarkedEvents = (ArrayList<Long>) entity.getProperty(UserInfo.BOOKMARKED_EVENTS);
-    ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(UserInfo.CHALLENGE_STATUSES);
-
-    UserInfo user = new UserInfo(userId, nickname, createdEvents, bookmarkedEvents, currentChallengeId, challengeStatuses);
-    return user;
   }
 } 
