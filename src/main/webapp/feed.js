@@ -167,35 +167,21 @@ function addEventBookmark(event) {
     if (gapi.auth2.getAuthInstance().isSignedIn.get() && user.bookmarked_events.includes(event.extendedProperties.event_id)) {
         bookmark.src="/resources/filled-bookmark.png"; 
         bookmarkDiv.childNodes[1].style.color = "#fafafa";
-        bookmarkDiv.onclick = () => {};
-        
     } else {
         bookmark.src = "/resources/bookmark.png";
         if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
             bookmarkDiv.onclick = async () => { 
-            bookmark.src="/resources/filled-bookmark.png"; 
-            bookmarkDiv.childNodes[1].style.color = "#fafafa";
-            bookmarkDiv.childNodes[1].innerText = parseInt(bookmarkDiv.childNodes[1].innerText)+1;
+                bookmark.src="/resources/filled-bookmark.png"; 
+                bookmarkDiv.childNodes[1].style.color = "#fafafa";
+                bookmarkDiv.childNodes[1].innerText = parseInt(bookmarkDiv.childNodes[1].innerText)+1;
 
-            const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}`, {method: 'PUT'});
-            user = await fetch(putRequest).then(response => response.json());
+                const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}`, {method: 'PUT'});
+                user = await fetch(putRequest).then(response => response.json());
 
-            bookmarkDiv.onclick = () => {};
-        };
-        }
-        
+                bookmarkDiv.onclick = () => {};
+            };
+        }   
     }
-
-    bookmarkDiv.onclick = async () => { 
-        bookmark.src="/resources/filled-bookmark.png"; 
-        bookmarkDiv.childNodes[1].style.color = "#fafafa";
-        bookmarkDiv.childNodes[1].innerText = parseInt(bookmarkDiv.childNodes[1].innerText)+1;
-
-        const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}`, {method: 'PUT'});
-        user = await fetch(putRequest).then(response => response.json());
-
-        bookmarkDiv.onclick = () => {};
-    };
     return bookmarkDiv;
 }
 
