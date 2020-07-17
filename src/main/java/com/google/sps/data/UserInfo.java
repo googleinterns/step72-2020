@@ -44,6 +44,7 @@ public final class UserInfo {
     this.challenge_statuses = new ArrayList<Integer>();
   }
 
+  // ArrayList Params may be null
   public UserInfo(String id, String nickname, ArrayList<Long> created_events, 
     ArrayList<Long> bookmarked_events, Long current_challenge_id, ArrayList<Integer> challenge_statuses) {
     this.id = id;
@@ -56,6 +57,9 @@ public final class UserInfo {
     else this.bookmarked_events = (ArrayList) bookmarked_events.clone();
 
     this.current_challenge_id = current_challenge_id;
+
+    // @Erick May need to change this initialization if structure of challenge statuses changes
+    if (challenge_statuses == null) this.challenge_statuses = new ArrayList<Integer>();
     this.challenge_statuses = (ArrayList) challenge_statuses.clone();
   }
 
