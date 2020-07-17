@@ -99,8 +99,8 @@ function postEvent(event) {
     const eventEl = document.createElement('div');
     eventEl.className = "event-post";
     eventEl.appendChild(addEventUserText(event));
-    eventEl.appendChild(addEventAddToCalendarButton(event));
     eventEl.appendChild(addEventBookmark(event));
+    eventEl.appendChild(addEventAddToCalendarButton(event));
     eventEl.appendChild(addEventMiddleSection(event));
     eventEl.appendChild(addEventInfo(event));
     return eventEl;
@@ -159,10 +159,43 @@ function addEventBookmark(event) {
     bookmarkDiv.style.height = 0;
     const bookmark = document.createElement('img');
     bookmark.className = "event-bookmark";
-    // add case for if user has bookmarked this event once users have been created
-    bookmark.src = "/resources/bookmark.png";
+    // bookmark.src = "/resources/bookmark.png";
     bookmarkDiv.appendChild(bookmark);
     bookmarkDiv.appendChild(addEventNumBookmarks(event));
+    bookmarkDiv.onclick = () => {};
+
+    if (gapi.auth2.getAuthInstance().isSignedIn.get() && user.bookmarked_events.includes(event.extendedProperties.event_id)) {
+        bookmark.src="/resources/filled-bookmark.png"; 
+        bookmarkDiv.childNodes[1].style.color = "#fafafa";
+        bookmarkDiv.onclick = () => {};
+        
+    } else {
+        bookmark.src = "/resources/bookmark.png";
+        if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+            bookmarkDiv.onclick = async () => { 
+            bookmark.src="/resources/filled-bookmark.png"; 
+            bookmarkDiv.childNodes[1].style.color = "#fafafa";
+            bookmarkDiv.childNodes[1].innerText = parseInt(bookmarkDiv.childNodes[1].innerText)+1;
+
+            const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}`, {method: 'PUT'});
+            user = await fetch(putRequest).then(response => response.json());
+
+            bookmarkDiv.onclick = () => {};
+        };
+        }
+        
+    }
+
+    bookmarkDiv.onclick = async () => { 
+        bookmark.src="/resources/filled-bookmark.png"; 
+        bookmarkDiv.childNodes[1].style.color = "#fafafa";
+        bookmarkDiv.childNodes[1].innerText = parseInt(bookmarkDiv.childNodes[1].innerText)+1;
+
+        const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}`, {method: 'PUT'});
+        user = await fetch(putRequest).then(response => response.json());
+
+        bookmarkDiv.onclick = () => {};
+    };
     return bookmarkDiv;
 }
 
@@ -276,6 +309,7 @@ function fillBadge(currentStep, totalSteps) {
 
 function setChallengesNavBar(challenges) {
     const navBar = document.getElementById("challenges-nav-bar");
+    navBar.innerHTML = "<p id='challenges-nav-bar-header'>Challenges</p>";
     for (challenge of challenges) {
         navBar.appendChild(createChallengeNavBarItem(challenge));
 
@@ -593,8 +627,14 @@ function addEventToCalendar(event) {
 async function getUserInfo() {
     let auth2 = gapi.auth2.getAuthInstance();
     let profile = auth2.currentUser.get().getBasicProfile();
-    let name = profile.getName();
-    user = await fetch(`/user?nickname=${name}`).then(response => response.json());
+    let response = await fetch("/user");
+    if (response.status == 404) {
+        let name = profile.getName();
+        const postRequest = new Request(`/user?nickname=${name}`, {method: "POST"});
+        await fetch(postRequest);
+        response = await fetch("/user")
+    }
+    user = await response.json();
 }
 
 /**

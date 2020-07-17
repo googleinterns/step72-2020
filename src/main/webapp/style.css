@@ -165,6 +165,7 @@ html, body {
     width: 28px;
     float: right;
     position: relative;
+    right: 28px;
     margin-right: 10px;
     bottom: 55px;
     cursor: pointer;
@@ -175,6 +176,7 @@ html, body {
     width: 28px;
     float: right;
     position: relative;
+    left: 40px;
     bottom: 60px;
     cursor: pointer;
     font-size: 30px;

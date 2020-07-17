@@ -71,23 +71,27 @@ public class UserServlet extends HttpServlet {
   static final String CHALLENGE_STATUS_PARAM = "stat";
   static final String BOOKMARKED_EVENT_PARAM = "book";
   static final String ADDED_TO_CALENDAR_PARAM = "add";
+  static final String EVENT = "Event";
+  static final String EVENT_ID = "event_id";
+  static final String BOOKMARKS = "bookmarks";
+
+  DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     UserService userService = UserServiceFactory.getUserService();
     
     String userId = userService.getCurrentUser().getUserId();
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-    Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate("userId", FilterOperator.EQUAL, userId));
+    Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
     Entity entity = datastore.prepare(query).asSingleEntity();
 
     if (entity == null) {
-        res.setStatus(404);
+        response.setStatus(404);
         return;
     }
 
-    UserInfo user = convertEntitytoUserInfo(entity, userId);
+    UserInfo user = UserInfo.convertEntitytoUserInfo(entity, userId);
 
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
@@ -102,18 +106,10 @@ public class UserServlet extends HttpServlet {
       String userId = userService.getCurrentUser().getUserId();
       String userNickname = request.getParameter(UserInfo.NICKNAME);
 
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
-
       Long currentChallengeId = 0L;
       ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
 
-      Entity userEntity = new Entity(UserInfo.DATA_TYPE);
-      userEntity.setProperty(UserInfo.ID, userId);
-      userEntity.setProperty(UserInfo.NICKNAME, userNickname);
-      userEntity.setProperty(UserInfo.CURRENT_CHALLENGE, currentChallengeId);
-      userEntity.setProperty(UserInfo.CHALLENGE_STATUSES, challengeStatuses);
-
-      datastore.put(userEntity);
+      datastore.put(new UserInfo(userId, userNickname, null, null, null, currentChallengeId, challengeStatuses).toEntity());
 
       response.sendRedirect("/index.html");
   }
@@ -132,19 +128,19 @@ public class UserServlet extends HttpServlet {
       Integer newStatus;
       Long eventId;
 
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
-
       Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(query).asSingleEntity();
+      UserInfo user = UserInfo.convertEntitytoUserInfo(entity, userId);
+      datastore.delete(entity.getKey());
 
       if (challengeIdParam != null) {
           try {
               challengeId = Long.parseLong(challengeIdParam);
               if (statusParam != null) {
                   newStatus = Integer.parseInt(statusParam);
-                  updateChallengeStatus(entity, challengeId, newStatus);
+                  updateChallengeStatus(user, challengeId, newStatus);
               } else {
-                  updateCurrentChallenge(entity, challengeId);
+                  updateCurrentChallenge(user, challengeId);
               }
           } catch (Exception e) {
               System.err.println(e.getMessage());
@@ -153,7 +149,7 @@ public class UserServlet extends HttpServlet {
       else if (bookmarkedEventParam != null) {
           try {
               eventId = Long.parseLong(bookmarkedEventParam);
-              updateBookmarkedEvents(entity, eventId);
+              updateBookmarkedEvents(user, eventId);
           } catch (Exception e) {
               System.err.println(e.getMessage());
           }
@@ -161,15 +157,13 @@ public class UserServlet extends HttpServlet {
       else if (addedToCalendarParam != null) {
           try {
               eventId = Long.parseLong(addedToCalendarParam);
-              updateAddedToCalendarEvents(entity, eventId);
+              updateAddedToCalendarEvents(user, eventId);
           } catch (Exception e) {
               System.err.println(e.getMessage());
           }
       }
 
-      datastore.put(entity);
-
-      UserInfo user = convertEntitytoUserInfo(entity, userId);
+      datastore.put(user.toEntity());
 
       response.setContentType("application/json; charset=UTF-8");
       response.setCharacterEncoding("UTF-8");
@@ -178,30 +172,36 @@ public class UserServlet extends HttpServlet {
       response.getWriter().println(json);
   }
 
-  // @Erick If challenge id structure is changed, update this method
-  private void updateCurrentChallenge(Entity user, Long challengeId) {
-      user.setProperty(UserInfo.CURRENT_CHALLENGE, challengeId);
-  }
-  
-  // @Erick If challenge id structure is changed, update this method
-  private void updateChallengeStatus(Entity user, Long challengeId, int status) {
-      ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) user.getProperty(UserInfo.CHALLENGE_STATUSES);
-      challengeStatuses.set(challengeId.intValue(), status);
-      user.setProperty(UserInfo.CHALLENGE_STATUSES, challengeStatuses);
+  // @Erick If challenge id structure changes, update this method
+  private void updateCurrentChallenge(UserInfo user, Long id) {
+      user.setCurrentChallenge(id);
   }
 
-  private void updateBookmarkedEvents(Entity user, Long eventId) {
-      ArrayList<Long> bookmarkedEvents =(ArrayList<Long>) user.getProperty(UserInfo.BOOKMARKED_EVENTS);
+  // @Erick If challenge status structure changes, update this method
+  private void updateChallengeStatus(UserInfo user, Long id, int status) {
+      ArrayList<Integer> challengeStatuses = user.getChallengeStatuses();
+      challengeStatuses.set(id.intValue(), status);
+      user.setChallengeStatuses(challengeStatuses);
+
+  }
+
+  private void updateBookmarkedEvents(UserInfo user, Long eventId) {
+      ArrayList<Long> bookmarkedEvents = user.getBookmarkedEvents();
       if (bookmarkedEvents == null) bookmarkedEvents = new ArrayList<Long>();
       bookmarkedEvents.add(eventId);
-      user.setProperty(UserInfo.BOOKMARKED_EVENTS, bookmarkedEvents);
+      user.setBookmarkedEvents(bookmarkedEvents);
+
+      Query query = new Query(EVENT).setFilter(new FilterPredicate(EVENT_ID, FilterOperator.EQUAL, eventId));
+      Entity entity = datastore.prepare(query).asSingleEntity();
+      entity.setProperty(BOOKMARKS, (long) entity.getProperty(BOOKMARKS)+1);
+      datastore.put(entity);
   }
 
-  private void updateAddedToCalendarEvents(Entity user, Long eventId) {
-      ArrayList<Long> addedEvents =(ArrayList<Long>) user.getProperty(UserInfo.ADDED_TO_CALENDAR_EVENTS);
+  private void updateAddedToCalendarEvents(UserInfo user, Long eventId) {
+      ArrayList<Long> addedEvents = user.getAddedToCalendarEvents();
       if (addedEvents == null) addedEvents = new ArrayList<Long>();
       addedEvents.add(eventId);
-      user.setProperty(UserInfo.ADDED_TO_CALENDAR_EVENTS, addedEvents);
+      user.setAddedToCalendarEvents(addedEvents);
   }
 
   private String convertToJson(UserInfo user) {
@@ -210,15 +210,4 @@ public class UserServlet extends HttpServlet {
       return json;
   }
 
-  private UserInfo convertEntitytoUserInfo(Entity entity, String userId) {
-    String nickname = (String) entity.getProperty(UserInfo.NICKNAME);
-    Long currentChallengeId = (Long) entity.getProperty(UserInfo.CURRENT_CHALLENGE);
-    ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(UserInfo.CREATED_EVENTS);
-    ArrayList<Long> bookmarkedEvents = (ArrayList<Long>) entity.getProperty(UserInfo.BOOKMARKED_EVENTS);
-    ArrayList<Long> addedEvents = (ArrayList<Long>) entity.getProperty(UserInfo.ADDED_TO_CALENDAR_EVENTS);
-    ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(UserInfo.CHALLENGE_STATUSES);
-
-    UserInfo user = new UserInfo(userId, nickname, createdEvents, bookmarkedEvents, addedEvents, currentChallengeId, challengeStatuses);
-    return user;
-  }
 } 

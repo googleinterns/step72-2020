@@ -17,6 +17,8 @@ package com.google.sps.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.appengine.api.datastore.Entity;
+
 public final class UserInfo {
 
   public static final String DATA_TYPE = "UserInfo";
@@ -29,12 +31,12 @@ public final class UserInfo {
   public static final String CHALLENGE_STATUSES = "challenge_statuses";
 
   private final String id;
-  private final String nickname;
-  private final List<Long> created_events;
-  private final List<Long> bookmarked_events;
-  private final List<Long> added_to_calendar_events;
+  private String nickname;
+  private List<Long> created_events;
+  private List<Long> bookmarked_events;
+  private List<Long> added_to_calendar_events;
   private Long current_challenge_id;
-  private final List<Integer> challenge_statuses;
+  private List<Integer> challenge_statuses;
 
 
   public UserInfo(String id, String nickname) {
@@ -47,6 +49,7 @@ public final class UserInfo {
     this.challenge_statuses = new ArrayList<Integer>();
   }
 
+  // ArrayList Params may be null
   public UserInfo(String id, String nickname, ArrayList<Long> created_events, ArrayList<Long> bookmarked_events, 
     ArrayList<Long> added_to_calendar_events, Long current_challenge_id, ArrayList<Integer> challenge_statuses) {
 
@@ -63,14 +66,79 @@ public final class UserInfo {
     else this.added_to_calendar_events = (ArrayList) added_to_calendar_events.clone();
 
     this.current_challenge_id = current_challenge_id;
-    this.challenge_statuses = (ArrayList) challenge_statuses.clone();
+
+    // @Erick May need to change this initialization if structure of challenge statuses changes
+    if (challenge_statuses == null) this.challenge_statuses = new ArrayList<Integer>();
+    else this.challenge_statuses = (ArrayList) challenge_statuses.clone();
   }
 
+  // @Erick May need to change the following methods if structure of challenge statuses or id changes
   public Long getCurrentChallenge() {
       return this.current_challenge_id;
   }
 
   public void setCurrentChallenge(Long chal_id) {
       this.current_challenge_id = chal_id;
+  }
+
+  public ArrayList<Integer> getChallengeStatuses() {
+      return (ArrayList) this.challenge_statuses;
+  }
+
+  // challenge_statuses param should not be null
+  public void setChallengeStatuses(ArrayList<Integer> challenge_statuses) {
+      this.challenge_statuses = (ArrayList) challenge_statuses.clone();
+  }
+
+  public ArrayList<Long> getCreatedEvents() {
+      return (ArrayList) this.created_events;
+  }
+
+  // created_events param should not be null
+  public void setCreatedEvents(ArrayList<Long> created_events) {
+      this.created_events = (ArrayList) created_events.clone();
+  }
+
+  public ArrayList<Long> getBookmarkedEvents() {
+      return (ArrayList) this.bookmarked_events;
+  }
+
+  // bookmarked_events param should not be null
+  public void setBookmarkedEvents(ArrayList<Long> bookmarked_events) {
+      this.bookmarked_events = (ArrayList) bookmarked_events.clone();
+  }
+
+  public ArrayList<Long> getAddedToCalendarEvents() {
+      return (ArrayList) this.added_to_calendar_events;
+  }
+
+  // added_to_calendar_events param should not be null
+  public void setAddedToCalendarEvents(ArrayList<Long> added_to_calendar_events) {
+      this.added_to_calendar_events = (ArrayList) added_to_calendar_events.clone();
+  }
+ 
+
+  public static UserInfo convertEntitytoUserInfo(Entity entity, String userId) {
+    String nickname = (String) entity.getProperty(NICKNAME);
+    Long currentChallengeId = (Long) entity.getProperty(CURRENT_CHALLENGE);
+    ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(CREATED_EVENTS);
+    ArrayList<Long> bookmarkedEvents = (ArrayList<Long>) entity.getProperty(BOOKMARKED_EVENTS);
+    ArrayList<Long> addedEvents = (ArrayList<Long>) entity.getProperty(ADDED_TO_CALENDAR_EVENTS);
+    ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(CHALLENGE_STATUSES);
+
+    UserInfo user = new UserInfo(userId, nickname, createdEvents, bookmarkedEvents, addedEvents, currentChallengeId, challengeStatuses);
+    return user;
+  }
+  
+  public Entity toEntity() {
+      Entity userEntity = new Entity(DATA_TYPE);
+      userEntity.setProperty(ID, this.id);
+      userEntity.setProperty(NICKNAME, this.nickname);
+      userEntity.setProperty(CREATED_EVENTS, this.created_events);
+      userEntity.setProperty(BOOKMARKED_EVENTS, this.bookmarked_events);
+      userEntity.setProperty(ADDED_TO_CALENDAR_EVENTS, this.added_to_calendar_events);
+      userEntity.setProperty(CURRENT_CHALLENGE, this.current_challenge_id);
+      userEntity.setProperty(CHALLENGE_STATUSES, this.challenge_statuses);
+      return userEntity;
   }
 } 
