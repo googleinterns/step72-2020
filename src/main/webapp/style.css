@@ -7,7 +7,6 @@ html, body {
 .content {
     height: 100%;
     position: absolute;
-    max-height: 95vh;
     width: 100%;
 }
 
@@ -207,5 +206,12 @@ html, body {
 #map {
     height: 100%;
     width: 100%;
+}
+
+.map_overlay {
+    border: 20px;
+    background-color: white;
+    overflow-y:auto;
+    margin: 20px;
 }
 

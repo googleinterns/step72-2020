@@ -14,10 +14,10 @@
 
 package com.google.sps.servlets;
 
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import javax.servlet.annotation.WebServlet;
@@ -40,13 +40,15 @@ public class WaterPollutionServlet extends HttpServlet {
     public static final String EPA_API_LINK = "https://enviro.epa.gov/enviro/efservice/SDW_CONTAM_VIOL_ZIP/";
     public static final String EPA_ZIP_FORMAT = "GEOLOCATION_ZIP/";
     public static final String EPA_STATE_FORMAT = "STATE/";
+    public static final String MIN_DATE = "/ENFDATE/>/01-JAN-14";
     public static final String CSV_FORMAT = "/Excel/";
     public static final String SPLITERATOR = "\",\"";
-    public static final int TOTAL_CELL_COUNT = 18;
+    public static final int TOTAL_CELL_COUNT = 47;
 
     private static final String AREA_PARAMETER = "area";
     private static final String ZIP = "zip";
-    private static final String STATE = "state";
+    private static final String TOWN_PARAMATER = "town";
+    private static final String STATE_PARAMATER = "state";
 
     private static final String ZIP_PARAMETER = "zip_code";
 
@@ -60,15 +62,18 @@ public class WaterPollutionServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String area = request.getParameter(AREA_PARAMETER);
         response.setContentType("application/json");
-        if(area.equals(ZIP)){
-            String json = new Gson().toJson(
-                retrieveSDWViolations(request.getParameter(ZIP_PARAMETER), EPA_ZIP_FORMAT));
-            response.getWriter().write(json);
-        } else if(area.equals(STATE)) {
-            String json = new Gson().toJson(
-                retrieveSDWViolations(request.getParameter(ZIP_PARAMETER), EPA_STATE_FORMAT));
-            response.getWriter().write(json);
-        }
+        // if(area.equals(ZIP)){
+        //     String json = new Gson().toJson(
+        //         retrieveSDWViolations(request.getParameter(ZIP_PARAMETER), EPA_ZIP_FORMAT));
+        //     response.getWriter().write(json);
+        // } else if(area.equals(STATE)) {
+        //     String json = new Gson().toJson(
+        //         retrieveSDWViolations(request.getParameter(ZIP_PARAMETER), EPA_STATE_FORMAT));
+        //     response.getWriter().write(json);
+        // }
+        String json = new Gson().toJson(
+            retrieveSDWViolations(request.getParameter(TOWN_PARAMATER), request.getParameter(STATE_PARAMATER)));
+        response.getWriter().write(json);
     }
 
     /**
@@ -78,23 +83,23 @@ public class WaterPollutionServlet extends HttpServlet {
     * @param areaType the Zip or State format for the EPA URL
     * @return the list of superfund sites pulled from the EPA API
     */
-    public ArrayList<WaterSystem> retrieveSDWViolations(String areaCode, String areaType){
-        ArrayList<WaterSystem> sites = new ArrayList<>();
+    public ArrayList<WaterSystem> retrieveSDWViolations(String town, String state){
+        ArrayList<WaterSystem> waterSystems;
         try {
-            URL url = new URL(EPA_API_LINK + areaType + areaCode + CSV_FORMAT);
-            sites = parseViolationsFromURL(url);
+            URL url = new URL("https://enviro.epa.gov/enviro/efservice/WATER_SYSTEM/"+"CITIES_SERVED/CONTAINS/"+town.toUpperCase()+"/PRIMACY_AGENCY_CODE/"+state + CSV_FORMAT);
+            // URL url = new URL(EPA_API_LINK + areaType + areaCode + MIN_DATE + CSV_FORMAT);
+            waterSystems = parseViolationsFromURL(url);
         } catch (IOException e){
             logger.error(e.getMessage());
+            waterSystems = new ArrayList<>();
+            System.out.println("IO Exception for Water Violations");
         }
-
-        //to be stored in database
-        ArrayList<WaterSystem> invalidSites = cleanSuperfundData(sites);
         
-        return sites;
+        return waterSystems;
     }
 
     public ArrayList<WaterSystem> parseViolationsFromURL(URL url) throws IOException{
-        ArrayList<WaterSystem> sites = new ArrayList<>();
+        ArrayList<WaterSystem> waterSystems = new ArrayList<>();
         Scanner scanner= new Scanner(url.openStream());
         scanner.nextLine();
         while(scanner.hasNextLine()){
@@ -103,44 +108,14 @@ public class WaterPollutionServlet extends HttpServlet {
             while(scanner.hasNextLine() && line.split(SPLITERATOR).length < TOTAL_CELL_COUNT){
                 line += scanner.nextLine();
             }
-            String cells[] = line.split(SPLITERATOR);
+            String[] cells = line.split(SPLITERATOR);
             if(cells.length < TOTAL_CELL_COUNT) continue;
-            String name = cells[3];
-            double score = DEFAULT_SCORE;
-            String state = cells[7];
-            String city = cells[6];
-            String county = cells[10];
-            String status = cells[15];
-            double lattitude, longitude;
-            try {
-                lattitude = Double.parseDouble(cells[12]);
-                longitude = Double.parseDouble(cells[13]);
-            } catch (Exception e){
-                // logger.info("Lat Long Issue for "+name +"\n The line of issue is: "+cells.toString());
-                lattitude = 0;
-                longitude = 0;
-            }
-            WaterSystem site = new WaterSystem(name, score, state, city, county, status, lattitude, longitude);
-            sites.add(site);
+            WaterSystem system = new WaterSystem(cells);
+            system.addViolations();
+            waterSystems.add(system);
         }
         scanner.close();
-        return sites;
-    }
-
-    /**
-     * Removes invalid superfund sites from the given list and returns them as their own list
-     */
-    public ArrayList<WaterSystem> cleanSuperfundData(final ArrayList<WaterSystem> sites){
-        ArrayList<WaterSystem> invalidSites = new ArrayList<>();
-        for(int i = 0; i < sites.size();){
-            if(sites.get(i).isValidSite()){
-                i++;
-            } else {
-                WaterSystem invalid = sites.remove(i);
-                invalidSites.add(invalid);
-            }
-        }
-        return invalidSites;
+        return waterSystems;
     }
 
 }
