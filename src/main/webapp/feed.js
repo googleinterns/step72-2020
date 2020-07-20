@@ -85,8 +85,12 @@ function loadChallenges() {
 }
 
 async function loadEvents() {
-    const timezone = document.getElementById("user-timezone");
+     const timezone = document.getElementById("user-timezone");
     timezone.value = new Date().getTimezoneOffset();
+
+    const idToken = document.getElementById("id-token");
+    idToken.value = getIdToken();
+
     let events = await fetch("/events").then(response => response.json());
     const feed = document.getElementById("events-feed");
     feed.innerHTML = "";
@@ -124,7 +128,8 @@ function addEventAddToCalendarButton(event) {
 async function clickAddToCalendar(addToCalDiv, event) {
     checkAddToCalendarButton(addToCalDiv);
 
-    const putRequest = new Request(`/user?add=${event.extendedProperties.event_id}`, {method: 'PUT'});
+    let idToken = getIdToken();
+    const putRequest = new Request(`/user?add=${event.extendedProperties.event_id}&id_token=${idToken}`, {method: 'PUT'});
     user = await fetch(putRequest).then(response => response.json());
 
     updateCalendar(event);
@@ -383,8 +388,8 @@ async function showNewChallengeCompletePage(challenge) {
     else {
         text.innerHTML = `${challenge.get("title")} challenge complete!<br>Next up is the <b>${challenges[newChallengeId].get("title")}</b> challenge`;
     }
-    let id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
-    const putRequest = new Request(`/user?id_token=${id_token}&chal=${newChallengeId}`, {method: 'PUT'});
+    let idToken = getIdToken();
+    const putRequest = new Request(`/user?id_token=${idToken}&chal=${newChallengeId}`, {method: 'PUT'});
     user = await fetch(putRequest).then(response => response.json());
 }
 
@@ -442,8 +447,8 @@ function setNextButton(displayedStep, challenge) {
     nextButton.onclick = async ()=> {
         let currentStatus = user.challenge_statuses[challenge.get("id")];
         if (currentStatus+1 == displayedStep) {
-            let id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
-            const putRequest = new Request(`/user?id_token=${id_token}&chal=${challenge.get("id")}&stat=${currentStatus+1}`, {method: 'PUT'});
+            let idToken = getIdToken();
+            const putRequest = new Request(`/user?id_token=${idToken}&chal=${challenge.get("id")}&stat=${currentStatus+1}`, {method: 'PUT'});
             user = await fetch(putRequest).then(response => response.json());
 
             const navBarItemBackground = document.getElementById("challenges-nav-bar-item-background-"+user.current_challenge_id);
@@ -530,8 +535,8 @@ function checkCheckbox(challenge) {
 }
 
 async function updateUserCurrentChallenge(id) {
-    let id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
-    const putRequest = new Request(`/user?id_token=${id_token}&chal=${id}`, {method: 'PUT'});
+    let idToken = getIdToken();
+    const putRequest = new Request(`/user?id_token=${idToken}&chal=${id}`, {method: 'PUT'});
     user = await fetch(putRequest).then(response => response.json());
 
     setChallengeBox(id);
@@ -594,15 +599,13 @@ function addEventToCalendar(event) {
 }
 
 async function getUserInfo() {
-    let auth2 = gapi.auth2.getAuthInstance();
-    let profile = auth2.currentUser.get().getBasicProfile();
-    let id_token = auth2.currentUser.get().getAuthResponse().id_token;
-    let response = await fetch(`/user?id_token=${id_token}`);
+    let idToken = getIdToken();
+    let response = await fetch(`/user?id_token=${idToken}`);
     if (response.status == 404) {
         let name = profile.getName();
-        const postRequest = new Request(`/user?id_token=${id_token}`, {method: "POST"});
+        const postRequest = new Request(`/user?id_token=${idToken}`, {method: "POST"});
         await fetch(postRequest);
-        response = await fetch(`/user?id_token=${id_token}`)
+        response = await fetch(`/user?id_token=${idToken}`)
     }
     user = await response.json();
 }
@@ -699,4 +702,8 @@ function showAddToCalendarButtons() {
 function hideAddToCalendarButtons() {
     const buttons = document.getElementsByClassName("add-to-calendar-div");
     for (btn of buttons) btn.style.display = "none";
+}
+
+function getIdToken() {
+    return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
 }
