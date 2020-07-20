@@ -82,6 +82,7 @@
         <p class="close-modal-button" id="close-create-event-modal-button" onclick="closeCreateEventModal()">x</p>
         <form id="create-event-form" action="/events" method="POST">
             <input type="text" id="user-timezone" name="timezone" style="display:none;" required></input>
+            <input type="text" id="id-token" name="id_token" style="display:none;" required></input>
             <label for="event-summary">Event:</label><br>
             <input type="text" id="event-summary" name="summary" required><br>
             <label for="event-location">Location:</label><br>

@@ -47,16 +47,19 @@
         <artifactId>google-api-services-calendar</artifactId>
         <version>v3-rev411-1.25.0</version>
     </dependency>
+
     <dependency>
         <groupId>com.google.oauth-client</groupId>
         <artifactId>google-oauth-client-java6</artifactId>
         <version>1.30.4</version>
     </dependency>
+
     <dependency>
         <groupId>com.google.oauth-client</groupId>
         <artifactId>google-oauth-client-jetty</artifactId>
         <version>1.30.4</version>
     </dependency>
+
     <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
@@ -82,6 +85,25 @@
         <version>1.10.19</version>
         <scope>test</scope>
     </dependency>
+
+    <dependency>
+        <groupId>com.google.api-client</groupId>
+        <artifactId>google-api-client</artifactId>
+        <version>1.30.4</version>
+    </dependency>
+
+    <dependency>
+        <groupId>com.google.api-client</groupId>
+        <artifactId>google-api-client-appengine</artifactId>
+        <version>1.30.4</version>
+    </dependency>
+
+    <dependency>
+        <groupId>com.google.api-client</groupId>
+        <artifactId>google-api-client-gson</artifactId>
+        <version>1.30.4</version>
+    </dependency> 
+
 
   </dependencies>
 

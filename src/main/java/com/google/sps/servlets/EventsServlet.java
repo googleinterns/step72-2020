@@ -49,7 +49,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.DateTime;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
@@ -58,6 +58,13 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Event.ExtendedProperties;
+
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
+import com.google.api.client.json.gson.GsonFactory;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -93,6 +100,16 @@ public class EventsServlet extends HttpServlet {
     static final String EVENT_NUM_VALUE = "value";
     static final String EVENT_ID = "event_id";
     static final String BOOKMARKS = "bookmarks";
+    static final String ID_TOKEN_PARAM = "id_token";
+
+    private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
+
+    static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
+    static final JsonFactory JSON_FACTORY = new GsonFactory();
+
+    static final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
+        .setAudience(Collections.singletonList(CLIENT_ID))
+        .build();
 
     static final List<String> CATEGORIES = new ArrayList<String>(
         Arrays.asList("food_beverage", "nature", "water", "waste_cleanup", "other")
@@ -161,6 +178,16 @@ public class EventsServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+      GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
+      if (idToken == null) {
+        System.out.println("Invalid ID token.");
+        response.setStatus(400);
+        return;
+      }
+
+      Payload payload = idToken.getPayload();
+      String userId = payload.getSubject();
+
       String eventSummary = request.getParameter(SUMMARY);
       String eventDescription = request.getParameter(DESCRIPTION);
       String eventLocation = request.getParameter(LOCATION);
@@ -186,9 +213,6 @@ public class EventsServlet extends HttpServlet {
       }
 
       long timestamp = System.currentTimeMillis();
-
-      UserService userService = UserServiceFactory.getUserService();
-      String userId = userService.getCurrentUser().getUserId();
 
       long eventId = getEventId();
       updateUserCreatedEvents(userId, eventId);
@@ -269,10 +293,20 @@ public class EventsServlet extends HttpServlet {
   public void updateUserCreatedEvents(String userId, long eventId) {
       Query userQuery = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(userQuery).asSingleEntity();
-      ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(UserInfo.CREATED_EVENTS);
+      ArrayList<Long> createdEvents = (ArrayList<Long>) entity.getProperty(UserInfo.CREATED_EVENTS);
       if (createdEvents == null) createdEvents = new ArrayList<Long>();
       createdEvents.add(eventId);
       entity.setProperty(UserInfo.CREATED_EVENTS, createdEvents);
       datastore.put(entity);
+  }
+
+  private GoogleIdToken verifyId(String idTokenString) {
+    GoogleIdToken idToken = null;
+    try {
+        idToken = verifier.verify(idTokenString);
+    } catch (Exception e) {
+        System.err.println(e.getMessage());
+    }
+    return idToken;
   }
 }
