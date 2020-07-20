@@ -25,10 +25,6 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Key;
 
-import com.google.appengine.api.users.UserServiceFactory;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.User;
-
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;

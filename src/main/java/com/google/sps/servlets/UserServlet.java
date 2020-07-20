@@ -27,10 +27,6 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
-import com.google.appengine.api.users.UserServiceFactory;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.User;
-
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -76,6 +72,7 @@ public class UserServlet extends HttpServlet {
   static final String CHALLENGE_ID_PARAM = "chal";
   static final String CHALLENGE_STATUS_PARAM = "stat";
   static final String ID_TOKEN_PARAM = "id_token";
+  static final String NAME = "name";
   private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
 
   static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
@@ -122,9 +119,8 @@ public class UserServlet extends HttpServlet {
     if (idToken != null) {
         Payload payload = idToken.getPayload();
 
-        // Print user identifier
         String userId = payload.getSubject();
-        String userNickname = (String) payload.get("name");
+        String userNickname = (String) payload.get(NAME);
         
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
 
