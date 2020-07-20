@@ -81,11 +81,22 @@ public class UserServlet extends HttpServlet {
   static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
   static final JsonFactory JSON_FACTORY = new GsonFactory();
 
+  static final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
+        .setAudience(Collections.singletonList(CLIENT_ID))
+        .build();
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    UserService userService = UserServiceFactory.getUserService();
-    
-    String userId = userService.getCurrentUser().getUserId();
+    GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
+    if (idToken == null) {
+        System.out.println("Invalid ID token.");
+        response.setStatus(400);
+        return;
+    }
+
+    Payload payload = idToken.getPayload();
+    String userId = payload.getSubject();
+
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
@@ -107,68 +118,41 @@ public class UserServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-    GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
-        .setAudience(Collections.singletonList(CLIENT_ID))
-        .build();
-    
-    String idTokenString = request.getParameter(ID_TOKEN_PARAM);
-
-    GoogleIdToken idToken = null;
-    try {
-        idToken = verifier.verify(idTokenString);
-    } catch (Exception e) {
-        System.err.println(e.getMessage());
-    }
+    GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
 
     if (idToken != null) {
         Payload payload = idToken.getPayload();
 
         // Print user identifier
         String userId = payload.getSubject();
-        System.out.println("User ID: " + userId);
+        String userNickname = (String) payload.get("name");
+        
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
 
-        // Get profile information from payload
-        String email = payload.getEmail();
-        boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
-        String name = (String) payload.get("name");
-        String pictureUrl = (String) payload.get("picture");
-        String locale = (String) payload.get("locale");
-        String familyName = (String) payload.get("family_name");
-        String givenName = (String) payload.get("given_name");
+        Long currentChallengeId = 0L;
+        ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
 
-        System.out.println(email);
-        System.out.println(emailVerified);
-        System.out.println(name);
-        System.out.println(locale);
-        System.out.println(familyName);
-        System.out.println(givenName);
-
-        // Use or store profile information
-        // ...
+        datastore.put(new UserInfo(userId, userNickname, null, null, currentChallengeId, challengeStatuses, null).toEntity());
 
     } else {
         System.out.println("Invalid ID token.");
+        response.setStatus(400);
     }
-    
-      UserService userService = UserServiceFactory.getUserService();
-      String userId = userService.getCurrentUser().getUserId();
-      String userNickname = request.getParameter(UserInfo.NICKNAME);
-
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
-
-      Long currentChallengeId = 0L;
-      ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
-
-      datastore.put(new UserInfo(userId, userNickname, null, null, currentChallengeId, challengeStatuses).toEntity());
 
       response.sendRedirect("/feed.html");
   }
 
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      UserService userService = UserServiceFactory.getUserService();
-      String userId = userService.getCurrentUser().getUserId();
+      GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
+      if (idToken == null) {
+        System.out.println("Invalid ID token.");
+        response.setStatus(400);
+        return;
+      }
+
+      Payload payload = idToken.getPayload();
+      String userId = payload.getSubject();
 
       String challengeIdParam = request.getParameter(CHALLENGE_ID_PARAM);
       String statusParam = request.getParameter(CHALLENGE_STATUS_PARAM);
@@ -181,7 +165,6 @@ public class UserServlet extends HttpServlet {
       Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(query).asSingleEntity();
       UserInfo user = UserInfo.convertEntitytoUserInfo(entity, userId);
-      datastore.delete(entity.getKey());
 
       if (challengeIdParam != null) {
           try {
@@ -222,5 +205,15 @@ public class UserServlet extends HttpServlet {
       Gson gson = new Gson();
       String json = gson.toJson(user);
       return json;
+  }
+
+  private GoogleIdToken verifyId(String idTokenString) {
+    GoogleIdToken idToken = null;
+    try {
+        idToken = verifier.verify(idTokenString);
+    } catch (Exception e) {
+        System.err.println(e.getMessage());
+    }
+    return idToken;
   }
 } 
