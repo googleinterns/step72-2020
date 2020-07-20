@@ -10,6 +10,9 @@ import java.util.Scanner;
 public class WaterSystem {
 
     public static final String EPA_WATERSYSTEM_LINK = "https://enviro.epa.gov/enviro/efservice/WATER_SYSTEM/PWSID/";
+    public static final String EPA_VIOLATIONS_LINK = "https://enviro.epa.gov/enviro/efservice/SDW_CONTAM_VIOL_ZIP/";
+    public static final String EPA_DATE_PARAMATER = "ENFDATE/%3E/01-JAN-12/";
+    public static final String EPA_PWSID_PARAMATER = "PWSID/";
     public static final String CSV_FORMAT = "/Excel/";
     public static final String SPLITERATOR = "\",\"";
     public static final int TOTAL_CELL_COUNT = 21;
@@ -71,7 +74,7 @@ public class WaterSystem {
     public void addViolations(){
         HashMap<String, WaterContaminant> contaminantsMap = new HashMap<String, WaterContaminant>();
         try {
-            URL url = new URL("https://enviro.epa.gov/enviro/efservice/SDW_CONTAM_VIOL_ZIP/"+"ENFDATE/%3E/01-JAN-12/"+"PWSID/"+pwsid + CSV_FORMAT);
+            URL url = new URL(EPA_VIOLATIONS_LINK+EPA_DATE_PARAMATER+EPA_PWSID_PARAMATER+pwsid + CSV_FORMAT);
             Scanner scanner= new Scanner(url.openStream());
             scanner.nextLine();
             while(scanner.hasNextLine()){
@@ -96,7 +99,7 @@ public class WaterSystem {
             System.out.println("IO Error in Finding SDW Violations");
         }
         contaminants.addAll(contaminantsMap.values());
-        System.out.println(contaminants);
+        // System.out.println(contaminants);
     }
 
     // private void addViolation(final String[] violationCells, final HashMap<String, WaterContaminant> contaminantsMap){
@@ -128,7 +131,9 @@ public class WaterSystem {
     }
     
 
-
+    /* This class is nested static so that Gson
+    * can turn a WaterSystem into a Json 
+     */
     public static class WaterContaminant {
 
         private int contaminantCode;

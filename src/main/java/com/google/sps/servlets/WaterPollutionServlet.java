@@ -37,9 +37,9 @@ public class WaterPollutionServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(WaterPollutionServlet.class);
     
-    public static final String EPA_API_LINK = "https://enviro.epa.gov/enviro/efservice/SDW_CONTAM_VIOL_ZIP/";
-    public static final String EPA_ZIP_FORMAT = "GEOLOCATION_ZIP/";
-    public static final String EPA_STATE_FORMAT = "STATE/";
+    public static final String EPA_WATERSYSTEM_LINK = "https://enviro.epa.gov/enviro/efservice/WATER_SYSTEM/";
+    public static final String EPA_CITY_PARAMETER = "CITIES_SERVED/CONTAINS/";
+    public static final String EPA_STATE_PARAMETER = "/PRIMACY_AGENCY_CODE/";
     public static final String MIN_DATE = "/ENFDATE/>/01-JAN-14";
     public static final String CSV_FORMAT = "/Excel/";
     public static final String SPLITERATOR = "\",\"";
@@ -86,7 +86,7 @@ public class WaterPollutionServlet extends HttpServlet {
     public ArrayList<WaterSystem> retrieveSDWViolations(String town, String state){
         ArrayList<WaterSystem> waterSystems;
         try {
-            URL url = new URL("https://enviro.epa.gov/enviro/efservice/WATER_SYSTEM/"+"CITIES_SERVED/CONTAINS/"+town.toUpperCase()+"/PRIMACY_AGENCY_CODE/"+state + CSV_FORMAT);
+            URL url = new URL(EPA_WATERSYSTEM_LINK+EPA_CITY_PARAMETER+town.toUpperCase()+EPA_STATE_PARAMETER+state + CSV_FORMAT);
             // URL url = new URL(EPA_API_LINK + areaType + areaCode + MIN_DATE + CSV_FORMAT);
             waterSystems = parseViolationsFromURL(url);
         } catch (IOException e){
