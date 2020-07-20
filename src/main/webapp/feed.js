@@ -46,10 +46,7 @@ mockUser.set("currentChallengeId", 1);
 mockUser.set("challengeStatuses", [0, 0, 0]);
 
 const user = mockUser;
-//const challenges = mockChallenges;
-
 let challenges = [];
-
 
 let eventCategoryIcons = new Map();
 eventCategoryIcons.set("food_beverage", "🥑🍋🍏");
@@ -287,8 +284,8 @@ async function getServerChallenges(){
       default:
         challenges[i].set("icon", "⚠");
         break;
-        }
     }
+  }
 }
 
 function boldCurrentChallengeTitle(chosenItem) {
