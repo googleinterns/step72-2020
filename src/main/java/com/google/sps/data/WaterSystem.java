@@ -102,20 +102,6 @@ public class WaterSystem {
         // System.out.println(contaminants);
     }
 
-    // private void addViolation(final String[] violationCells, final HashMap<String, WaterContaminant> contaminantsMap){
-    //     if(violationCells.length < TOTAL_CELL_COUNT){
-    //         System.out.println("Too few cells");
-    //         return;
-    //     }
-    //     System.out.println(violationCells[7] + " in "+pwsid);
-    //     String contaminantName = violationCells[7];
-    //     contaminantsMap.putIfAbsent(contaminantName, new WaterContaminant(violationCells));
-    //     String violationDate = violationCells[18];
-    //     String enforcementAction = violationCells[17];
-    //     contaminantsMap.get(contaminantName).addViolationInstance(violationDate, enforcementAction);
-    //     System.out.println(contaminantsMap.get(contaminantName));
-    // }
-
     public boolean equals(Object o){
         if(this == o) return true;
         
@@ -141,6 +127,7 @@ public class WaterSystem {
         private String sources;
         private String definition;
         private String healthEffects;
+        //the key is the date and the value are the enforcement actions for that date
         private HashMap<String, ArrayList<String>> violations;
     
     
