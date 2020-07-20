@@ -50,8 +50,14 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
+import com.google.api.client.json.gson.GsonFactory;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -71,12 +77,29 @@ public class UserServlet extends HttpServlet {
   static final String CHALLENGE_STATUS_PARAM = "stat";
   static final String BOOKMARKED_EVENT_PARAM = "book";
   static final String ADDED_TO_CALENDAR_PARAM = "add";
+  static final String ID_TOKEN_PARAM = "id_token";
+
+  private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
+
+  static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
+  static final JsonFactory JSON_FACTORY = new GsonFactory();
+
+  static final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
+        .setAudience(Collections.singletonList(CLIENT_ID))
+        .build();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    UserService userService = UserServiceFactory.getUserService();
-    
-    String userId = userService.getCurrentUser().getUserId();
+    GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
+    if (idToken == null) {
+        System.out.println("Invalid ID token.");
+        response.setStatus(400);
+        return;
+    }
+
+    Payload payload = idToken.getPayload();
+    String userId = payload.getSubject();
+
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
@@ -92,30 +115,46 @@ public class UserServlet extends HttpServlet {
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 
-    String json = convertToJson(user);
-    response.getWriter().println(json);
+    response.getWriter().println(user.toJSON());
   }
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      UserService userService = UserServiceFactory.getUserService();
-      String userId = userService.getCurrentUser().getUserId();
-      String userNickname = request.getParameter(UserInfo.NICKNAME);
+    GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
 
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
+    if (idToken != null) {
+        Payload payload = idToken.getPayload();
 
-      Long currentChallengeId = 0L;
-      ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
+        // Print user identifier
+        String userId = payload.getSubject();
+        String userNickname = (String) payload.get("name");
+        
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
 
-      datastore.put(new UserInfo(userId, userNickname, null, null, null, currentChallengeId, challengeStatuses).toEntity());
+        Long currentChallengeId = 0L;
+        ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0)); 
 
-      response.sendRedirect("/index.html");
+        datastore.put(new UserInfo(userId, userNickname, null, null, null, currentChallengeId, challengeStatuses, null).toEntity());
+
+    } else {
+        System.out.println("Invalid ID token.");
+        response.setStatus(400);
+    }
+    
+    response.sendRedirect("/index.html");
   }
 
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      UserService userService = UserServiceFactory.getUserService();
-      String userId = userService.getCurrentUser().getUserId();
+      GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
+      if (idToken == null) {
+        System.out.println("Invalid ID token.");
+        response.setStatus(400);
+        return;
+      }
+
+      Payload payload = idToken.getPayload();
+      String userId = payload.getSubject();
 
       String challengeIdParam = request.getParameter(CHALLENGE_ID_PARAM);
       String statusParam = request.getParameter(CHALLENGE_STATUS_PARAM);
@@ -131,7 +170,6 @@ public class UserServlet extends HttpServlet {
       Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(query).asSingleEntity();
       UserInfo user = UserInfo.convertEntitytoUserInfo(entity, userId);
-      datastore.delete(entity.getKey());
 
       if (challengeIdParam != null) {
           try {
@@ -168,8 +206,7 @@ public class UserServlet extends HttpServlet {
       response.setContentType("application/json; charset=UTF-8");
       response.setCharacterEncoding("UTF-8");
 
-      String json = convertToJson(user);
-      response.getWriter().println(json);
+      response.getWriter().println(user.toJSON());
   }
 
   // @Erick If challenge id structure changes, update this method
@@ -199,10 +236,14 @@ public class UserServlet extends HttpServlet {
       user.setAddedToCalendarEvents(addedEvents);
   }
 
-  private String convertToJson(UserInfo user) {
-      Gson gson = new Gson();
-      String json = gson.toJson(user);
-      return json;
+  private GoogleIdToken verifyId(String idTokenString) {
+    GoogleIdToken idToken = null;
+    try {
+        idToken = verifier.verify(idTokenString);
+    } catch (Exception e) {
+        System.err.println(e.getMessage());
+    }
+    return idToken;
   }
 
 } 

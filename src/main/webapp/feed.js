@@ -383,7 +383,8 @@ async function showNewChallengeCompletePage(challenge) {
     else {
         text.innerHTML = `${challenge.get("title")} challenge complete!<br>Next up is the <b>${challenges[newChallengeId].get("title")}</b> challenge`;
     }
-    const putRequest = new Request(`/user?chal=${newChallengeId}`, {method: 'PUT'});
+    let id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+    const putRequest = new Request(`/user?id_token=${id_token}&chal=${newChallengeId}`, {method: 'PUT'});
     user = await fetch(putRequest).then(response => response.json());
 }
 
@@ -441,7 +442,8 @@ function setNextButton(displayedStep, challenge) {
     nextButton.onclick = async ()=> {
         let currentStatus = user.challenge_statuses[challenge.get("id")];
         if (currentStatus+1 == displayedStep) {
-            const putRequest = new Request(`/user?chal=${challenge.get("id")}&stat=${currentStatus+1}`, {method: 'PUT'});
+            let id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+            const putRequest = new Request(`/user?id_token=${id_token}&chal=${challenge.get("id")}&stat=${currentStatus+1}`, {method: 'PUT'});
             user = await fetch(putRequest).then(response => response.json());
 
             const navBarItemBackground = document.getElementById("challenges-nav-bar-item-background-"+user.current_challenge_id);
@@ -528,7 +530,8 @@ function checkCheckbox(challenge) {
 }
 
 async function updateUserCurrentChallenge(id) {
-    const putRequest = new Request(`/user?chal=${id}`, {method: 'PUT'});
+    let id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+    const putRequest = new Request(`/user?id_token=${id_token}&chal=${id}`, {method: 'PUT'});
     user = await fetch(putRequest).then(response => response.json());
 
     setChallengeBox(id);
@@ -593,12 +596,13 @@ function addEventToCalendar(event) {
 async function getUserInfo() {
     let auth2 = gapi.auth2.getAuthInstance();
     let profile = auth2.currentUser.get().getBasicProfile();
-    let response = await fetch("/user");
+    let id_token = auth2.currentUser.get().getAuthResponse().id_token;
+    let response = await fetch(`/user?id_token=${id_token}`);
     if (response.status == 404) {
         let name = profile.getName();
-        const postRequest = new Request(`/user?nickname=${name}`, {method: "POST"});
+        const postRequest = new Request(`/user?id_token=${id_token}`, {method: "POST"});
         await fetch(postRequest);
-        response = await fetch("/user")
+        response = await fetch(`/user?id_token=${id_token}`)
     }
     user = await response.json();
 }

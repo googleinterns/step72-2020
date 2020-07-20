@@ -17,7 +17,10 @@ package com.google.sps.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.*;
+
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 
 public final class UserInfo {
 
@@ -29,6 +32,7 @@ public final class UserInfo {
   public static final String ADDED_TO_CALENDAR_EVENTS = "added_to_calendar_events";
   public static final String CURRENT_CHALLENGE = "current_challenge";
   public static final String CHALLENGE_STATUSES = "challenge_statuses";
+  public static final String ENTITY_KEY = "entity_key";
 
   private final String id;
   private String nickname;
@@ -37,11 +41,12 @@ public final class UserInfo {
   private List<Long> added_to_calendar_events;
   private Long current_challenge_id;
   private List<Integer> challenge_statuses;
+  private Key entity_key;
 
-
-  public UserInfo(String id, String nickname) {
+  public UserInfo(String id, String nickname, Key entity_key) {
     this.id = id;
     this.nickname = nickname;
+    this.entity_key = entity_key;
     this.created_events = new ArrayList<Long>();
     this.bookmarked_events = new ArrayList<Long>();
     this.added_to_calendar_events = new ArrayList<Long>();
@@ -51,10 +56,11 @@ public final class UserInfo {
 
   // ArrayList Params may be null
   public UserInfo(String id, String nickname, ArrayList<Long> created_events, ArrayList<Long> bookmarked_events, 
-    ArrayList<Long> added_to_calendar_events, Long current_challenge_id, ArrayList<Integer> challenge_statuses) {
+    ArrayList<Long> added_to_calendar_events, Long current_challenge_id, ArrayList<Integer> challenge_statuses, Key entity_key) {
 
     this.id = id;
     this.nickname = nickname;
+    this.entity_key = entity_key;
 
     if (created_events == null) this.created_events = new ArrayList<Long>();
     else this.created_events = (ArrayList) created_events.clone();
@@ -71,6 +77,7 @@ public final class UserInfo {
     if (challenge_statuses == null) this.challenge_statuses = new ArrayList<Integer>();
     else this.challenge_statuses = (ArrayList) challenge_statuses.clone();
   }
+  
 
   // @Erick May need to change the following methods if structure of challenge statuses or id changes
   public Long getCurrentChallenge() {
@@ -119,6 +126,7 @@ public final class UserInfo {
  
 
   public static UserInfo convertEntitytoUserInfo(Entity entity, String userId) {
+    Key entityKey = entity.getKey();
     String nickname = (String) entity.getProperty(NICKNAME);
     Long currentChallengeId = (Long) entity.getProperty(CURRENT_CHALLENGE);
     ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(CREATED_EVENTS);
@@ -126,12 +134,15 @@ public final class UserInfo {
     ArrayList<Long> addedEvents = (ArrayList<Long>) entity.getProperty(ADDED_TO_CALENDAR_EVENTS);
     ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(CHALLENGE_STATUSES);
 
-    UserInfo user = new UserInfo(userId, nickname, createdEvents, bookmarkedEvents, addedEvents, currentChallengeId, challengeStatuses);
+    UserInfo user = new UserInfo(userId, nickname, createdEvents, bookmarkedEvents, addedEvents, currentChallengeId, challengeStatuses, entityKey);
+
     return user;
   }
   
   public Entity toEntity() {
-      Entity userEntity = new Entity(DATA_TYPE);
+      Entity userEntity;
+      if (this.entity_key == null) userEntity = new Entity(DATA_TYPE);
+      else userEntity = new Entity(DATA_TYPE, this.entity_key.getId());
       userEntity.setProperty(ID, this.id);
       userEntity.setProperty(NICKNAME, this.nickname);
       userEntity.setProperty(CREATED_EVENTS, this.created_events);
@@ -140,5 +151,11 @@ public final class UserInfo {
       userEntity.setProperty(CURRENT_CHALLENGE, this.current_challenge_id);
       userEntity.setProperty(CHALLENGE_STATUSES, this.challenge_statuses);
       return userEntity;
+  }
+
+  public String toJSON() {
+      Gson gson = new Gson();
+      String json = gson.toJson(this);
+      return json;
   }
 } 
