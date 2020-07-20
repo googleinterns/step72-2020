@@ -17,6 +17,8 @@ package com.google.sps.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.*;
+
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
@@ -109,5 +111,11 @@ public final class UserInfo {
       userEntity.setProperty(CURRENT_CHALLENGE, this.current_challenge_id);
       userEntity.setProperty(CHALLENGE_STATUSES, this.challenge_statuses);
       return userEntity;
+  }
+
+  public String toJSON() {
+      Gson gson = new Gson();
+      String json = gson.toJson(this);
+      return json;
   }
 } 

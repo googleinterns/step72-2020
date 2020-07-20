@@ -71,6 +71,7 @@ async function loadPage() {
     timezone.value = new Date().getTimezoneOffset();
     const events = await fetch("/events").then(response => response.json());
     const feed = document.getElementById("events-feed");
+    feed.innerHTML = "";
     for (event of events) {
         feed.appendChild(postEvent(event));
     }
@@ -577,7 +578,6 @@ async function getUserInfo() {
     let auth2 = gapi.auth2.getAuthInstance();
     let profile = auth2.currentUser.get().getBasicProfile();
     let id_token = auth2.currentUser.get().getAuthResponse().id_token;
-    console.log(id_token);
     let response = await fetch(`/user?id_token=${id_token}`);
     if (response.status == 404) {
         let name = profile.getName();

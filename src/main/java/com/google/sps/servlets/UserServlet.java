@@ -112,8 +112,7 @@ public class UserServlet extends HttpServlet {
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 
-    String json = convertToJson(user);
-    response.getWriter().println(json);
+    response.getWriter().println(user.toJSON());
   }
 
   @Override
@@ -185,8 +184,7 @@ public class UserServlet extends HttpServlet {
       response.setContentType("application/json; charset=UTF-8");
       response.setCharacterEncoding("UTF-8");
 
-      String json = convertToJson(user);
-      response.getWriter().println(json);
+      response.getWriter().println(user.toJSON());
   }
 
   // @Erick If challenge id structure changes, update this method
@@ -199,12 +197,6 @@ public class UserServlet extends HttpServlet {
       ArrayList<Integer> challengeStatuses = user.getChallengeStatuses();
       challengeStatuses.set(id.intValue(), status);
       user.setChallengeStatuses(challengeStatuses);
-  }
-
-  private String convertToJson(UserInfo user) {
-      Gson gson = new Gson();
-      String json = gson.toJson(user);
-      return json;
   }
 
   private GoogleIdToken verifyId(String idTokenString) {
