@@ -724,7 +724,7 @@ async function sortEventsByDistance(location) {
     const service = new google.maps.DistanceMatrixService;
     for (event of events) {
         const result = await getDistanceMatrix(service, {
-            origins: ["60035"],
+            origins: [location],
             destinations: [event.location],
             travelMode: 'DRIVING',
             unitSystem: google.maps.UnitSystem.METRIC,
@@ -755,4 +755,8 @@ async function getLocalEvents(location) {
     for (event of events) {
         feed.appendChild(postEvent(event));
     }
+}
+
+function test(input) {
+    console.log(input);
 }
