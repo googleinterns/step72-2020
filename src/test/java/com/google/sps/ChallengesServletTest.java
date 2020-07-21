@@ -38,12 +38,8 @@ public final class ChallengesServletTest {
       when(response.getWriter()).thenReturn(pw);
       servlet.doGet(request, response);
       pw.flush();
-
-      //System.out.println(new Gson().toJson(Challenges.challenges));
-      //System.out.println(writer.toString());
       Assert.assertEquals(new Gson().toJson(ChallengeData.challenges),
                           writer.toString().trim());
-
     } catch (IOException e) {}
   }
 }

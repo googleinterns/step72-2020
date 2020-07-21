@@ -4,24 +4,30 @@ import com.google.sps.data.Challenge;
 import com.google.sps.data.ChallengeData;
 import java.util.Arrays;
 import java.util.List;
+import javafx.util.Pair;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Before;
 import org.junit.runners.JUnit4;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito.*;
 
 @RunWith(JUnit4.class)
 public final class ChallengeTest {
-  private static final List<String> STEPS = Arrays.asList("step 1", "step 2", "step 3");
+  private List<Pair<String,String>> step_desc_pairs;
   private List<Challenge> challenge_list;
 
   @Before
   public void setup(){
+    step_desc_pairs = Arrays.asList(
+      new Pair<String, String>("step 1", "Use a reusable bag for Gro"),
+      new Pair<String, String>("step 2", "Reduce..."),
+      new Pair<String, String>("step 3", "Recylce"));
+
     challenge_list = Arrays.asList(
-      new Challenge(Challenge.Type.GARDENING,"Environmentally friendly fertilizer!", STEPS),
-      new Challenge(Challenge.Type.RECYCLE, "Old Electronics" ,STEPS),
-      new Challenge(Challenge.Type.WASTE, "Create your own compost", STEPS));
+      new Challenge(Challenge.Type.GARDENING,"Environmentally friendly fertilizer!", step_desc_pairs),
+      new Challenge(Challenge.Type.RECYCLE,"Old Electronics",step_desc_pairs),
+      new Challenge(Challenge.Type.WASTE,"Create your own compost", step_desc_pairs));
   }
   
   @Test
