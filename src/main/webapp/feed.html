@@ -21,7 +21,7 @@
         <div id="events-feed"></div>
         <div class="feed-right-side">
             <div class="feed-box create-event-box" onclick="openCreateEventModal()"><div class="feed-box-content create-event-box-content"><p class="icon">📅</p><p class="create-event-text">create an event</p></div></div>
-            <div class="feed-box challenges-box" onclick="openChallengesModal()">
+            <div class="feed-box challenges-box" onclick="openChallengesModal()">  
                 <div class="feed-box-content challenges-box-content">
                     <p class="icon">🌏</p><p class="challenges-text">challenges</p>
                 </div>
@@ -31,6 +31,11 @@
                     <div class="badge-filling" id="feed-badge-filling"></div>
                 </div>
             </div>
+            <div class="feed-box badges-box" onclick="openBadgesModal()">
+              <div class="feed-box-content badges-box-content">
+                  <p class="icon">🏆 </p><p class="badges-text"> badges</p>
+              </div> 
+
         </div>
     </div>
     <div id="challenges-modal">
@@ -92,6 +97,10 @@
             </select><br>
             <input class="button" id="submit-button" type="submit" />
         </form>
+    </div>
+    <div id="badge-modal">
+      <p class ="close-modal-buton" id="close-badges-modal-button" onclick="closeBadgesModal()">x</p>
+      
     </div>
   </body>
 </html>
