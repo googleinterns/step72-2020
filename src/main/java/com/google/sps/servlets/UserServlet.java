@@ -116,25 +116,25 @@ public class UserServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
 
-    if (idToken != null) {
-        Payload payload = idToken.getPayload();
-
-        String userId = payload.getSubject();
-        String userNickname = (String) payload.get(NAME);
-        
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
-
-        Long currentChallengeId = 0L;
-        ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
-
-        datastore.put(new UserInfo(userId, userNickname, null, null, currentChallengeId, challengeStatuses, null).toEntity());
-
-    } else {
+    if (idToken == null) {
         System.out.println("Invalid ID token.");
         response.setStatus(400);
+        return;
     }
 
-      response.sendRedirect("/feed.html");
+    Payload payload = idToken.getPayload();
+    
+    String userId = payload.getSubject();
+    String userNickname = (String) payload.get(NAME);
+    
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
+
+    Long currentChallengeId = 0L;
+    ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
+
+    datastore.put(new UserInfo(userId, userNickname, null, null, currentChallengeId, challengeStatuses, null).toEntity());
+
+    response.sendRedirect("/feed.html");
   }
 
   @Override
