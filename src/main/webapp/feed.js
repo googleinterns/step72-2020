@@ -594,7 +594,6 @@ function closeCreateEventModal() {
 }
 
 function updateCalendar(event) {
-
     gapi.client.calendar.calendarList.list().then(function(response) {
           let calendars = response.result.items;
           for (calendar of calendars) {
@@ -672,7 +671,7 @@ function initClient() {
     signoutButton.onclick = handleSignoutClick;
     
 }, function(error) {
-        appendPre(JSON.stringify(error, null, 2));
+        console.log(JSON.stringify(error, null, 2));
     });
 }
 
@@ -714,18 +713,6 @@ function handleAuthClick(event) {
 function handleSignoutClick(event) {
     gapi.auth2.getAuthInstance().signOut();
 }
-
-/**
-* Append a pre element to the body containing the given message
-* as its text node. Used to display the results of the API call.
-*
-* @param {string} message Text to be placed in pre element.
-*/
-function appendPre(message) {
-    const pre = document.getElementById('content');
-    const textContent = document.createTextNode(message + '\n');
-    pre.appendChild(textContent);
-} 
 
 function showAddToCalendarButtons() {
     const buttons = document.getElementsByClassName("add-to-calendar-div");

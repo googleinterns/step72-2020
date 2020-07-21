@@ -141,7 +141,6 @@ public class UserServlet extends HttpServlet {
         .setChallengeStatuses(challengeStatuses)
         .build();
     
-    System.out.println("USER: " + user);
 
     datastore.put(user.toEntity());
 

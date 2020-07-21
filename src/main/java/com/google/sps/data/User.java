@@ -34,6 +34,15 @@ public final class User {
   public static final String CHALLENGE_STATUSES = "challenge_statuses";
   public static final String ENTITY_KEY = "entity_key";
 
+  private String id;
+  private String nickname;
+  private ArrayList<Long> created_events;
+  private ArrayList<Long> bookmarked_events;
+  private ArrayList<Long> added_to_calendar_events;
+  private Long current_challenge_id;
+  private ArrayList<Integer> challenge_statuses;
+  private Key entity_key;
+
   public static class Builder {
         private String id; 
         private String nickname;
@@ -71,7 +80,9 @@ public final class User {
             return this;
         }
         public Builder setChallengeStatuses(ArrayList<Integer> challenge_statuses){
-            this.challenge_statuses = challenge_statuses;
+            // @Erick May need to change this initialization if structure of challenge statuses changes
+            if (challenge_statuses == null) this.challenge_statuses = new ArrayList<Integer>();
+            else this.challenge_statuses = (ArrayList) challenge_statuses.clone();
             return this;
         }
         public Builder setEntityKey(Key entity_key) {
@@ -103,51 +114,6 @@ public final class User {
    }
 
 
-
-  private String id;
-  private String nickname;
-  private ArrayList<Long> created_events;
-  private ArrayList<Long> bookmarked_events;
-  private ArrayList<Long> added_to_calendar_events;
-  private Long current_challenge_id;
-  private ArrayList<Integer> challenge_statuses;
-  private Key entity_key;
-
-//   public UserInfo(String id, String nickname, Key entity_key) {
-//     this.id = id;
-//     this.nickname = nickname;
-//     this.entity_key = entity_key;
-//     this.created_events = new ArrayList<Long>();
-//     this.bookmarked_events = new ArrayList<Long>();
-//     this.added_to_calendar_events = new ArrayList<Long>();
-//     this.current_challenge_id = 0L;
-//     this.challenge_statuses = new ArrayList<Integer>();
-//   }
-
-//   // ArrayList Params may be null
-//   public UserInfo(String id, String nickname, ArrayList<Long> created_events, ArrayList<Long> bookmarked_events, 
-//     ArrayList<Long> added_to_calendar_events, Long current_challenge_id, ArrayList<Integer> challenge_statuses, Key entity_key) {
-
-//     this.id = id;
-//     this.nickname = nickname;
-//     this.entity_key = entity_key;
-
-//     if (created_events == null) this.created_events = new ArrayList<Long>();
-//     else this.created_events = (ArrayList) created_events.clone();
-
-//     if (bookmarked_events == null) this.bookmarked_events = new ArrayList<Long>();
-//     else this.bookmarked_events = (ArrayList) bookmarked_events.clone();
-
-//     if (added_to_calendar_events == null) this.added_to_calendar_events = new ArrayList<Long>();
-//     else this.added_to_calendar_events = (ArrayList) added_to_calendar_events.clone();
-
-//     this.current_challenge_id = current_challenge_id;
-
-//     // @Erick May need to change this initialization if structure of challenge statuses changes
-//     if (challenge_statuses == null) this.challenge_statuses = new ArrayList<Integer>();
-//     else this.challenge_statuses = (ArrayList) challenge_statuses.clone();
-//   }
-  
 
   // @Erick May need to change the following methods if structure of challenge statuses or id changes
   public Long getCurrentChallenge() {
