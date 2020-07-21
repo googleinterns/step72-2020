@@ -27,7 +27,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
-import com.google.sps.data.UserInfo;
+import com.google.sps.data.User;
 
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
@@ -135,9 +135,9 @@ public class EventsServlet extends HttpServlet {
         String userId = (String) entity.getProperty(CREATOR);
         long eventId = (long) entity.getProperty(EVENT_ID);
 
-        Query userQuery = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
+        Query userQuery = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
         Entity creator = datastore.prepare(userQuery).asSingleEntity();
-        String nickname = (String) creator.getProperty(UserInfo.NICKNAME);
+        String nickname = (String) creator.getProperty(User.NICKNAME);
 
         DateTime startDateTime = new DateTime(startTime);
         EventDateTime start = new EventDateTime()
@@ -284,12 +284,12 @@ public class EventsServlet extends HttpServlet {
   }
 
   public void updateUserCreatedEvents(String userId, long eventId) {
-      Query userQuery = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
+      Query userQuery = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(userQuery).asSingleEntity();
-      ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(UserInfo.CREATED_EVENTS);
+      ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(User.CREATED_EVENTS);
       if (createdEvents == null) createdEvents = new ArrayList<Long>();
       createdEvents.add(eventId);
-      entity.setProperty(UserInfo.CREATED_EVENTS, createdEvents);
+      entity.setProperty(User.CREATED_EVENTS, createdEvents);
       datastore.put(entity);
   }
 
