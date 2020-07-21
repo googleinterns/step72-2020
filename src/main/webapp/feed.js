@@ -54,6 +54,7 @@ let challenges;
 const projectTitle = "GEN Capstone";
 let calendarId = null; 
 
+
 let eventCategoryIcons = new Map();
 eventCategoryIcons.set("food_beverage", "🥑🍋🍏");
 eventCategoryIcons.set("nature", "🌲🌱🌳");
@@ -75,10 +76,13 @@ async function loadPage() {
     for (event of events) {
         feed.appendChild(postEvent(event));
     }
+    
+    await getServerChallenges();
 
     setChallengeBox(user.current_challenge_id);
 
     setChallengesNavBar(challenges);
+
 
     window.onclick = function(event) {
         const challengesModal = document.getElementById("challenges-modal");
@@ -204,6 +208,7 @@ function setChallengeBox(challengeId) {
         stepsText.innerText = "Complete!";
     }
     else {
+        //console.log("challenges length = " + challenges.length) ;
         icon.innerText = challenges[challengeId].get("icon");
 
         const currentStep = user.challenge_statuses[challengeId];
@@ -231,9 +236,11 @@ function fillBadge(currentStep, totalSteps) {
     }
 }
 
+//start here to implement (note for me)
 function setChallengesNavBar(challenges) {
     const navBar = document.getElementById("challenges-nav-bar");
     navBar.innerHTML = "<p id='challenges-nav-bar-header'>Challenges</p>";
+
     for (challenge of challenges) {
         navBar.appendChild(createChallengeNavBarItem(challenge));
 
@@ -254,7 +261,7 @@ function createChallengeNavBarItem(challenge) {
 
     const title = document.createElement('p');
     title.className = "challenges-nav-bar-item-title";
-    title.innerText = challenge.get("title");
+    title.innerText = challenge.get("type");
     item.appendChild(title);
 
     const icon = document.createElement('p');
@@ -273,6 +280,35 @@ function createChallengeNavBarItem(challenge) {
         }    
     });
     return item;
+}
+
+async function getServerChallenges(){
+  const response = await fetch('/challenges');
+  const challengeJson = await response.json();
+
+  var i;
+  for(i = 0; i < challengeJson.length; i++){
+    challenges[i] = new Map();
+    challenges[i].set("id", i);
+    challenges[i].set("title", challengeJson[i].name);
+    challenges[i].set("type", challengeJson[i].challenge_type);
+    challenges[i].set("steps", challengeJson[i].steps_desc_pair);
+
+    switch (challenges[i].get("type")) {
+      case("RECYCLE"):
+        challenges[i].set("icon", "♻️");
+        break;
+      case("GARDENING"):
+        challenges[i].set("icon", "🌱");
+        break;
+      case("WASTE"):
+        challenges[i].set("icon", "🗑");
+        break;
+      default:
+        challenges[i].set("icon", "⚠");
+        break;
+    }
+  }
 }
 
 function boldCurrentChallengeTitle(chosenItem) {
@@ -294,16 +330,16 @@ function showChallengeInfo(challenge, displayedStep) {
     header.innerText = challenge.get("icon") + " " + challenge.get("title") + " " + stepsText;
 
     const stepText = document.getElementById("challenges-main-panel-step");
-    stepText.innerText = challenge.get("steps")[displayedStep-1];
+    stepText.innerText = challenge.get("steps")[displayedStep-1].key;
 
     setPrevButton(displayedStep, challenge);
     setNextButton(displayedStep, challenge);
     
     const description = document.getElementById("challenges-main-panel-description");
-    description.innerText = challenge.get("descriptions")[displayedStep-1];
+    description.innerText = challenge.get("steps")[displayedStep-1].value;
 
     const resources = document.getElementById("challenges-main-panel-resources");
-    resources.innerText = challenge.get("resources")[displayedStep-1];
+    //resources.innerText = challenge.get("resources")[displayedStep-1];
 
     createModalChallengesBadge(displayedStep, challenge);
 
