@@ -35,10 +35,10 @@ public final class UserInfo {
 
   private final String id;
   private final String nickname;
-  private final List<Long> created_events;
-  private final List<Long> bookmarked_events;
+  private final ArrayList<Long> created_events;
+  private final ArrayList<Long> bookmarked_events;
   private Long current_challenge_id;
-  private List<Integer> challenge_statuses;
+  private ArrayList<Integer> challenge_statuses;
   private Key entity_key;
 
   public UserInfo(String id, String nickname, Key entity_key) {
