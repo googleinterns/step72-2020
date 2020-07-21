@@ -11,8 +11,16 @@ html, body {
     width: 100%;
 }
 
-.header {
+#left-side-header {
     display: flex;
+}
+
+#right-side-header {
+    float: right;
+}
+
+#feed-right-side {
+    margin-left: 70%;
 }
 
 
@@ -24,10 +32,13 @@ html, body {
     margin-left: 1%;
     align-items: flex-end;
     padding-bottom: 8px;
+    margin-bottom: 18px;
 }
 
 .tab {
     cursor: pointer;
+    text-decoration: none;
+    color: black;
 }
 
 .feed-heading {
@@ -95,6 +106,8 @@ html, body {
 .badge-icon {
     text-align: center;
     margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
 }
 
 .challenge-steps {
@@ -108,10 +121,11 @@ html, body {
 
 .badge-filling {
     border-radius: 0 0 10px 10px;
-    width: 80px;
+    width: 78.8px;
     background: #e5ecec;
     position: relative;
-    z-index: -1;
+    z-index: 0;
+    left: 1px;
 }
 
 #events-searchbar-input {
@@ -150,6 +164,19 @@ html, body {
     margin-right: 10px;
     bottom: 55px;
     cursor: pointer;
+}
+
+.add-to-calendar-div {
+    display: none;
+    width: 28px;
+    float: right;
+    position: relative;
+    bottom: 60px;
+    cursor: pointer;
+    font-size: 30px;
+    line-height: 30px;
+    height: 30px;
+    color: #004643;
 }
 
 .event-bookmark-num {
@@ -346,7 +373,7 @@ html, body {
 
 #modal-badge-filling {
     z-index: 1;
-    width: 100px;
+    width: 98px;
 }
 
 #challenges-modal-set-challenge-div {
@@ -391,9 +418,7 @@ html, body {
     background: #fafafa;
     width: 33%;
     margin: auto;
-}
-
-#create-event-form {
+    border: 2.5px solid #004643;
     padding: 20px;
     font-size: 20px;
 }
@@ -422,4 +447,17 @@ html, body {
 #map {
     height: 100%;
     width: 100%;
+}
+
+#authorize-button, #signout-button {
+    background: #004643;
+    color: #fafafa;
+    border: none;
+    height: 30px;
+    width: 80px;
+    position: relative;
+    bottom: 55px;
+    margin-right: 20px;
+    font-size: 16px;
+    font-family: 'Open Sans', sans-serif;
 }
