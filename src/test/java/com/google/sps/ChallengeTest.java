@@ -40,7 +40,7 @@ public final class ChallengeTest {
     Assert.assertTrue(ChallengeData.challenges[1].isEqual(challenge_list.get(1)));
   }
 
-  @Test	
+  @Test
   public void isEqualInvalid(){
     Assert.assertFalse(challenge_list.get(0).isEqual(challenge_list.get(1)));
   }
