@@ -1,5 +1,15 @@
 package com.google.sps.data;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.QueryResultList;
+import com.google.appengine.api.datastore.Key;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,6 +26,15 @@ public class WaterSystem {
     public static final String CSV_FORMAT = "/Excel/";
     public static final String SPLITERATOR = "\",\"";
     public static final int TOTAL_CELL_COUNT = 21;
+
+    public static final String WATER_SYSTEM_ENTITY = "WaterSystem";
+    public static final String PWSID_PROPERTY = "pwsid";
+    public static final String NAME_PROPERTY = "name";
+    public static final String CONTAMINANTS_PROPERTY = "contaminants";
+    public static final String STATE_PROPERTY = "state";
+    public static final String CITY_PROPERTY = "city";
+    public static final String COUNTY_PROPERTY = "county";
+    public static final String POPULATION_PROPERTY = "populationServed";
 
     private String pwsid;
     private String name;
@@ -102,6 +121,20 @@ public class WaterSystem {
         // System.out.println(contaminants);
     }
 
+    public Key addToDatabase(){
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        Entity systemEntity = new Entity(WATER_SYSTEM_ENTITY);
+        systemEntity.setProperty(PWSID_PROPERTY, pwsid);
+        systemEntity.setProperty(NAME_PROPERTY, name);
+        systemEntity.setProperty(CONTAMINANTS_PROPERTY, null); //need to add key
+        systemEntity.setProperty(STATE_PROPERTY, state);
+        systemEntity.setProperty(CITY_PROPERTY, city);
+        systemEntity.setProperty(COUNTY_PROPERTY, county);
+        systemEntity.setProperty(POPULATION_PROPERTY, populationServed);
+        datastore.put(systemEntity);
+        return systemEntity.getKey();
+    }
+
     public boolean equals(Object o){
         if(this == o) return true;
         
@@ -121,6 +154,13 @@ public class WaterSystem {
     * can turn a WaterSystem into a Json 
      */
     public static class WaterContaminant {
+
+        public static final String CONTAMINANT_ENTITY = "contaminant";
+        public static final String CCODE_PROPERTY = "code";
+        public static final String CNAME_PROPERTY = "name";
+        public static final String SOURCES_PROPERTY = "sources";
+        public static final String DEFINITION_PROPERTY = "definition";
+        public static final String HEALTH_PROPERTY = "health";
 
         private int contaminantCode;
         private String contaminantName;
@@ -151,12 +191,22 @@ public class WaterSystem {
                 violations.get(violationDate).add(enforcementAction);
             }
         }
+
+        public Key addToDatabase(){
+            DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+            Entity contamEntity = new Entity(CONTAMINANT_ENTITY);
+            contamEntity.setProperty(CCODE_PROPERTY, contaminantCode);
+            contamEntity.setProperty(CNAME_PROPERTY, contaminantName);
+            contamEntity.setProperty(SOURCES_PROPERTY, sources);
+            contamEntity.setProperty(DEFINITION_PROPERTY, definition);
+            contamEntity.setProperty(HEALTH_PROPERTY, healthEffects);
+            datastore.put(contamEntity);
+            return contamEntity.getKey();
+        }
     
         public String toString() {
             return contaminantName + " during " + violations.toString();
         }
     
-    
-        
     }
 }
