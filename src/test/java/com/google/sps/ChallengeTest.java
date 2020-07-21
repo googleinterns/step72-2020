@@ -41,6 +41,11 @@ public final class ChallengeTest {
   }
 
   @Test
+  public void isEqualInvalid(){
+    Assert.assertFalse(challenge_list.get(0).isEqual(challenge_list.get(1)));
+  }
+
+  @Test
   public void toStringTestValid(){
     System.out.println(challenge_list.get(1).toString());
     Assert.assertTrue(challenge_list.get(1).toString().equals("Challenge Type: RECYCLE, Name: Old Electronics"));
