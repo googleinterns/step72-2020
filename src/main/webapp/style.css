@@ -7,7 +7,6 @@ html, body {
 .content {
     height: 100%;
     position: absolute;
-    max-height: 95vh;
     width: 100%;
 }
 
@@ -457,6 +456,13 @@ html, body {
     width: 100%;
 }
 
+.map_overlay {
+    border: 20px;
+    background-color: white;
+    overflow-y:auto;
+    margin: 20px;
+}
+
 #authorize-button, #signout-button {
     background: #004643;
     color: #fafafa;
@@ -469,6 +475,7 @@ html, body {
     font-size: 16px;
     font-family: 'Open Sans', sans-serif;
 }
+<<<<<<< HEAD
 
 .add-to-calendar-popup {
     display: block;
@@ -506,3 +513,5 @@ html, body {
   0%{ opacity:0; }
   100% { opacity:1; }
 }
+=======
+>>>>>>> a2387e010a502b8f1187db7dda7c00ed9dcccaa1

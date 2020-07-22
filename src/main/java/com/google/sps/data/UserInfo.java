@@ -40,7 +40,7 @@ public final class UserInfo {
   private List<Long> bookmarked_events;
   private List<Long> added_to_calendar_events;
   private Long current_challenge_id;
-  private List<Integer> challenge_statuses;
+  private ArrayList<Integer> challenge_statuses;
   private Key entity_key;
 
   public UserInfo(String id, String nickname, Key entity_key) {

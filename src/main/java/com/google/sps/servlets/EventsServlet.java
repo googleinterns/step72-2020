@@ -27,9 +27,6 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
-import com.google.appengine.api.users.UserServiceFactory;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.User;
 import com.google.sps.data.UserInfo;
 
 import java.io.IOException;

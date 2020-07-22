@@ -27,10 +27,6 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
-import com.google.appengine.api.users.UserServiceFactory;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.User;
-
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -81,6 +77,7 @@ public class UserServlet extends HttpServlet {
   static final String EVENT_ID = "event_id";
   static final String BOOKMARKS = "bookmarks";
   static final String ID_TOKEN_PARAM = "id_token";
+  static final String NAME = "name";
 
   private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
 
@@ -127,24 +124,23 @@ public class UserServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
 
-    if (idToken != null) {
-        Payload payload = idToken.getPayload();
-
-        // Print user identifier
-        String userId = payload.getSubject();
-        String userNickname = (String) payload.get("name");
-        
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
-
-        Long currentChallengeId = 0L;
-        ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0)); 
-
-        datastore.put(new UserInfo(userId, userNickname, null, null, null, currentChallengeId, challengeStatuses, null).toEntity());
-
-    } else {
+    if (idToken == null) {
         System.out.println("Invalid ID token.");
         response.setStatus(400);
+        return;
     }
+
+    Payload payload = idToken.getPayload();
+
+    String userId = payload.getSubject();
+    String userNickname = (String) payload.get("name");
+        
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
+
+    Long currentChallengeId = 0L;
+    ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0)); 
+
+    datastore.put(new UserInfo(userId, userNickname, null, null, null, currentChallengeId, challengeStatuses, null).toEntity());
     
     response.sendRedirect("/index.html");
   }
