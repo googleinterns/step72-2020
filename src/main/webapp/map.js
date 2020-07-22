@@ -145,7 +145,7 @@ function iconUrl(score){
 }
 
 function addWaterSystem(areaType, zipCode){
-    fetch('/water?area='+areaType+"&zip_code="+zipCode+"&town="+town+"&state="+state).then(response => response.json()).then((systems) => {
+    fetch("/water?town="+town+"&state="+state).then(response => response.json()).then((systems) => {
         const waterElement = document.getElementById("water");
         var waterPollutionHTML = "";
         systems.forEach((system) => {

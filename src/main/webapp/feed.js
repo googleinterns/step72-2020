@@ -1,52 +1,59 @@
-// will move to backend eventually, will make challenge & step classes
-let mockChallenges = [];
-mockChallenges[0] = new Map();
-mockChallenges[0].set("id", 0);
-mockChallenges[0].set("title", "Gardening");
-mockChallenges[0].set("icon", "🌱");
-let mockGardeningSteps = ["Plant tomatoes", "Plant a tree", "Save rainwater"];
-let mockGardeningStepDescriptions = ["Start a garden in your backyard",
-"More trees are always good", "Reuse rainwater for your plants"];
-let mockGardeningStepResources = ["Here is a link for more information",
-"Here is a link for more information", "Here is a link for more information"];
-mockChallenges[0].set("steps", mockGardeningSteps);
-mockChallenges[0].set("descriptions", mockGardeningStepDescriptions);
-mockChallenges[0].set("resources", mockGardeningStepResources);
+function createMockChallenges() {
+    let mockChallenges = [];
+    mockChallenges[0] = new Map();
+    mockChallenges[0].set("id", 0);
+    mockChallenges[0].set("title", "Gardening");
+    mockChallenges[0].set("icon", "🌱");
+    let mockGardeningSteps = ["Plant tomatoes", "Plant a tree", "Save rainwater"];
+    let mockGardeningStepDescriptions = ["Start a garden in your backyard",
+    "More trees are always good", "Reuse rainwater for your plants"];
+    let mockGardeningStepResources = ["Here is a link for more information",
+    "Here is a link for more information", "Here is a link for more information"];
+    mockChallenges[0].set("steps", mockGardeningSteps);
+    mockChallenges[0].set("descriptions", mockGardeningStepDescriptions);
+    mockChallenges[0].set("resources", mockGardeningStepResources);
 
-mockChallenges[1] = new Map();
-mockChallenges[1].set("id", 1);
-mockChallenges[1].set("title", "Recycling");
-mockChallenges[1].set("icon", "♻️");
-let mockRecyclingSteps = ["Use a reusable bag for groceries", "Reduce","Recycle"];
-let mockRecyclingStepDescriptions = ["(More information about why this helps the environment)",
-"Description for step 2", "Description for step 3"];
-let mockRecyclingStepResources = ["(External resources about recycling related environmental issues)",
-"Here is a link for more information", "Here is a link for more information"];
-mockChallenges[1].set("steps", mockRecyclingSteps);
-mockChallenges[1].set("descriptions", mockRecyclingStepDescriptions);
-mockChallenges[1].set("resources", mockRecyclingStepResources);
+    mockChallenges[1] = new Map();
+    mockChallenges[1].set("id", 1);
+    mockChallenges[1].set("title", "Recycling");
+    mockChallenges[1].set("icon", "♻️");
+    let mockRecyclingSteps = ["Use a reusable bag for groceries", "Reduce","Recycle"];
+    let mockRecyclingStepDescriptions = ["(More information about why this helps the environment)",
+    "Description for step 2", "Description for step 3"];
+    let mockRecyclingStepResources = ["(External resources about recycling related environmental issues)",
+    "Here is a link for more information", "Here is a link for more information"];
+    mockChallenges[1].set("steps", mockRecyclingSteps);
+    mockChallenges[1].set("descriptions", mockRecyclingStepDescriptions);
+    mockChallenges[1].set("resources", mockRecyclingStepResources);
 
-mockChallenges[2] = new Map();
-mockChallenges[2].set("id", 2);
-mockChallenges[2].set("title", "Food");
-mockChallenges[2].set("icon", "🥑");
-let mockFoodSteps = ["Food step 1", "Food step 2", "Food step 3"];
-let mockFoodStepDescriptions = ["food description 1",
-"food description 2", "food description 3"];
-let mockFoodStepResources = ["Here is a link for more information",
-"Here is a link for more information", "Here is a link for more information"];
-mockChallenges[2].set("steps", mockFoodSteps);
-mockChallenges[2].set("descriptions", mockFoodStepDescriptions);
-mockChallenges[2].set("resources", mockFoodStepResources);
+    mockChallenges[2] = new Map();
+    mockChallenges[2].set("id", 2);
+    mockChallenges[2].set("title", "Food");
+    mockChallenges[2].set("icon", "🥑");
+    let mockFoodSteps = ["Food step 1", "Food step 2", "Food step 3"];
+    let mockFoodStepDescriptions = ["food description 1",
+    "food description 2", "food description 3"];
+    let mockFoodStepResources = ["Here is a link for more information",
+    "Here is a link for more information", "Here is a link for more information"];
+    mockChallenges[2].set("steps", mockFoodSteps);
+    mockChallenges[2].set("descriptions", mockFoodStepDescriptions);
+    mockChallenges[2].set("resources", mockFoodStepResources);
 
-let mockUser = new Map();
-mockUser.set("name", "User A");
-mockUser.set("currentChallengeId", 1);
-// array where indices correspond to challenge id and value = how many steps have been completed
-mockUser.set("challengeStatuses", [1, 0, 2]);
+    return mockChallenges;
+}
 
-const user = mockUser;
-const challenges = mockChallenges;
+const CLIENT_ID = '605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com';
+const API_KEY = 'AIzaSyAUR8-gJeYJOCSDJTP6qgN7FsIDG3u-vgU';
+const SCOPES  = "https://www.googleapis.com/auth/calendar.app.created https://www.googleapis.com/auth/calendar.readonly";
+var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+
+
+let user;
+let challenges;
+
+const projectTitle = "GEN Capstone";
+let calendarId = null; 
+
 
 let eventCategoryIcons = new Map();
 eventCategoryIcons.set("food_beverage", "🥑🍋🍏");
@@ -59,17 +66,23 @@ const badgeHeight = 120;
 let lastBoldedItem;
 
 async function loadPage() {
+    challenges = createMockChallenges();
+
     const timezone = document.getElementById("user-timezone");
     timezone.value = new Date().getTimezoneOffset();
     const events = await fetch("/events").then(response => response.json());
     const feed = document.getElementById("events-feed");
+    feed.innerHTML = "";
     for (event of events) {
         feed.appendChild(postEvent(event));
     }
+    
+    await getServerChallenges();
 
-    setChallengeBox(user.get("currentChallengeId"));
+    setChallengeBox(user.current_challenge_id);
 
-    setChallengesNavBar(mockUser, challenges);
+    setChallengesNavBar(challenges);
+
 
     window.onclick = function(event) {
         const challengesModal = document.getElementById("challenges-modal");
@@ -87,10 +100,20 @@ function postEvent(event) {
     const eventEl = document.createElement('div');
     eventEl.className = "event-post";
     eventEl.appendChild(addEventUserText(event));
+    eventEl.appendChild(addEventAddToCalendarButton(event));
     // eventEl.appendChild(addEventBookmark(event));
     eventEl.appendChild(addEventMiddleSection(event));
     eventEl.appendChild(addEventInfo(event));
     return eventEl;
+}
+
+function addEventAddToCalendarButton(event) {
+    const addToCalDiv = document.createElement('div');
+    addToCalDiv.style.height = 10;
+    addToCalDiv.className = "add-to-calendar-div";
+    addToCalDiv.innerText = "+";
+    addToCalDiv.onclick = updateCalendar;
+    return addToCalDiv;
 }
 
 function addEventBookmark(event) {
@@ -185,9 +208,10 @@ function setChallengeBox(challengeId) {
         stepsText.innerText = "Complete!";
     }
     else {
+        //console.log("challenges length = " + challenges.length) ;
         icon.innerText = challenges[challengeId].get("icon");
 
-        const currentStep = user.get("challengeStatuses")[challengeId];
+        const currentStep = user.challenge_statuses[challengeId];
         const totalSteps = challenges[challengeId].get("steps").length;
         
         stepsText.style.fontSize = "20px";
@@ -200,39 +224,44 @@ function setChallengeBox(challengeId) {
 function fillBadge(currentStep, totalSteps) {
     const badgeFilling = document.getElementById("feed-badge-filling")
     badgeFilling.style.height = badgeHeight*(currentStep/totalSteps) + "px";
-    badgeFilling.style.bottom = badgeHeight*(currentStep/totalSteps) + "px";
+    let offset = 1.5;
+    if (currentStep/totalSteps == 1) offset = -1.5;
+    badgeFilling.style.bottom = badgeHeight*(currentStep/totalSteps) + offset + "px";
+
     if (currentStep/totalSteps == 1) {
         badgeFilling.style.borderRadius = "10px 10px 10px 10px";
     }
     else {
         badgeFilling.style.borderRadius = "0 0 10px 10px";
     }
-    return badgeFilling;
 }
 
-function setChallengesNavBar(user, challenges) {
+//start here to implement (note for me)
+function setChallengesNavBar(challenges) {
     const navBar = document.getElementById("challenges-nav-bar");
+    navBar.innerHTML = "<p id='challenges-nav-bar-header'>Challenges</p>";
+
     for (challenge of challenges) {
-        navBar.appendChild(createChallengeNavBarItem(user, challenge));
+        navBar.appendChild(createChallengeNavBarItem(challenge));
 
         const itemBackground = document.createElement('div');
         itemBackground.id = "challenges-nav-bar-item-background-" + challenge.get("id");
         itemBackground.className = "challenges-nav-bar-item-background";
         let percentDone = 0;
-        if (challenge.get("steps").length != 0) percentDone = user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
+        if (challenge.get("steps").length != 0) percentDone = user.challenge_statuses[challenge.get("id")] / challenge.get("steps").length;
         itemBackground.style.width = percentDone*100+"%";
         navBar.appendChild(itemBackground);
     }
 }
 
-function createChallengeNavBarItem(user, challenge) {
+function createChallengeNavBarItem(challenge) {
     const item = document.createElement('div');
     item.className = "challenges-nav-bar-item";
     item.id = "challenges-nav-bar-item-" + challenge.get("id");
 
     const title = document.createElement('p');
     title.className = "challenges-nav-bar-item-title";
-    title.innerText = challenge.get("title");
+    title.innerText = challenge.get("type");
     item.appendChild(title);
 
     const icon = document.createElement('p');
@@ -242,15 +271,44 @@ function createChallengeNavBarItem(user, challenge) {
 
     item.addEventListener("click", () => {
         boldCurrentChallengeTitle(item);
-        const step = user.get("challengeStatuses")[challenge.get("id")]+1;
+        const step = user.challenge_statuses[challenge.get("id")]+1;
         if (step < challenge.get("steps").length+1) {
-            showChallengeInfo(user, challenge, step);
+            showChallengeInfo(challenge, step);
         }
         else {
             showChallengeCompletePage(challenge, false);
         }    
     });
     return item;
+}
+
+async function getServerChallenges(){
+  const response = await fetch('/challenges');
+  const challengeJson = await response.json();
+
+  var i;
+  for(i = 0; i < challengeJson.length; i++){
+    challenges[i] = new Map();
+    challenges[i].set("id", i);
+    challenges[i].set("title", challengeJson[i].name);
+    challenges[i].set("type", challengeJson[i].challenge_type);
+    challenges[i].set("steps", challengeJson[i].steps_desc_pair);
+
+    switch (challenges[i].get("type")) {
+      case("RECYCLE"):
+        challenges[i].set("icon", "♻️");
+        break;
+      case("GARDENING"):
+        challenges[i].set("icon", "🌱");
+        break;
+      case("WASTE"):
+        challenges[i].set("icon", "🗑");
+        break;
+      default:
+        challenges[i].set("icon", "⚠");
+        break;
+    }
+  }
 }
 
 function boldCurrentChallengeTitle(chosenItem) {
@@ -260,7 +318,7 @@ function boldCurrentChallengeTitle(chosenItem) {
     lastBoldedItem = chosenItem;
 }
 
-function showChallengeInfo(user, challenge, displayedStep) {
+function showChallengeInfo(challenge, displayedStep) {
     const completeContent = document.getElementById("challenge-complete-content");
     completeContent.style.display = "none";
 
@@ -272,21 +330,21 @@ function showChallengeInfo(user, challenge, displayedStep) {
     header.innerText = challenge.get("icon") + " " + challenge.get("title") + " " + stepsText;
 
     const stepText = document.getElementById("challenges-main-panel-step");
-    stepText.innerText = challenge.get("steps")[displayedStep-1];
+    stepText.innerText = challenge.get("steps")[displayedStep-1].key;
 
-    setPrevButton(displayedStep, user, challenge);
-    setNextButton(displayedStep, user, challenge);
+    setPrevButton(displayedStep, challenge);
+    setNextButton(displayedStep, challenge);
     
     const description = document.getElementById("challenges-main-panel-description");
-    description.innerText = challenge.get("descriptions")[displayedStep-1];
+    description.innerText = challenge.get("steps")[displayedStep-1].value;
 
     const resources = document.getElementById("challenges-main-panel-resources");
-    resources.innerText = challenge.get("resources")[displayedStep-1];
+    //resources.innerText = challenge.get("resources")[displayedStep-1];
 
     createModalChallengesBadge(displayedStep, challenge);
 
     const setChallengeDiv = document.getElementById("challenges-modal-set-challenge-div");
-    if (displayedStep == user.get("challengeStatuses")[challenge.get("id")]+1) {
+    if (displayedStep == user.challenge_statuses[challenge.get("id")]+1) {
         setChallengeDiv.style.display = "flex";
         setCheckbox(challenge);
     }
@@ -307,10 +365,10 @@ function showChallengeCompletePage(challenge, newCompletion) {
 
     newCompletion ? showNewChallengeCompletePage(challenge) : showOldChallengeCompletePage(challenge);
 
-    setPrevButton(challenge.get("steps").length+1, user, challenge);
+    setPrevButton(challenge.get("steps").length+1, challenge);
 }
 
-function showNewChallengeCompletePage(challenge) {
+async function showNewChallengeCompletePage(challenge) {
     const text = document.getElementById("challenge-complete-text");
     let newChallengeId = findNextUncompletedChallenge(challenge.get("id"));
     if (newChallengeId == -1) {
@@ -319,13 +377,15 @@ function showNewChallengeCompletePage(challenge) {
     else {
         text.innerHTML = `${challenge.get("title")} challenge complete!<br>Next up is the <b>${challenges[newChallengeId].get("title")}</b> challenge`;
     }
-    user.set("currentChallengeId", newChallengeId);
+    let id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+    const putRequest = new Request(`/user?id_token=${id_token}&chal=${newChallengeId}`, {method: 'PUT'});
+    user = await fetch(putRequest).then(response => response.json());
 }
 
 function findNextUncompletedChallenge(prevChallengeId) {
     for (i = 1; i < challenges.length; i++) {
         let id = (prevChallengeId+i) % challenges.length;
-        let status = user.get("challengeStatuses")[id];
+        let status = user.challenge_statuses[id];
         if (status < challenges[id].get("steps").length) {
             return id;
         }
@@ -338,7 +398,7 @@ function showOldChallengeCompletePage(challenge) {
     text.innerHTML = `${challenge.get("title")} challenge complete!`;
 }
 
-function setPrevButton(displayedStep, user, challenge) {
+function setPrevButton(displayedStep, challenge) {
     const prevButton = document.getElementById("challenges-modal-prev-step-button");
     const nextButton = document.getElementById("challenges-modal-next-step-button");
     if (displayedStep == 1) {
@@ -351,16 +411,16 @@ function setPrevButton(displayedStep, user, challenge) {
     }
 
     prevButton.onclick = ()=> {
-        showChallengeInfo(user, challenge, displayedStep-1);
+        showChallengeInfo(challenge, displayedStep-1);
     };
 }
 
 
-function setNextButton(displayedStep, user, challenge) {
+function setNextButton(displayedStep, challenge) {
     const nextButton = document.getElementById("challenges-modal-next-step-button");
     
-    if (displayedStep == user.get("challengeStatuses")[challenge.get("id")]+1) {
-        if (user.get("currentChallengeId") != challenge.get("id")) {
+    if (displayedStep == user.challenge_statuses[challenge.get("id")]+1) {
+        if (user.current_challenge_id != challenge.get("id")) {
             nextButton.style.display = "none";
         }
         else {
@@ -373,27 +433,31 @@ function setNextButton(displayedStep, user, challenge) {
         nextButton.innerText = "view next step →";
     }
 
-    nextButton.onclick = ()=> {
-        let currentStatus = user.get("challengeStatuses")[challenge.get("id")];
+    nextButton.onclick = async ()=> {
+        let currentStatus = user.challenge_statuses[challenge.get("id")];
         if (currentStatus+1 == displayedStep) {
-            user.get("challengeStatuses")[challenge.get("id")] = currentStatus+1;
-            const navBarItemBackground = document.getElementById("challenges-nav-bar-item-background-"+user.get("currentChallengeId"));
-            let percentDone = user.get("challengeStatuses")[challenge.get("id")] / challenge.get("steps").length;
+            let id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+            const putRequest = new Request(`/user?id_token=${id_token}&chal=${challenge.get("id")}&stat=${currentStatus+1}`, {method: 'PUT'});
+            user = await fetch(putRequest).then(response => response.json());
+
+            const navBarItemBackground = document.getElementById("challenges-nav-bar-item-background-"+user.current_challenge_id);
+            let percentDone = user.challenge_statuses[challenge.get("id")] / challenge.get("steps").length;
             navBarItemBackground.style.width = percentDone*100+"%";
+
             setChallengeBox(challenge.get("id"));
         }
         if (displayedStep < challenge.get("steps").length) {
-            showChallengeInfo(user, challenge, displayedStep+1);
+            showChallengeInfo(challenge, displayedStep+1);
         }
         else {
-            const newCompletion = user.get("challengeStatuses")[challenge.get("id")] == challenge.get("steps").length;
+            const newCompletion = user.challenge_statuses[challenge.get("id")] == challenge.get("steps").length;
             showChallengeCompletePage(challenge, newCompletion);
         }    
     }; 
 } 
 
 function setCheckbox(challenge) {
-    if (challenge.get("id") == user.get("currentChallengeId")) {
+    if (challenge.get("id") == user.current_challenge_id) {
         checkCheckbox(challenge);
     }
     else {
@@ -401,10 +465,11 @@ function setCheckbox(challenge) {
     }
 
     const checkbox = document.getElementById("challenges-modal-set-challenge-checkbox");
-    checkbox.addEventListener("click", () => {
+    checkbox.onclick =  async () => {
         checkCheckbox(challenge);
-        setNextButton(user.get("challengeStatuses")[challenge.get("id")]+1, user, challenge);
-    })
+        await updateUserCurrentChallenge(challenge.get("id"));
+        setNextButton(user.challenge_statuses[challenge.get("id")]+1, challenge);
+    };
 }
 
 function createModalChallengesBadge(currentStep, challenge) {
@@ -427,7 +492,7 @@ function createModalChallengesBadge(currentStep, challenge) {
 function closeChallengesModal() {
     const modal = document.getElementById("challenges-modal");
     modal.style.display = "none";
-    setChallengeBox(user.get("currentChallengeId"));
+    setChallengeBox(user.current_challenge_id);
 }
 
 function openChallengesModal() {
@@ -437,15 +502,15 @@ function openChallengesModal() {
     const navBarItems = document.getElementsByClassName("challenges-nav-bar-item");
     if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
 
-    if (user.get("currentChallengeId") == -1) {
+    if (user.current_challenge_id == -1) {
         showChallengeCompletePage(challenges[0], false);
     }
 
     else {
-        const challenge = challenges[user.get("currentChallengeId")];
-        showChallengeInfo(user, challenge, user.get("challengeStatuses")[user.get("currentChallengeId")]+1);
+        const challenge = challenges[user.current_challenge_id];
+        showChallengeInfo(challenge, user.challenge_statuses[user.current_challenge_id]+1);
         
-        const navBarItem = document.getElementById("challenges-nav-bar-item-"+user.get("currentChallengeId"));
+        const navBarItem = document.getElementById("challenges-nav-bar-item-"+user.current_challenge_id);
         navBarItem.style.fontWeight = "bold";
         lastBoldedItem = navBarItem;
     }
@@ -456,8 +521,14 @@ function checkCheckbox(challenge) {
     checkbox.style.border = "none";
     const checkmark = document.getElementById("challenges-modal-checkmark");
     checkmark.style.display = "block";
-    user.set("currentChallengeId", challenge.get("id"));
-    setChallengeBox(challenge.get("id"));
+}
+
+async function updateUserCurrentChallenge(id) {
+    let id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+    const putRequest = new Request(`/user?id_token=${id_token}&chal=${id}`, {method: 'PUT'});
+    user = await fetch(putRequest).then(response => response.json());
+
+    setChallengeBox(id);
 }
 
 function resetCheckbox() {
@@ -475,4 +546,173 @@ function openCreateEventModal() {
 function closeCreateEventModal() {
     const modal = document.getElementById("create-event-modal");
     modal.style.display = "none";
+}
+
+function updateCalendar() {
+    gapi.client.calendar.calendarList.list().then(function(response) {
+          var calendars = response.result.items;
+          for (calendar of calendars) {
+              if (calendar.summary == projectTitle) {
+                  calendarId = calendar.id;
+              }
+          }
+
+        if (calendarId == null) {
+            var calendarRequest = gapi.client.calendar.calendars.insert({
+                'summary': projectTitle
+            });
+
+            calendarRequest.execute(function(response) {
+                calendarId = response.id;
+            addEventToCalendar();
+            });
+        }
+        else {
+            addEventToCalendar();
+        };    
+    });
+
+}
+
+function addEventToCalendar() {
+    var event = {
+        'summary': 'Google I/O 2015',
+        'location': '800 Howard St., San Francisco, CA 94103',
+        'description': 'A chance to hear more about Google\'s developer products.',
+        'start': {
+            'dateTime': '2020-07-12T09:00:00-07:00',
+            'timeZone': 'America/Los_Angeles'
+        },
+       'end': {
+          'dateTime': '2020-07-12T17:00:00-07:00',
+          'timeZone': 'America/Los_Angeles'
+        },
+        'recurrence': [
+            'RRULE:FREQ=DAILY;COUNT=2'
+        ],
+        'attendees': [
+            {'email': 'lpage@example.com'},
+            {'email': 'sbrin@example.com'}
+        ],
+        'reminders': {
+            'useDefault': false,
+            'overrides': [
+            {'method': 'email', 'minutes': 24 * 60},
+            {'method': 'popup', 'minutes': 10}
+            ]
+        }
+    };
+
+    var request = gapi.client.calendar.events.insert({
+            'calendarId': calendarId,
+            'resource': event
+        });
+        request.execute();
+}
+
+async function getUserInfo() {
+    let auth2 = gapi.auth2.getAuthInstance();
+    let profile = auth2.currentUser.get().getBasicProfile();
+    let id_token = auth2.currentUser.get().getAuthResponse().id_token;
+    let response = await fetch(`/user?id_token=${id_token}`);
+    if (response.status == 404) {
+        let name = profile.getName();
+        const postRequest = new Request(`/user?id_token=${id_token}`, {method: "POST"});
+        await fetch(postRequest);
+        response = await fetch(`/user?id_token=${id_token}`)
+    }
+    user = await response.json();
+}
+
+/**
+*  On load, called to load the auth2 library and API client library.
+*/
+function handleClientLoad() {
+    gapi.load('client:auth2', initClient);
+}
+
+/**
+*  Initializes the API client library and sets up sign-in state
+*  listeners.
+*/
+function initClient() {
+    gapi.client.init({
+     apiKey: API_KEY,
+     clientId: CLIENT_ID,
+     discoveryDocs: DISCOVERY_DOCS,
+      scope: SCOPES
+    }).then(function () {
+    // Listen for sign-in state changes.
+    gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+
+    // Handle the initial sign-in state.
+    updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+    const authorizeButton = document.getElementById('authorize-button');
+    const signoutButton = document.getElementById('signout-button');
+    authorizeButton.onclick = handleAuthClick;
+    signoutButton.onclick = handleSignoutClick;
+    
+}, function(error) {
+        appendPre(JSON.stringify(error, null, 2));
+    });
+}
+
+/**
+*  Called when the signed in status changes, to update the UI
+*  appropriately. After a sign-in, the API is called.
+*/
+async function updateSigninStatus(isSignedIn) {
+    const authorizeButton = document.getElementById('authorize-button');
+    const signoutButton = document.getElementById('signout-button');
+    const feedRightSide = document.getElementById("feed-right-side");
+if (isSignedIn) {
+    authorizeButton.style.display = 'none';
+    signoutButton.style.display = 'block';
+    feedRightSide.style.display = "block";  
+    await getUserInfo();
+    await loadPage();
+    showAddToCalendarButtons();
+} else {
+    authorizeButton.style.display = 'block';
+    signoutButton.style.display = 'none';
+    feedRightSide.style.display = "none";
+    await loadPage();
+    hideAddToCalendarButtons();
+}
+}
+
+/**
+*  Sign in the user upon button click.
+*/
+function handleAuthClick(event) {
+    gapi.auth2.getAuthInstance().signIn();
+}
+
+/**
+*  Sign out the user upon button click.
+*/
+function handleSignoutClick(event) {
+    gapi.auth2.getAuthInstance().signOut();
+}
+
+/**
+* Append a pre element to the body containing the given message
+* as its text node. Used to display the results of the API call.
+*
+* @param {string} message Text to be placed in pre element.
+*/
+function appendPre(message) {
+    const pre = document.getElementById('content');
+    const textContent = document.createTextNode(message + '\n');
+    pre.appendChild(textContent);
+} 
+
+function showAddToCalendarButtons() {
+    const buttons = document.getElementsByClassName("add-to-calendar-div");
+    for (btn of buttons) btn.style.display = "block";
+}
+
+function hideAddToCalendarButtons() {
+    const buttons = document.getElementsByClassName("add-to-calendar-div");
+    for (btn of buttons) btn.style.display = "none";
 }

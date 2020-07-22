@@ -1,5 +1,6 @@
 package com.google.sps;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import com.google.sps.data.WaterSystem;
@@ -21,9 +22,9 @@ public class WaterPollutionTest {
     @Test
     public void hometownTest(){
         ArrayList<WaterSystem> servletSystems = new ArrayList<>();
-        // try {
+        try {
             servletSystems = servlet.retrieveSDWViolations("Acton", "MA");
-        // } catch (IOException e){}
+        } catch (IOException e){}
         System.out.println(servletSystems);
         WaterSystem acton = new WaterSystem("MA2002000");
         Assert.assertTrue(servletSystems.contains(acton));

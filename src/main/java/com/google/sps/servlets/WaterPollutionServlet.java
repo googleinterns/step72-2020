@@ -16,6 +16,7 @@ package com.google.sps.servlets;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -28,6 +29,10 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 import com.google.sps.data.WaterSystem;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.CharSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,20 +65,15 @@ public class WaterPollutionServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String area = request.getParameter(AREA_PARAMETER);
         response.setContentType("application/json");
-        // if(area.equals(ZIP)){
-        //     String json = new Gson().toJson(
-        //         retrieveSDWViolations(request.getParameter(ZIP_PARAMETER), EPA_ZIP_FORMAT));
-        //     response.getWriter().write(json);
-        // } else if(area.equals(STATE)) {
-        //     String json = new Gson().toJson(
-        //         retrieveSDWViolations(request.getParameter(ZIP_PARAMETER), EPA_STATE_FORMAT));
-        //     response.getWriter().write(json);
-        // }
+        try {
         String json = new Gson().toJson(
             retrieveSDWViolations(request.getParameter(TOWN_PARAMATER), request.getParameter(STATE_PARAMATER)));
         response.getWriter().write(json);
+        } catch (IOException e){
+            response.sendError(500);
+            logger.error(e.getMessage());
+        }
     }
 
     /**
@@ -83,38 +83,20 @@ public class WaterPollutionServlet extends HttpServlet {
     * @param areaType the Zip or State format for the EPA URL
     * @return the list of superfund sites pulled from the EPA API
     */
-    public ArrayList<WaterSystem> retrieveSDWViolations(String town, String state){
-        ArrayList<WaterSystem> waterSystems;
-        try {
-            URL url = new URL(EPA_WATERSYSTEM_LINK+EPA_CITY_PARAMETER+town.toUpperCase()+EPA_STATE_PARAMETER+state + CSV_FORMAT);
-            // URL url = new URL(EPA_API_LINK + areaType + areaCode + MIN_DATE + CSV_FORMAT);
-            waterSystems = parseViolationsFromURL(url);
-        } catch (IOException e){
-            logger.error(e.getMessage());
-            waterSystems = new ArrayList<>();
-            System.out.println("IO Exception for Water Violations");
-        }
-        
-        return waterSystems;
+    public ArrayList<WaterSystem> retrieveSDWViolations(String town, String state) throws IOException{
+        URL url = new URL(EPA_WATERSYSTEM_LINK+EPA_CITY_PARAMETER+town.toUpperCase()+EPA_STATE_PARAMETER+state + CSV_FORMAT);
+        return parseViolationsFromURL(url);
     }
 
-    public ArrayList<WaterSystem> parseViolationsFromURL(URL url) throws IOException{
+    public ArrayList<WaterSystem> parseViolationsFromURL(URL url) throws IOException {
         ArrayList<WaterSystem> waterSystems = new ArrayList<>();
-        Scanner scanner= new Scanner(url.openStream());
-        scanner.nextLine();
-        while(scanner.hasNextLine()){
-            String line = scanner.nextLine();
-            //cleans data to ignore new line characters within a cell
-            while(scanner.hasNextLine() && line.split(SPLITERATOR).length < TOTAL_CELL_COUNT){
-                line += scanner.nextLine();
-            }
-            String[] cells = line.split(SPLITERATOR);
-            if(cells.length < TOTAL_CELL_COUNT) continue;
-            WaterSystem system = new WaterSystem(cells);
+        CSVParser csvParser = CSVParser.parse(url, Charset.defaultCharset(), CSVFormat.EXCEL.withFirstRecordAsHeader());
+        for(CSVRecord csvRecord: csvParser.getRecords()){
+            WaterSystem system = new WaterSystem(csvRecord);
             system.addViolations();
             waterSystems.add(system);
         }
-        scanner.close();
+        csvParser.close();
         return waterSystems;
     }
 

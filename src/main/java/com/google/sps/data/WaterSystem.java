@@ -13,9 +13,14 @@ import com.google.appengine.api.datastore.Key;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 
 public class WaterSystem {
 
@@ -73,20 +78,20 @@ public class WaterSystem {
                 this.county = cells[46];
                 this.populationServed = Integer.parseInt(cells[15]);
             } else {
-                System.out.println("THere is no data for "+pwsid);
+                System.out.println("There is no data for "+pwsid);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public WaterSystem(String[] cells){
-        this.pwsid = cells[0].replace("\"", "");
-        this.name = cells[1];
-        this.state = cells[3];
-        this.city = cells[45];
-        this.county = cells[46].replace("\"", "");
-        this.populationServed = Integer.parseInt(cells[15]);
+    public WaterSystem(CSVRecord csvRecord){
+        this.pwsid = csvRecord.get(0);
+        this.name = csvRecord.get(1);
+        this.state = csvRecord.get(3);
+        this.city = csvRecord.get(45);
+        this.county = csvRecord.get(46);
+        this.populationServed = Integer.parseInt(csvRecord.get(15));
         this.contaminants = new ArrayList<WaterContaminant>();
     }
 
@@ -94,31 +99,20 @@ public class WaterSystem {
         HashMap<String, WaterContaminant> contaminantsMap = new HashMap<String, WaterContaminant>();
         try {
             URL url = new URL(EPA_VIOLATIONS_LINK+EPA_DATE_PARAMATER+EPA_PWSID_PARAMATER+pwsid + CSV_FORMAT);
-            Scanner scanner= new Scanner(url.openStream());
-            scanner.nextLine();
-            while(scanner.hasNextLine()){
-                String line = scanner.nextLine();
-                //cleans data to ignore new line characters within a cell
-                while(scanner.hasNextLine() && line.split(SPLITERATOR).length < TOTAL_CELL_COUNT){
-                    line += scanner.nextLine();
-                }
-                // System.out.println(line);
-                String[] cells = line.split(SPLITERATOR);
-                if(cells.length < TOTAL_CELL_COUNT) continue;
-                String contaminantName = cells[7];
-                contaminantsMap.putIfAbsent(contaminantName, new WaterContaminant(cells));
-                String violationDate = cells[18];
-                String enforcementAction = cells[17];
+            CSVParser csvParser = CSVParser.parse(url, Charset.defaultCharset(), CSVFormat.EXCEL.withFirstRecordAsHeader());
+            for(CSVRecord csvRecord: csvParser.getRecords()){
+                String contaminantName = csvRecord.get(7);
+                contaminantsMap.putIfAbsent(contaminantName, new WaterContaminant(csvRecord));
+                String violationDate = csvRecord.get(18);
+                String enforcementAction = csvRecord.get(17);
                 contaminantsMap.get(contaminantName).addViolationInstance(violationDate, enforcementAction);
-                // System.out.println(contaminantsMap.get(contaminantName));
             }
-            scanner.close();
+            csvParser.close();
         } catch (IOException e){
             e.printStackTrace();
             System.out.println("IO Error in Finding SDW Violations");
         }
         contaminants.addAll(contaminantsMap.values());
-        // System.out.println(contaminants);
     }
 
     public Key addToDatabase(){
@@ -172,12 +166,12 @@ public class WaterSystem {
     
     
     
-        public WaterContaminant(final String[] sdwViolationCells) {
-            contaminantCode = Integer.parseInt(sdwViolationCells[6]);
-            contaminantName = sdwViolationCells[7];
-            sources = sdwViolationCells[8];
-            definition = sdwViolationCells[9];
-            healthEffects = sdwViolationCells[10];
+        public WaterContaminant(CSVRecord csvRecord) {
+            contaminantCode = Integer.parseInt(csvRecord.get(6));
+            contaminantName = csvRecord.get(7);
+            sources = csvRecord.get(8);
+            definition = csvRecord.get(9);
+            healthEffects = csvRecord.get(10);
             violations = new HashMap<String, ArrayList<String>>();
         }
     
