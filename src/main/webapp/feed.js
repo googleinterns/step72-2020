@@ -49,11 +49,12 @@ var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/
 
 
 let user;
-let challenges;
 let events;
+let challenges = [];
 
 const projectTitle = "GEN Capstone";
 let calendarId = null; 
+
 
 let eventCategoryIcons = new Map();
 eventCategoryIcons.set("food_beverage", "🥑🍋🍏");
@@ -66,12 +67,13 @@ const badgeHeight = 120;
 let lastBoldedItem;
 
 
-function loadChallenges() {
-    challenges = createMockChallenges();
+async function loadChallenges() {
+    await getServerChallenges();
 
     setChallengeBox(user.current_challenge_id);
 
     setChallengesNavBar(challenges);
+
 
     window.onclick = function(event) {
         const challengesModal = document.getElementById("challenges-modal");
@@ -104,8 +106,8 @@ function postEvent(event) {
     const eventEl = document.createElement('div');
     eventEl.className = "event-post";
     eventEl.appendChild(addEventUserText(event));
+    eventEl.appendChild(addEventBookmark(event));
     eventEl.appendChild(addEventAddToCalendarButton(event));
-    // eventEl.appendChild(addEventBookmark(event));
     eventEl.appendChild(addEventMiddleSection(event));
     eventEl.appendChild(addEventInfo(event));
     return eventEl;
@@ -165,24 +167,44 @@ function addEventBookmark(event) {
     bookmarkDiv.style.height = 0;
     const bookmark = document.createElement('img');
     bookmark.className = "event-bookmark";
-    // add case for if user has bookmarked this event once users have been created
-    bookmark.src = "/resources/bookmark.png";
     bookmarkDiv.appendChild(bookmark);
     bookmarkDiv.appendChild(addEventNumBookmarks(event));
+    bookmarkDiv.onclick = () => {};
+
+    if (gapi.auth2.getAuthInstance().isSignedIn.get() && user.bookmarked_events.includes(event.extendedProperties.event_id)) {
+        bookmark.src="/resources/filled-bookmark.png"; 
+        bookmarkDiv.childNodes[1].style.color = "#fafafa";
+    } else {
+        bookmark.src = "/resources/bookmark.png";
+        if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+            bookmarkDiv.onclick = async () => { 
+                bookmark.src="/resources/filled-bookmark.png"; 
+                bookmarkDiv.childNodes[1].style.color = "#fafafa";
+                bookmarkDiv.childNodes[1].innerText = parseInt(bookmarkDiv.childNodes[1].innerText)+1;
+
+                let idToken = getIdToken();
+                const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}&id_token=${idToken}`, {method: 'PUT'});
+                user = await fetch(putRequest).then(response => response.json());
+
+                bookmarkDiv.onclick = () => {};
+            };
+        }   
+    }
     return bookmarkDiv;
 }
 
 function addEventNumBookmarks(event) {
     const bookmarkNum = document.createElement('p');
     bookmarkNum.className = "event-bookmark-num";
-    bookmarkNum.innerText = event.get("bookmarks");
+    const bookmarks = event.extendedProperties.bookmarks;
+    if (bookmarks > 99) bookmarkNum.innerText = "99+";
+    else bookmarkNum.innerText = bookmarks;
     return bookmarkNum;
 }
 
 function addEventUserText(event) {
     const eventUser = document.createElement('p');
     eventUser.className = "event-info";
-    // eventUser.innerText = event.creator + " posted an event:";
     eventUser.innerText = event.extendedProperties.creator + " posted an event:";
 
     return eventUser;
@@ -252,6 +274,7 @@ function setChallengeBox(challengeId) {
         stepsText.innerText = "Complete!";
     }
     else {
+        //console.log("challenges length = " + challenges.length) ;
         icon.innerText = challenges[challengeId].get("icon");
 
         const currentStep = user.challenge_statuses[challengeId];
@@ -279,9 +302,11 @@ function fillBadge(currentStep, totalSteps) {
     }
 }
 
+//start here to implement (note for me)
 function setChallengesNavBar(challenges) {
     const navBar = document.getElementById("challenges-nav-bar");
     navBar.innerHTML = "<p id='challenges-nav-bar-header'>Challenges</p>";
+
     for (challenge of challenges) {
         navBar.appendChild(createChallengeNavBarItem(challenge));
 
@@ -302,7 +327,7 @@ function createChallengeNavBarItem(challenge) {
 
     const title = document.createElement('p');
     title.className = "challenges-nav-bar-item-title";
-    title.innerText = challenge.get("title");
+    title.innerText = challenge.get("type");
     item.appendChild(title);
 
     const icon = document.createElement('p');
@@ -321,6 +346,35 @@ function createChallengeNavBarItem(challenge) {
         }    
     });
     return item;
+}
+
+async function getServerChallenges(){
+  const response = await fetch('/challenges');
+  const challengeJson = await response.json();
+
+  var i;
+  for(i = 0; i < challengeJson.length; i++){
+    challenges[i] = new Map();
+    challenges[i].set("id", i);
+    challenges[i].set("title", challengeJson[i].name);
+    challenges[i].set("type", challengeJson[i].challenge_type);
+    challenges[i].set("steps", challengeJson[i].steps_desc_pair);
+
+    switch (challenges[i].get("type")) {
+      case("RECYCLE"):
+        challenges[i].set("icon", "♻️");
+        break;
+      case("GARDENING"):
+        challenges[i].set("icon", "🌱");
+        break;
+      case("WASTE"):
+        challenges[i].set("icon", "🗑");
+        break;
+      default:
+        challenges[i].set("icon", "⚠");
+        break;
+    }
+  }
 }
 
 function boldCurrentChallengeTitle(chosenItem) {
@@ -342,16 +396,16 @@ function showChallengeInfo(challenge, displayedStep) {
     header.innerText = challenge.get("icon") + " " + challenge.get("title") + " " + stepsText;
 
     const stepText = document.getElementById("challenges-main-panel-step");
-    stepText.innerText = challenge.get("steps")[displayedStep-1];
+    stepText.innerText = challenge.get("steps")[displayedStep-1].key;
 
     setPrevButton(displayedStep, challenge);
     setNextButton(displayedStep, challenge);
     
     const description = document.getElementById("challenges-main-panel-description");
-    description.innerText = challenge.get("descriptions")[displayedStep-1];
+    description.innerText = challenge.get("steps")[displayedStep-1].value;
 
     const resources = document.getElementById("challenges-main-panel-resources");
-    resources.innerText = challenge.get("resources")[displayedStep-1];
+    //resources.innerText = challenge.get("resources")[displayedStep-1];
 
     createModalChallengesBadge(displayedStep, challenge);
 
@@ -561,9 +615,8 @@ function closeCreateEventModal() {
 }
 
 function updateCalendar(event) {
-
     gapi.client.calendar.calendarList.list().then(function(response) {
-          var calendars = response.result.items;
+          let calendars = response.result.items;
           for (calendar of calendars) {
               if (calendar.summary == projectTitle) {
                   calendarId = calendar.id;
@@ -571,7 +624,7 @@ function updateCalendar(event) {
           }
 
         if (calendarId == null) {
-            var calendarRequest = gapi.client.calendar.calendars.insert({
+            let calendarRequest = gapi.client.calendar.calendars.insert({
                 'summary': projectTitle
             });
 
@@ -592,7 +645,7 @@ function addEventToCalendar(event) {
     let end = moment(event.end.dateTime.value).format('YYYY-MM-DD[T]HH:mm:ssZZ');
     event.end.dateTime = end;
 
-    var request = gapi.client.calendar.events.insert({
+    let request = gapi.client.calendar.events.insert({
             'calendarId': calendarId,
             'resource': event
         });
@@ -603,7 +656,6 @@ async function getUserInfo() {
     let idToken = getIdToken();
     let response = await fetch(`/user?id_token=${idToken}`);
     if (response.status == 404) {
-        let name = profile.getName();
         const postRequest = new Request(`/user?id_token=${idToken}`, {method: "POST"});
         await fetch(postRequest);
         response = await fetch(`/user?id_token=${idToken}`)
@@ -640,7 +692,7 @@ function initClient() {
     signoutButton.onclick = handleSignoutClick;
     
 }, function(error) {
-        appendPre(JSON.stringify(error, null, 2));
+        console.log(JSON.stringify(error, null, 2));
     });
 }
 
@@ -683,18 +735,6 @@ function handleSignoutClick(event) {
     gapi.auth2.getAuthInstance().signOut();
 }
 
-/**
-* Append a pre element to the body containing the given message
-* as its text node. Used to display the results of the API call.
-*
-* @param {string} message Text to be placed in pre element.
-*/
-function appendPre(message) {
-    const pre = document.getElementById('content');
-    const textContent = document.createTextNode(message + '\n');
-    pre.appendChild(textContent);
-} 
-
 function showAddToCalendarButtons() {
     const buttons = document.getElementsByClassName("add-to-calendar-div");
     for (btn of buttons) btn.style.display = "block";
@@ -708,7 +748,6 @@ function hideAddToCalendarButtons() {
 function getIdToken() {
     return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
 }
-
 
 async function sortEventsByDistance(location) {
     const getDistanceMatrix = (service, data) => new Promise((resolve, reject) => {
@@ -731,7 +770,6 @@ async function sortEventsByDistance(location) {
             avoidHighways: false,
             avoidTolls: false
         });
-        console.log(result);
         event.distance = result.rows[0].elements[0].distance.value;
     }
     
@@ -743,9 +781,7 @@ async function sortEventsByDistance(location) {
     }
 
     events.sort(compareByDistance);
-    console.log(events);
 }
-
 
 async function getLocalEvents(location) {
     await sortEventsByDistance(location);
@@ -755,8 +791,5 @@ async function getLocalEvents(location) {
     for (event of events) {
         feed.appendChild(postEvent(event));
     }
-}
-
-function test(input) {
-    console.log(input);
+    if (gapi.auth2.getAuthInstance().isSignedIn.get()) showAddToCalendarButtons();
 }

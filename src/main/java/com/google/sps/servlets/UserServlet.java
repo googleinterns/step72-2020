@@ -63,7 +63,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.google.sps.data.UserInfo;
+import com.google.sps.data.User;
 
 /** Servlet that returns events sorted by most recent timestamp */
 @WebServlet("/user")
@@ -73,10 +73,16 @@ public class UserServlet extends HttpServlet {
   static final String CHALLENGE_STATUS_PARAM = "stat";
   static final String BOOKMARKED_EVENT_PARAM = "book";
   static final String ADDED_TO_CALENDAR_PARAM = "add";
+  static final String EVENT = "Event";
+  static final String EVENT_ID = "event_id";
+  static final String BOOKMARKS = "bookmarks";
   static final String ID_TOKEN_PARAM = "id_token";
   static final String NAME = "name";
+
   private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
 
+  DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+  
   static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
   static final JsonFactory JSON_FACTORY = new GsonFactory();
 
@@ -96,9 +102,7 @@ public class UserServlet extends HttpServlet {
     Payload payload = idToken.getPayload();
     String userId = payload.getSubject();
 
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-
-    Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
+    Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
     Entity entity = datastore.prepare(query).asSingleEntity();
 
     if (entity == null) {
@@ -106,7 +110,7 @@ public class UserServlet extends HttpServlet {
         return;
     }
 
-    UserInfo user = UserInfo.convertEntitytoUserInfo(entity, userId);
+    User user = User.convertEntitytoUser(entity, userId);
 
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
@@ -118,24 +122,31 @@ public class UserServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
 
-    if (idToken != null) {
-        Payload payload = idToken.getPayload();
-
-        String userId = payload.getSubject();
-        String userNickname = (String) payload.get(NAME);
-        
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
-
-        Long currentChallengeId = 0L;
-        ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0)); 
-
-        datastore.put(new UserInfo(userId, userNickname, null, null, null, currentChallengeId, challengeStatuses, null).toEntity());
-
-    } else {
+    if (idToken == null) {
         System.out.println("Invalid ID token.");
         response.setStatus(400);
+        return;
     }
+
+    Payload payload = idToken.getPayload();
+
+    String userId = payload.getSubject();
+    String userNickname = (String) payload.get("name");
+        
+
+    Long currentChallengeId = 0L;
+    // change to get length of challenges (replace the 3)
+    ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
+
+    User user = new User.Builder(userId)
+        .setNickname(userNickname)
+        .setCurrentChallengeId(currentChallengeId)
+        .setChallengeStatuses(challengeStatuses)
+        .build();
     
+
+    datastore.put(user.toEntity());
+
     response.sendRedirect("/index.html");
   }
 
@@ -160,11 +171,9 @@ public class UserServlet extends HttpServlet {
       Integer newStatus;
       Long eventId;
 
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
-
-      Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
+      Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(query).asSingleEntity();
-      UserInfo user = UserInfo.convertEntitytoUserInfo(entity, userId);
+      User user = User.convertEntitytoUser(entity, userId);
 
       if (challengeIdParam != null) {
           try {
@@ -205,26 +214,31 @@ public class UserServlet extends HttpServlet {
   }
 
   // @Erick If challenge id structure changes, update this method
-  private void updateCurrentChallenge(UserInfo user, Long id) {
+  private void updateCurrentChallenge(User user, Long id) {
       user.setCurrentChallenge(id);
   }
 
   // @Erick If challenge status structure changes, update this method
-  private void updateChallengeStatus(UserInfo user, Long id, int status) {
+  private void updateChallengeStatus(User user, Long id, int status) {
       ArrayList<Integer> challengeStatuses = user.getChallengeStatuses();
       challengeStatuses.set(id.intValue(), status);
       user.setChallengeStatuses(challengeStatuses);
 
   }
 
-  private void updateBookmarkedEvents(UserInfo user, Long eventId) {
+  private void updateBookmarkedEvents(User user, Long eventId) {
       ArrayList<Long> bookmarkedEvents = user.getBookmarkedEvents();
       if (bookmarkedEvents == null) bookmarkedEvents = new ArrayList<Long>();
       bookmarkedEvents.add(eventId);
       user.setBookmarkedEvents(bookmarkedEvents);
+
+      Query query = new Query(EVENT).setFilter(new FilterPredicate(EVENT_ID, FilterOperator.EQUAL, eventId));
+      Entity entity = datastore.prepare(query).asSingleEntity();
+      entity.setProperty(BOOKMARKS, (long) entity.getProperty(BOOKMARKS)+1);
+      datastore.put(entity);
   }
 
-  private void updateAddedToCalendarEvents(UserInfo user, Long eventId) {
+  private void updateAddedToCalendarEvents(User user, Long eventId) {
       ArrayList<Long> addedEvents = user.getAddedToCalendarEvents();
       if (addedEvents == null) addedEvents = new ArrayList<Long>();
       addedEvents.add(eventId);

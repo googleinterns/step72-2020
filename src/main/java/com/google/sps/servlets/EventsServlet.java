@@ -27,7 +27,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
-import com.google.sps.data.UserInfo;
+import com.google.sps.data.User;
 
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
@@ -96,15 +96,10 @@ public class EventsServlet extends HttpServlet {
     static final String EVENT_NUM = "EventNum";
     static final String EVENT_NUM_VALUE = "value";
     static final String EVENT_ID = "event_id";
+    static final String BOOKMARKS = "bookmarks";
     static final String ID_TOKEN_PARAM = "id_token";
 
     private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
-
-    static final List<String> CATEGORIES = new ArrayList<String>(
-        Arrays.asList("food_beverage", "nature", "water", "waste_cleanup", "other")
-    );
-
-    static final int MAX_STRING_BYTES = 1500;
 
     static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
     static final JsonFactory JSON_FACTORY = new GsonFactory();
@@ -112,6 +107,12 @@ public class EventsServlet extends HttpServlet {
     static final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
         .setAudience(Collections.singletonList(CLIENT_ID))
         .build();
+
+    static final List<String> CATEGORIES = new ArrayList<String>(
+        Arrays.asList("food_beverage", "nature", "water", "waste_cleanup", "other")
+    );
+
+    static final int MAX_STRING_BYTES = 1500;
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -134,10 +135,11 @@ public class EventsServlet extends HttpServlet {
         String category = (String) entity.getProperty(CATEGORY);
         String userId = (String) entity.getProperty(CREATOR);
         long eventId = (long) entity.getProperty(EVENT_ID);
+        long bookmarks = (long) entity.getProperty(BOOKMARKS);
 
-        Query userQuery = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
+        Query userQuery = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
         Entity creator = datastore.prepare(userQuery).asSingleEntity();
-        String nickname = (String) creator.getProperty(UserInfo.NICKNAME);
+        String nickname = (String) creator.getProperty(User.NICKNAME);
 
         DateTime startDateTime = new DateTime(startTime);
         EventDateTime start = new EventDateTime()
@@ -158,6 +160,7 @@ public class EventsServlet extends HttpServlet {
         ep.set(CATEGORY, category);
         ep.set(CREATOR, nickname);
         ep.set(EVENT_ID, eventId);
+        ep.set(BOOKMARKS, bookmarks);
         event.setExtendedProperties(ep);
     
         events.add(event);
@@ -221,6 +224,7 @@ public class EventsServlet extends HttpServlet {
       eventEntity.setProperty(END_TIME, eventEndDateTime);
       eventEntity.setProperty(CATEGORY, category);
       eventEntity.setProperty(CREATOR, userId);
+      eventEntity.setProperty(BOOKMARKS, 0);
 
       datastore.put(eventEntity);
 
@@ -284,12 +288,12 @@ public class EventsServlet extends HttpServlet {
   }
 
   public void updateUserCreatedEvents(String userId, long eventId) {
-      Query userQuery = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
+      Query userQuery = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(userQuery).asSingleEntity();
-      ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(UserInfo.CREATED_EVENTS);
+      ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(User.CREATED_EVENTS);
       if (createdEvents == null) createdEvents = new ArrayList<Long>();
       createdEvents.add(eventId);
-      entity.setProperty(UserInfo.CREATED_EVENTS, createdEvents);
+      entity.setProperty(User.CREATED_EVENTS, createdEvents);
       datastore.put(entity);
   }
 

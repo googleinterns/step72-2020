@@ -7,7 +7,6 @@ html, body {
 .content {
     height: 100%;
     position: absolute;
-    max-height: 95vh;
     width: 100%;
 }
 
@@ -166,6 +165,7 @@ html, body {
     width: 28px;
     float: right;
     position: relative;
+    right: 28px;
     margin-right: 10px;
     bottom: 55px;
     cursor: pointer;
@@ -176,6 +176,7 @@ html, body {
     width: 28px;
     float: right;
     position: relative;
+    left: 40px;
     bottom: 60px;
     cursor: pointer;
     font-size: 30px;
@@ -189,7 +190,7 @@ html, body {
     width: 30px;
     text-align: center;
     position: relative;
-    left: 91.3%;
+    left: 85%;
     bottom: 50px;
     color: #004643;
     cursor: pointer;
@@ -211,6 +212,7 @@ html, body {
     height: 220px;
     font-size: 24px;
     margin-left: 4%;
+    margin-right: 4%;
 }
 
 .event-icon {
@@ -453,6 +455,13 @@ html, body {
 #map {
     height: 100%;
     width: 100%;
+}
+
+.map_overlay {
+    border: 20px;
+    background-color: white;
+    overflow-y:auto;
+    margin: 20px;
 }
 
 #authorize-button, #signout-button {
