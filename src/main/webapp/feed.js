@@ -67,16 +67,6 @@ let lastBoldedItem;
 
 
 async function loadChallenges() {
-
-    const timezone = document.getElementById("user-timezone");
-    timezone.value = new Date().getTimezoneOffset();
-    const events = await fetch("/events").then(response => response.json());
-    const feed = document.getElementById("events-feed");
-    feed.innerHTML = "";
-    for (event of events) {
-        feed.appendChild(postEvent(event));
-    }
-    
     await getServerChallenges();
 
     setChallengeBox(user.current_challenge_id);
@@ -97,7 +87,7 @@ async function loadChallenges() {
 }
 
 async function loadEvents() {
-    const timezone = document.getElementById("user-timezone");
+     const timezone = document.getElementById("user-timezone");
     timezone.value = new Date().getTimezoneOffset();
 
     const idToken = document.getElementById("id-token");
@@ -625,9 +615,8 @@ function closeCreateEventModal() {
 }
 
 function updateCalendar(event) {
-
     gapi.client.calendar.calendarList.list().then(function(response) {
-          var calendars = response.result.items;
+          let calendars = response.result.items;
           for (calendar of calendars) {
               if (calendar.summary == projectTitle) {
                   calendarId = calendar.id;
@@ -635,7 +624,7 @@ function updateCalendar(event) {
           }
 
         if (calendarId == null) {
-            var calendarRequest = gapi.client.calendar.calendars.insert({
+            let calendarRequest = gapi.client.calendar.calendars.insert({
                 'summary': projectTitle
             });
 
@@ -656,7 +645,7 @@ function addEventToCalendar(event) {
     let end = moment(event.end.dateTime.value).format('YYYY-MM-DD[T]HH:mm:ssZZ');
     event.end.dateTime = end;
 
-    var request = gapi.client.calendar.events.insert({
+    let request = gapi.client.calendar.events.insert({
             'calendarId': calendarId,
             'resource': event
         });
@@ -703,7 +692,7 @@ function initClient() {
     signoutButton.onclick = handleSignoutClick;
     
 }, function(error) {
-        appendPre(JSON.stringify(error, null, 2));
+        console.log(JSON.stringify(error, null, 2));
     });
 }
 
@@ -745,18 +734,6 @@ function handleAuthClick(event) {
 function handleSignoutClick(event) {
     gapi.auth2.getAuthInstance().signOut();
 }
-
-/**
-* Append a pre element to the body containing the given message
-* as its text node. Used to display the results of the API call.
-*
-* @param {string} message Text to be placed in pre element.
-*/
-function appendPre(message) {
-    const pre = document.getElementById('content');
-    const textContent = document.createTextNode(message + '\n');
-    pre.appendChild(textContent);
-} 
 
 function showAddToCalendarButtons() {
     const buttons = document.getElementsByClassName("add-to-calendar-div");
