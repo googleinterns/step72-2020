@@ -92,7 +92,7 @@ public class EventsServlet extends HttpServlet {
     static final String START_TIME = "start";
     static final String END_TIME = "end";
     static final String USER_TIMEZONE = "timezone";
-    static final String CREATOR = "creator";
+    static final String EVENT_CREATOR = "creator";
     static final String EVENT_NUM = "EventNum";
     static final String EVENT_NUM_VALUE = "value";
     static final String EVENT_ID = "event_id";
@@ -132,12 +132,12 @@ public class EventsServlet extends HttpServlet {
         Date startTime = (Date) entity.getProperty(START_TIME);
         Date endTime = (Date) entity.getProperty(END_TIME);
         String category = (String) entity.getProperty(CATEGORY);
-        String userId = (String) entity.getProperty(CREATOR);
+        String userId = (String) entity.getProperty(EVENT_CREATOR);
         long eventId = (long) entity.getProperty(EVENT_ID);
 
         Query userQuery = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
-        Entity creator = datastore.prepare(userQuery).asSingleEntity();
-        String nickname = (String) creator.getProperty(User.NICKNAME);
+        Entity eventCreator = datastore.prepare(userQuery).asSingleEntity();
+        String nickname = (String) eventCreator.getProperty(User.NICKNAME);
 
         DateTime startDateTime = new DateTime(startTime);
         EventDateTime start = new EventDateTime()
@@ -156,7 +156,7 @@ public class EventsServlet extends HttpServlet {
 
         ExtendedProperties ep = new ExtendedProperties();
         ep.set(CATEGORY, category);
-        ep.set(CREATOR, nickname);
+        ep.set(EVENT_CREATOR, nickname);
         ep.set(EVENT_ID, eventId);
         event.setExtendedProperties(ep);
     
@@ -220,7 +220,7 @@ public class EventsServlet extends HttpServlet {
       eventEntity.setProperty(START_TIME, eventStartDateTime);
       eventEntity.setProperty(END_TIME, eventEndDateTime);
       eventEntity.setProperty(CATEGORY, category);
-      eventEntity.setProperty(CREATOR, userId);
+      eventEntity.setProperty(EVENT_CREATOR, userId);
 
       datastore.put(eventEntity);
 

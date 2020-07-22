@@ -75,6 +75,8 @@ public class UserServlet extends HttpServlet {
   static final String ADDED_TO_CALENDAR_PARAM = "add";
   static final String ID_TOKEN_PARAM = "id_token";
   static final String NAME = "name";
+
+  // OAuth credentials client ID, used to verify user ID token
   private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
 
   static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
@@ -132,7 +134,7 @@ public class UserServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
 
     Long currentChallengeId = 0L;
-    // change to get length of challenges (replace the 3)
+    // @Erick Change to get length of challenges (replace the 3)
     ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
 
     User user = new User.Builder(userId)
@@ -140,7 +142,6 @@ public class UserServlet extends HttpServlet {
         .setCurrentChallengeId(currentChallengeId)
         .setChallengeStatuses(challengeStatuses)
         .build();
-    
 
     datastore.put(user.toEntity());
 

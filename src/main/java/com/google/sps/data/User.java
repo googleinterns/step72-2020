@@ -32,6 +32,10 @@ public final class User {
   public static final String ADDED_TO_CALENDAR_EVENTS = "added_to_calendar_events";
   public static final String CURRENT_CHALLENGE = "current_challenge";
   public static final String CHALLENGE_STATUSES = "challenge_statuses";
+
+  /* Stored so that calls to datastore.put(entity) will overwrite the user with the
+   same userId if such a user already exists -- prevents multiple instances of 
+   same user being stored */
   public static final String ENTITY_KEY = "entity_key";
 
   private String id;
@@ -187,6 +191,7 @@ public final class User {
       Entity userEntity;
       if (this.entity_key == null) userEntity = new Entity(DATA_TYPE);
       else userEntity = new Entity(DATA_TYPE, this.entity_key.getId());
+      this.entity_key = userEntity.getKey();
       userEntity.setProperty(ID, this.id);
       userEntity.setProperty(NICKNAME, this.nickname);
       userEntity.setProperty(CREATED_EVENTS, this.created_events);
