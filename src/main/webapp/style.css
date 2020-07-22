@@ -205,7 +205,7 @@ html, body {
     height: 200px;
 }
 
-#challenges-modal, #create-event-modal {
+#challenges-modal, #create-event-modal, #badges-modal {
     color: #004643;
     display: none; 
     position: fixed;
@@ -422,4 +422,18 @@ html, body {
 #map {
     height: 100%;
     width: 100%;
+}
+
+.gallery img{
+    /*transition: 2s;
+    /*width: 200px; */
+    padding: 14px;
+}
+
+.gallery{
+    background: #fafafa;
+    height: 60%;
+    border: solid 3px #004643;
+
+    margin: 10px 50px;
 }

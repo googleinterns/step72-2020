@@ -77,12 +77,29 @@ async function loadPage() {
     window.onclick = function(event) {
         const challengesModal = document.getElementById("challenges-modal");
         const createEventModal = document.getElementById("create-event-modal");
-        if (event.target == challengesModal) {
+        const badgesModal = document.getElementById("badges-modal");
+        
+        switch(event.target){
+          case (challengesModal):
+            closeChallengesModal();
+            break;
+          case (createEventModal):
+            closeCreateEventModal();
+            break;
+          case (badgesModal):
+            closeBadgesModal();
+            break;
+          default:
+            break;  
+        }
+        
+        
+        /*if (event.target == challengesModal) {
             closeChallengesModal();
         }
         else if (event.target == createEventModal) {
             closeCreateEventModal();
-        }
+        } */
     }
 }
 
@@ -509,5 +526,17 @@ function openCreateEventModal() {
 
 function closeCreateEventModal() {
     const modal = document.getElementById("create-event-modal");
+    modal.style.display = "none";
+}
+
+function openBadgesModal(){
+    const modal = document.getElementById("badges-modal");
+    modal.style.display = "block"; // or flex
+
+    const galleryItems = document.getElementsByClassName("gallery");
+}
+
+function closeBadgesModal(){
+    const modal = document.getElementById("badges-modal");
     modal.style.display = "none";
 }
