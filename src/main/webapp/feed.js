@@ -166,7 +166,6 @@ function addEventBookmark(event) {
     bookmarkDiv.style.height = 0;
     const bookmark = document.createElement('img');
     bookmark.className = "event-bookmark";
-    // bookmark.src = "/resources/bookmark.png";
     bookmarkDiv.appendChild(bookmark);
     bookmarkDiv.appendChild(addEventNumBookmarks(event));
     bookmarkDiv.onclick = () => {};
