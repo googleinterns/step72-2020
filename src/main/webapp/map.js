@@ -7,6 +7,7 @@ var map;
 var lastInfoWindow = null;
 var bounds;
 var state = "01";
+var town = "";
 
 function initMap() {
     var mapOptions = {
@@ -39,6 +40,10 @@ function initMap() {
 
     geocoder = new google.maps.Geocoder();
     map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+
+    map.controls[google.maps.ControlPosition.LEFT_TOP].push(document.getElementById("content_form"));
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(document.getElementById("water"));
 }
 
 function loadAreaDataFromForm(){
@@ -65,6 +70,7 @@ function zoomToArea(areaType, areaCode){
             
             setGeographicState();
             addSuperfundMarkers(areaType, areaCode);
+            addWaterSystem(areaType, areaCode);
 
         } else {
 
@@ -76,6 +82,7 @@ function zoomToArea(areaType, areaCode){
 }
 
 function setGeographicState(){
+    town = lastGeocode.address_components[1].short_name;
     for(i in lastGeocode.address_components){
         if(lastGeocode.address_components[i].short_name.length === 2){
             state = lastGeocode.address_components[i].short_name;
@@ -135,4 +142,22 @@ function iconUrl(score){
     else url +="red";
 	url += "-dot.png";
 	return url;
+}
+
+function addWaterSystem(areaType, zipCode){
+    fetch("/water?town="+town+"&state="+state).then(response => response.json()).then((systems) => {
+        const waterElement = document.getElementById("water");
+        var waterPollutionHTML = "";
+        systems.forEach((system) => {
+            console.log(system);
+            console.log(system.contaminants);
+            waterPollutionHTML += 
+                "<h2>"+system.name+"</h2>"+
+                "<h4>Serves "+system.populationServed+"</h4>";
+            system.contaminants.forEach((contaminant) => {
+                waterPollutionHTML += "<p>"+contaminant.contaminantName+"</p>";
+            });
+        });
+        waterElement.innerHTML = waterPollutionHTML;
+    });
 }

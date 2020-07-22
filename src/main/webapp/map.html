@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html style="max-height:100vh;">
+<html style="max-height: 100vh;">
   <head>
     <meta charset="UTF-8">
     <title>Pollution Map</title>
@@ -9,9 +9,9 @@
   type="text/javascript"></script>
     <script src="map.js"></script>
   </head>
-  <body  onload="initMap();">
+  <body style="margin: 0;" onload="initMap();">
     <div class="content">
-      <div>
+      <div id="content_form" class="map_overlay">
           <form id="area_form" onsubmit="loadAreaDataFromForm()">
               <label for="zip_code">Zip code: </label>
               <input type="text" id="zip_code" rows="1" cols="5">
@@ -21,6 +21,7 @@
           <button id="view_state_button" onclick="viewState()">View State</button>
         </div>
         <div id="map"></div>
+        <div id="water" class="map_overlay"></div>
     </div>
   </body>
 </html>
