@@ -725,5 +725,6 @@ function hideAddToCalendarButtons() {
 }
 
 function getIdToken() {
+    console.log(gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token);
     return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
 }
