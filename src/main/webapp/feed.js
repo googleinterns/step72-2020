@@ -793,3 +793,20 @@ async function getLocalEvents(location) {
     }
     if (gapi.auth2.getAuthInstance().isSignedIn.get()) showAddToCalendarButtons();
 }
+
+let showBookmarked = false;
+
+function toggleShowBookmarked() {
+    showBookmarked = !showBookmarked;
+    showBookmarked ? showOnlyBookmarkedEvents() : showAllEvents();   
+}
+
+function showOnlyBookmarkedEvents() {
+    const checkmark = document.getElementById("show-bookmarked-checkmark");
+    checkmark.style.display = "block";
+}
+
+function showAllEvents() {
+    const checkmark = document.getElementById("show-bookmarked-checkmark");
+    checkmark.style.display = "none";
+}
