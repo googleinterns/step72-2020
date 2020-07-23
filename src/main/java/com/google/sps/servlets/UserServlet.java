@@ -81,10 +81,16 @@ public class UserServlet extends HttpServlet {
 
   static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
   static final JsonFactory JSON_FACTORY = new GsonFactory();
+  
+  private Verifier verifier;
 
-  static final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
-        .setAudience(Collections.singletonList(CLIENT_ID))
-        .build();
+  public void setVerifier(Verifier verifier) {
+      this.verifier = verifier;
+  }
+
+//   static final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
+//         .setAudience(Collections.singletonList(CLIENT_ID))
+//         .build();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
