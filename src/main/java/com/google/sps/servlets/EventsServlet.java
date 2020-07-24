@@ -117,8 +117,13 @@ public class EventsServlet extends HttpServlet {
       String eventDateString = request.getParameter(EventWrapper.DATE);
       String eventStartTimeString = request.getParameter(EventWrapper.START_TIME);
       String eventEndTimeString = request.getParameter(EventWrapper.END_TIME);
-      String timezoneOffset = request.getParameter(USER_TIMEZONE);
       String category = request.getParameter(EventWrapper.CATEGORY);
+
+      String timezoneOffset = request.getParameter(USER_TIMEZONE);
+      if (timezoneOffset == null) {
+          response.setStatus(400);
+          return;
+      }
   
       Date eventStartDateTime = getEventDateTime(eventDateString, eventStartTimeString, timezoneOffset);
       Date eventEndDateTime = getEventDateTime(eventDateString, eventEndTimeString, timezoneOffset);
