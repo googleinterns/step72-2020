@@ -24,6 +24,7 @@ import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
@@ -48,12 +49,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
-import com.google.api.client.json.gson.GsonFactory;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -64,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.sps.data.User;
+import com.google.sps.data.GoogleIdHelper;
 
 /** Servlet that returns events sorted by most recent timestamp */
 @WebServlet("/user")
@@ -79,27 +76,14 @@ public class UserServlet extends HttpServlet {
   static final String ID_TOKEN_PARAM = "id_token";
   static final String NAME = "name";
 
-  private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
-
-  DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-  
-  static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
-  static final JsonFactory JSON_FACTORY = new GsonFactory();
-
-  static final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
-        .setAudience(Collections.singletonList(CLIENT_ID))
-        .build();
-
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
-    if (idToken == null) {
-        System.out.println("Invalid ID token.");
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Payload payload = GoogleIdHelper.verifyId(request);
+    if (payload == null) {
         response.setStatus(400);
         return;
     }
-
-    Payload payload = idToken.getPayload();
     String userId = payload.getSubject();
 
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
@@ -120,22 +104,18 @@ public class UserServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
-
-    if (idToken == null) {
-        System.out.println("Invalid ID token.");
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    Payload payload = GoogleIdHelper.verifyId(request);
+    if (payload == null) {
         response.setStatus(400);
         return;
     }
-
-    Payload payload = idToken.getPayload();
-
     String userId = payload.getSubject();
     String userNickname = (String) payload.get("name");
         
 
     Long currentChallengeId = 0L;
-    // change to get length of challenges (replace the 3)
+    // @Erick Change to get length of challenges (replace the 3)
     ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
 
     User user = new User.Builder(userId)
@@ -143,7 +123,6 @@ public class UserServlet extends HttpServlet {
         .setCurrentChallengeId(currentChallengeId)
         .setChallengeStatuses(challengeStatuses)
         .build();
-    
 
     datastore.put(user.toEntity());
 
@@ -152,14 +131,11 @@ public class UserServlet extends HttpServlet {
 
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
-      if (idToken == null) {
-        System.out.println("Invalid ID token.");
+      Payload payload = GoogleIdHelper.verifyId(request);
+      if (payload == null) {
         response.setStatus(400);
         return;
       }
-
-      Payload payload = idToken.getPayload();
       String userId = payload.getSubject();
 
       String challengeIdParam = request.getParameter(CHALLENGE_ID_PARAM);
@@ -170,7 +146,8 @@ public class UserServlet extends HttpServlet {
       Long challengeId;
       Integer newStatus;
       Long eventId;
-
+      
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(query).asSingleEntity();
       User user = User.convertEntitytoUser(entity, userId);
@@ -227,12 +204,13 @@ public class UserServlet extends HttpServlet {
   }
 
   private void updateBookmarkedEvents(User user, Long eventId) {
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       ArrayList<Long> bookmarkedEvents = user.getBookmarkedEvents();
       if (bookmarkedEvents == null) bookmarkedEvents = new ArrayList<Long>();
       bookmarkedEvents.add(eventId);
       user.setBookmarkedEvents(bookmarkedEvents);
 
-      Query query = new Query(EVENT).setFilter(new FilterPredicate(EVENT_ID, FilterOperator.EQUAL, eventId));
+      Query query = new Query(EVENT).setFilter(new FilterPredicate("__key__", FilterOperator.EQUAL, KeyFactory.createKey(EVENT, eventId)));
       Entity entity = datastore.prepare(query).asSingleEntity();
       entity.setProperty(BOOKMARKS, (long) entity.getProperty(BOOKMARKS)+1);
       datastore.put(entity);
@@ -244,15 +222,4 @@ public class UserServlet extends HttpServlet {
       addedEvents.add(eventId);
       user.setAddedToCalendarEvents(addedEvents);
   }
-
-  private GoogleIdToken verifyId(String idTokenString) {
-    GoogleIdToken idToken = null;
-    try {
-        idToken = verifier.verify(idTokenString);
-    } catch (Exception e) {
-        System.err.println(e.getMessage());
-    }
-    return idToken;
-  }
-
 } 
