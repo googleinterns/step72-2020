@@ -56,10 +56,8 @@ public final class EventWrapper {
   public static final String SUMMARY = "summary";
   public static final String DESCRIPTION = "description";
   public static final String LOCATION = "location";
-  public static final String DATETIME = "date_time";
   public static final String CATEGORY = "category";
   public static final String UTC_TIMEZONE = "UTC";
-  public static final String DATE = "date";
   public static final String START_TIME = "start";
   public static final String END_TIME = "end";
   public static final String EVENT_CREATOR = "creator";
