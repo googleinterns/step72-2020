@@ -689,6 +689,7 @@ if (isSignedIn) {
     feedRightSide.style.display = "block";  
     await getUserInfo();
     await loadEvents();
+    await loadChallenges();
     showAddToCalendarButtons();
 } else {
     authorizeButton.style.display = 'block';
