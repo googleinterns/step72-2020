@@ -227,7 +227,7 @@ public final class EventWrapper {
   public Entity toEntity() {
       Entity eventEntity;
       if (this.entity_key == null) eventEntity = new Entity(EVENT);
-      else eventEntity = new Entity(EVENT, this.entity_key);
+      else eventEntity = new Entity(EVENT, this.entity_key.getId());
       this.entity_key = eventEntity.getKey();
       long timestamp = System.currentTimeMillis();
       eventEntity.setProperty(SUMMARY, this.summary);

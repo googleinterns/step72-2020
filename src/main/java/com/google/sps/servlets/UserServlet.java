@@ -214,7 +214,4 @@ public class UserServlet extends HttpServlet {
       addedEvents.add(eventId);
       user.setAddedToCalendarEvents(addedEvents);
   }
-
-  
-
 } 

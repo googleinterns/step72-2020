@@ -80,6 +80,7 @@ public class EventsServlet extends HttpServlet {
     public static final String EVENT = "Event";
     public static final String TIMESTAMP = "timestamp";
     public static final String USER_TIMEZONE = "timezone";
+    public static final String DATE = "date";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -114,7 +115,7 @@ public class EventsServlet extends HttpServlet {
       String eventSummary = request.getParameter(EventWrapper.SUMMARY);
       String eventDescription = request.getParameter(EventWrapper.DESCRIPTION);
       String eventLocation = request.getParameter(EventWrapper.LOCATION);
-      String eventDateString = request.getParameter(EventWrapper.DATE);
+      String eventDateString = request.getParameter(DATE);
       String eventStartTimeString = request.getParameter(EventWrapper.START_TIME);
       String eventEndTimeString = request.getParameter(EventWrapper.END_TIME);
       String category = request.getParameter(EventWrapper.CATEGORY);
@@ -145,12 +146,11 @@ public class EventsServlet extends HttpServlet {
         .build();
 
       Entity eventEntity = eventWrapper.toEntity();
-
-      updateUserCreatedEvents(userId, eventEntity.getKey().getId());
-      
+        
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(eventEntity);
-
+      updateUserCreatedEvents(userId, eventEntity.getKey().getId());
+    
       response.sendRedirect("/index.html");
   }
 
