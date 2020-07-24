@@ -704,21 +704,20 @@ async function updateSigninStatus(isSignedIn) {
     const authorizeButton = document.getElementById('authorize-button');
     const signoutButton = document.getElementById('signout-button');
     const feedRightSide = document.getElementById("feed-right-side");
-    if (isSignedIn) {
-        authorizeButton.style.display = 'none';
-        signoutButton.style.display = 'block';
-        feedRightSide.style.display = "block";  
-        await getUserInfo();
-        await loadEvents();
-        loadChallenges();
-        showAddToCalendarButtons();
-    } else {
-        authorizeButton.style.display = 'block';
-        signoutButton.style.display = 'none';
-        feedRightSide.style.display = "none";
-        await loadEvents();
-        hideAddToCalendarButtons();
-    }
+if (isSignedIn) {
+    authorizeButton.style.display = 'none';
+    signoutButton.style.display = 'block';
+    feedRightSide.style.display = "block";  
+    await getUserInfo();
+    await loadEvents();
+    showAddToCalendarButtons();
+} else {
+    authorizeButton.style.display = 'block';
+    signoutButton.style.display = 'none';
+    feedRightSide.style.display = "none";
+    await loadEvents();
+    hideAddToCalendarButtons();
+}
 }
 
 /**
