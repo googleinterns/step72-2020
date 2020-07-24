@@ -145,12 +145,11 @@ public class EventsServlet extends HttpServlet {
         .build();
 
       Entity eventEntity = eventWrapper.toEntity();
-
-      updateUserCreatedEvents(userId, eventEntity.getKey().getId());
-      
+        
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(eventEntity);
-
+      updateUserCreatedEvents(userId, eventEntity.getKey().getId());
+    
       response.sendRedirect("/index.html");
   }
 
