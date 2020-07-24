@@ -80,10 +80,10 @@ public class EventsServlet extends HttpServlet {
     public static final String EVENT = "Event";
     public static final String TIMESTAMP = "timestamp";
     public static final String USER_TIMEZONE = "timezone";
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     FetchOptions fetchOptions = FetchOptions.Builder.withLimit(10);
     Query query = new Query(EVENT).addSort(TIMESTAMP, SortDirection.DESCENDING);
     PreparedQuery pq = datastore.prepare(query);
@@ -142,7 +142,8 @@ public class EventsServlet extends HttpServlet {
       Entity eventEntity = eventWrapper.toEntity();
 
       updateUserCreatedEvents(userId, eventEntity.getKey().getId());
-
+      
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(eventEntity);
 
       response.sendRedirect("/index.html");
@@ -178,6 +179,7 @@ public class EventsServlet extends HttpServlet {
 
 
   public void updateUserCreatedEvents(String userId, long eventId) {
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Query userQuery = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(userQuery).asSingleEntity();
       ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(User.CREATED_EVENTS);
