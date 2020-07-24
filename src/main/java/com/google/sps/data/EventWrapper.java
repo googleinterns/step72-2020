@@ -78,7 +78,7 @@ public final class EventWrapper {
   private Date end;
   private String category;
   private String creator_id;
-  /* Stored in order to retrieve consister ID for the event */
+  /* Stored in order to retrieve consistent ID for the event */
   private Key entity_key;
 
   public static class Builder {
