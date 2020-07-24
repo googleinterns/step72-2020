@@ -28,6 +28,7 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
 import com.google.sps.data.User;
+import com.google.sps.data.EventWrapper;
 
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
@@ -76,29 +77,9 @@ import java.util.TimeZone;
 @WebServlet("/events")
 public class EventsServlet extends HttpServlet {
 
-    static final String EVENT = "Event";
-    static final String TIMESTAMP = "timestamp";
-    static final String SUMMARY = "summary";
-    static final String DESCRIPTION = "description";
-    static final String LOCATION = "location";
-    static final String DATETIME = "date_time";
-    static final String CATEGORY = "category";
-    static final String UTC_TIMEZONE = "UTC";
-    static final String DATE = "date";
-    static final String START_TIME = "start";
-    static final String END_TIME = "end";
-    static final String USER_TIMEZONE = "timezone";
-    static final String EVENT_CREATOR = "creator";
-    static final String EVENT_NUM = "EventNum";
-    static final String EVENT_NUM_VALUE = "value";
-    static final String EVENT_ID = "event_id";
-
-    static final List<String> CATEGORIES = new ArrayList<String>(
-        Arrays.asList("food_beverage", "nature", "water", "waste_cleanup", "other")
-    );
-
-    static final int MAX_STRING_BYTES = 1500;
-
+    public static final String EVENT = "Event";
+    public static final String TIMESTAMP = "timestamp";
+    public static final String USER_TIMEZONE = "timezone";
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
   @Override
@@ -111,42 +92,7 @@ public class EventsServlet extends HttpServlet {
 
     List<Event> events = new ArrayList<>();
     for (Entity entity : results) {
-        long timestamp = (long) entity.getProperty(TIMESTAMP);
-        String summary = (String) entity.getProperty(SUMMARY);
-        String description = (String) entity.getProperty(DESCRIPTION);
-        String location = (String) entity.getProperty(LOCATION);
-        Date startTime = (Date) entity.getProperty(START_TIME);
-        Date endTime = (Date) entity.getProperty(END_TIME);
-        String category = (String) entity.getProperty(CATEGORY);
-        String userId = (String) entity.getProperty(EVENT_CREATOR);
-        long eventId = (long) entity.getProperty(EVENT_ID);
-
-        Query userQuery = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
-        Entity eventCreator = datastore.prepare(userQuery).asSingleEntity();
-        String nickname = (String) eventCreator.getProperty(User.NICKNAME);
-
-        DateTime startDateTime = new DateTime(startTime);
-        EventDateTime start = new EventDateTime()
-            .setDateTime(startDateTime)
-            .setTimeZone(UTC_TIMEZONE);
-        DateTime endDateTime = new DateTime(endTime);
-        EventDateTime end = new EventDateTime()
-            .setDateTime(endDateTime)
-            .setTimeZone(UTC_TIMEZONE);
-        Event event = new Event()
-            .setSummary(summary)
-            .setLocation(location)
-            .setDescription(description)
-            .setStart(start)
-            .setEnd(end);
-
-        ExtendedProperties ep = new ExtendedProperties();
-        ep.set(CATEGORY, category);
-        ep.set(EVENT_CREATOR, nickname);
-        ep.set(EVENT_ID, eventId);
-        event.setExtendedProperties(ep);
-    
-        events.add(event);
+        events.add(EventWrapper.convertEntityToEvent(entity));
     }
 
     response.setContentType("application/json; charset=UTF-8");
@@ -165,20 +111,14 @@ public class EventsServlet extends HttpServlet {
       }
       String userId = payload.getSubject();
 
-      String eventSummary = request.getParameter(SUMMARY);
-      String eventDescription = request.getParameter(DESCRIPTION);
-      String eventLocation = request.getParameter(LOCATION);
-      String eventDateString = request.getParameter(DATE);
-      String eventStartTimeString = request.getParameter(START_TIME);
-      String eventEndTimeString = request.getParameter(END_TIME);
+      String eventSummary = request.getParameter(EventWrapper.SUMMARY);
+      String eventDescription = request.getParameter(EventWrapper.DESCRIPTION);
+      String eventLocation = request.getParameter(EventWrapper.LOCATION);
+      String eventDateString = request.getParameter(EventWrapper.DATE);
+      String eventStartTimeString = request.getParameter(EventWrapper.START_TIME);
+      String eventEndTimeString = request.getParameter(EventWrapper.END_TIME);
       String timezoneOffset = request.getParameter(USER_TIMEZONE);
-      String category = request.getParameter(CATEGORY);
-
-      eventSummary = sanitizeInput(eventSummary);
-      eventDescription = sanitizeInput(eventDescription);
-      eventLocation = sanitizeInput(eventLocation);
-
-      if (!CATEGORIES.contains(category)) category = "other";
+      String category = request.getParameter(EventWrapper.CATEGORY);
   
       Date eventStartDateTime = getEventDateTime(eventDateString, eventStartTimeString, timezoneOffset);
       Date eventEndDateTime = getEventDateTime(eventDateString, eventEndTimeString, timezoneOffset);
@@ -189,21 +129,19 @@ public class EventsServlet extends HttpServlet {
           eventEndDateTime = temp;
       }
 
-      long timestamp = System.currentTimeMillis();
+      EventWrapper eventWrapper = new EventWrapper.Builder()
+        .setSummary(eventSummary)
+        .setDescription(eventDescription)
+        .setLocation(eventLocation)
+        .setStartDateTime(eventStartDateTime)
+        .setEndDateTime(eventEndDateTime)
+        .setCategory(category)
+        .setCreator(userId)
+        .build();
 
-      long eventId = getEventId();
-      updateUserCreatedEvents(userId, eventId);
+      Entity eventEntity = eventWrapper.toEntity();
 
-      Entity eventEntity = new Entity(EVENT);
-      eventEntity.setProperty(EVENT_ID, eventId);
-      eventEntity.setProperty(SUMMARY, eventSummary);
-      eventEntity.setProperty(TIMESTAMP, timestamp);
-      eventEntity.setProperty(LOCATION, eventLocation);
-      eventEntity.setProperty(DESCRIPTION, eventDescription);
-      eventEntity.setProperty(START_TIME, eventStartDateTime);
-      eventEntity.setProperty(END_TIME, eventEndDateTime);
-      eventEntity.setProperty(CATEGORY, category);
-      eventEntity.setProperty(EVENT_CREATOR, userId);
+      updateUserCreatedEvents(userId, eventEntity.getKey().getId());
 
       datastore.put(eventEntity);
 
@@ -238,33 +176,6 @@ public class EventsServlet extends HttpServlet {
       }
   }
 
-  public String sanitizeInput(String input) throws java.io.UnsupportedEncodingException {
-      input = new String( input.getBytes("UTF-8") , 0, Math.min(MAX_STRING_BYTES, input.length()), "UTF-8");
-      return input;
-  }
-
-  public long getEventId() {
-      Query query = new Query(EVENT_NUM);
-      PreparedQuery pq = datastore.prepare(query);
-      QueryResultList<Entity> eventNumResult = pq.asQueryResultList(FetchOptions.Builder.withDefaults());
-
-      Entity eventNumEntity;
-      long eventNumValue;
-      if (eventNumResult.size() == 0) {
-          eventNumEntity = new Entity(EVENT_NUM);
-          eventNumValue = 0;
-          eventNumEntity.setProperty(EVENT_NUM_VALUE, eventNumValue);
-          datastore.put(eventNumEntity);      
-      }
-      else {
-          eventNumEntity = eventNumResult.get(0);
-          eventNumValue = (long)eventNumEntity.getProperty(EVENT_NUM_VALUE)+1;
-          eventNumEntity.setProperty(EVENT_NUM_VALUE, eventNumValue);
-          datastore.put(eventNumEntity);
-      }
-
-      return eventNumValue;
-  }
 
   public void updateUserCreatedEvents(String userId, long eventId) {
       Query userQuery = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
