@@ -785,12 +785,8 @@ async function sortEventsByDistance(location) {
 async function getLocalEvents(location) {
     await sortEventsByDistance(location);
 
-    const feed = document.getElementById("events-feed");
-    feed.innerHTML = "";
-    for (event of events) {
-        feed.appendChild(postEvent(event));
-    }
-    if (gapi.auth2.getAuthInstance().isSignedIn.get()) showAddToCalendarButtons();
+    if (showBookmarked) showOnlyBookmarkedEvents();
+    else showAllEvents();
 }
 
 let showBookmarked = false;
@@ -803,9 +799,21 @@ function toggleShowBookmarked() {
 function showOnlyBookmarkedEvents() {
     const checkmark = document.getElementById("show-bookmarked-checkmark");
     checkmark.style.display = "block";
+    const feed = document.getElementById("events-feed");
+    feed.innerHTML = "";
+    for (event of events) {
+        if (user.bookmarked_events.includes(event.extendedProperties.event_id)) feed.appendChild(postEvent(event));
+    }
+    showAddToCalendarButtons();
 }
 
 function showAllEvents() {
     const checkmark = document.getElementById("show-bookmarked-checkmark");
     checkmark.style.display = "none";
+    const feed = document.getElementById("events-feed");
+    feed.innerHTML = "";
+    for (event of events) {
+        feed.appendChild(postEvent(event));
+    }
+    if (gapi.auth2.getAuthInstance().isSignedIn.get()) showAddToCalendarButtons();
 }
