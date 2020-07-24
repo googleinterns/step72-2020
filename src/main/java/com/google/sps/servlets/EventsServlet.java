@@ -56,12 +56,8 @@ import com.google.api.services.calendar.model.Events;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Event.ExtendedProperties;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
-import com.google.api.client.json.gson.GsonFactory;
+import com.google.sps.data.GoogleIdHelper;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -96,22 +92,12 @@ public class EventsServlet extends HttpServlet {
     static final String EVENT_NUM = "EventNum";
     static final String EVENT_NUM_VALUE = "value";
     static final String EVENT_ID = "event_id";
-    static final String ID_TOKEN_PARAM = "id_token";
-
-    private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
 
     static final List<String> CATEGORIES = new ArrayList<String>(
         Arrays.asList("food_beverage", "nature", "water", "waste_cleanup", "other")
     );
 
     static final int MAX_STRING_BYTES = 1500;
-
-    static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
-    static final JsonFactory JSON_FACTORY = new GsonFactory();
-
-    static final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
-        .setAudience(Collections.singletonList(CLIENT_ID))
-        .build();
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -172,14 +158,11 @@ public class EventsServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
-      if (idToken == null) {
-        System.out.println("Invalid ID token.");
+      Payload payload = GoogleIdHelper.verifyId(request);
+      if (payload == null) {
         response.setStatus(400);
         return;
       }
-
-      Payload payload = idToken.getPayload();
       String userId = payload.getSubject();
 
       String eventSummary = request.getParameter(SUMMARY);
@@ -293,13 +276,4 @@ public class EventsServlet extends HttpServlet {
       datastore.put(entity);
   }
 
-  private GoogleIdToken verifyId(String idTokenString) {
-    GoogleIdToken idToken = null;
-    try {
-        idToken = verifier.verify(idTokenString);
-    } catch (Exception e) {
-        System.err.println(e.getMessage());
-    }
-    return idToken;
-  }
 }

@@ -184,7 +184,10 @@ public final class User {
 
     return user;
   }
-  
+  /* Calling datastore.put([user object].toEntity()) multiple times on a [user object]
+   that wasn't instantiated from a User.convertEntityToUser call will result in 
+   multiple users being created in the datastore
+  */
   public Entity toEntity() {
       Entity userEntity;
       if (this.entity_key == null) userEntity = new Entity(DATA_TYPE);
