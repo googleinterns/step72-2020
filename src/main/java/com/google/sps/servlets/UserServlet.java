@@ -60,6 +60,7 @@ import java.util.Map;
 
 import com.google.sps.data.User;
 import com.google.sps.data.GoogleIdHelper;
+import com.google.sps.data.IdHelper;
 
 /** Servlet that returns events sorted by most recent timestamp */
 @WebServlet("/user")
@@ -72,20 +73,25 @@ public class UserServlet extends HttpServlet {
   static final String ID_TOKEN_PARAM = "id_token";
   static final String NAME = "name";
   
-  private Verifier verifier;
+  private IdHelper idHelper;
 
-  public void setVerifier(Verifier verifier) {
-      this.verifier = verifier;
+  public void setIdHelper(IdHelper idHelper) {
+      this.idHelper = idHelper;
   }
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    Payload payload = GoogleIdHelper.verifyId(request);
-    if (payload == null) {
-        response.setStatus(400);
-        return;
+    // Payload payload = GoogleIdHelper.verifyId(request);
+    // if (payload == null) {
+    //     response.setStatus(400);
+    //     return;
+    // }
+    // String userId = payload.getSubject();
+    String userId = GoogleIdHelper.getUserId(request);
+    if (userId == null) {
+          response.setStatus(400);
+          return;
     }
-    String userId = payload.getSubject();
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -109,13 +115,19 @@ public class UserServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    Payload payload = GoogleIdHelper.verifyId(request);
-    if (payload == null) {
-        response.setStatus(400);
-        return;
+    // Payload payload = GoogleIdHelper.verifyId(request);
+    // if (payload == null) {
+    //     response.setStatus(400);
+    //     return;
+    // }
+    // String userId = payload.getSubject();
+    // String userNickname = (String) payload.get(NAME);
+    String userId = GoogleIdHelper.getUserId(request);
+    if (userId == null) {
+          response.setStatus(400);
+          return;
     }
-    String userId = payload.getSubject();
-    String userNickname = (String) payload.get(NAME);
+    String userNickname = GoogleIdHelper.getUserNickname(request);
     
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
 
@@ -136,12 +148,17 @@ public class UserServlet extends HttpServlet {
 
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      Payload payload = GoogleIdHelper.verifyId(request);
-      if (payload == null) {
-        response.setStatus(400);
-        return;
+    //   Payload payload = GoogleIdHelper.verifyId(request);
+    //   if (payload == null) {
+    //     response.setStatus(400);
+    //     return;
+    //   }
+    //   String userId = payload.getSubject();
+      String userId = GoogleIdHelper.getUserId(request);
+      if (userId == null) {
+          response.setStatus(400);
+          return;
       }
-      String userId = payload.getSubject();
 
       String challengeIdParam = request.getParameter(CHALLENGE_ID_PARAM);
       String statusParam = request.getParameter(CHALLENGE_STATUS_PARAM);

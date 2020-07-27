@@ -25,7 +25,7 @@ import com.google.api.client.json.JsonFactory;
 import java.util.Collections;
 
 
-public final class GoogleIdHelper {
+public final class GoogleIdHelper implements IdHelper {
     
     // OAuth credentials client ID, used to verify user ID token
     private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
@@ -60,7 +60,6 @@ public final class GoogleIdHelper {
     public static String getUserId(HttpServletRequest request) {
         Payload payload = verifyId(request);
         if (payload == null) {
-            response.setStatus(400);
             return null;
         }
         return payload.getSubject();
@@ -69,7 +68,6 @@ public final class GoogleIdHelper {
     public static String getUserNickname(HttpServletRequest request) {
         Payload payload = verifyId(request);
         if (payload == null) {
-            response.setStatus(400);
             return null;
         }
         return (String) payload.get(NAME);

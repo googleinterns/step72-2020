@@ -24,20 +24,26 @@ import javax.servlet.http.HttpServletRequest;
 import com.google.api.client.json.JsonFactory;
 import java.util.Collections;
 
+import java.util.Map;
+import java.util.HashMap;
 
-public final class MockIdHelper {
+
+public final class MockIdHelper implements IdHelper {
 
     static final String ID_TOKEN_PARAM = "id_token";
     static final String NAME = "name";
     static final String USER_ID = "userId";
 
-    private Map<String, String> mockPayload = new Map<String, String>();
-    mockPayload.put(USER_ID, "00");
-    mockPayload.put(NAME, "mock-username");
+    private static Map<String, String> mockPayload = new HashMap<String, String>() {
+        {
+            put(USER_ID, "00");
+            put(NAME, "mock-username");
+        }
+    };
 
 
     public static Map<String, String> verifyId(HttpServletRequest request) {
-        GoogleIdToken idToken = null;
+        String idToken = null;
         try {
             idToken = request.getParameter(ID_TOKEN_PARAM);
         } catch (Exception e) {
@@ -47,14 +53,12 @@ public final class MockIdHelper {
             System.out.println("Invalid ID token.");
             return null;
         }
-
         return mockPayload;
     }
 
     public static String getUserId(HttpServletRequest request) {
         Map<String, String> payload = verifyId(request);
         if (payload == null) {
-            response.setStatus(400);
             return null;
         }
         return payload.get(USER_ID);
@@ -63,13 +67,8 @@ public final class MockIdHelper {
     public static String getUserNickname(HttpServletRequest request) {
         Map<String, String> payload = verifyId(request);
         if (payload == null) {
-            response.setStatus(400);
             return null;
         }
         return payload.get(NAME);
-    }
-
-    public void setAcceptableIdToken(String token) {
-
     }
 }
