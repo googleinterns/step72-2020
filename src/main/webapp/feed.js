@@ -704,10 +704,12 @@ async function updateSigninStatus(isSignedIn) {
     const authorizeButton = document.getElementById('authorize-button');
     const signoutButton = document.getElementById('signout-button');
     const feedRightSide = document.getElementById("feed-right-side");
+    const showBookmarkedOption = document.getElementById("show-bookmarked-div");
 if (isSignedIn) {
     authorizeButton.style.display = 'none';
     signoutButton.style.display = 'block';
     feedRightSide.style.display = "block";  
+    showBookmarkedOption.style.display = "flex";
     await getUserInfo();
     await loadEvents();
     showAddToCalendarButtons();
@@ -715,6 +717,7 @@ if (isSignedIn) {
     authorizeButton.style.display = 'block';
     signoutButton.style.display = 'none';
     feedRightSide.style.display = "none";
+    showBookmarkedOption.style.display = "none";
     await loadEvents();
     hideAddToCalendarButtons();
 }

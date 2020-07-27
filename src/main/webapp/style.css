@@ -524,7 +524,7 @@ html, body {
 }
 
 #show-bookmarked-div {
-    display: flex;
+    display: none;
 }
 
 #show-bookmarked-div > p {
