@@ -33,6 +33,14 @@ public class Challenge {
     return false; 
   }
 
+  public Type getType() {
+    return challenge_type;
+  }
+  
+  public String getName() {
+    return name;
+  }
+
   public String toString() {
       return "Challenge Type: " + challenge_type + ", Name: " + name;
   }

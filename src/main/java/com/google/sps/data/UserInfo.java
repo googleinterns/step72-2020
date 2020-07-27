@@ -19,8 +19,12 @@ import java.util.List;
 
 import com.google.gson.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.EmbeddedEntity;
+import javafx.util.Pair;
 
 public final class UserInfo {
 
@@ -37,8 +41,9 @@ public final class UserInfo {
   private final String nickname;
   private final ArrayList<Long> created_events;
   private final ArrayList<Long> bookmarked_events;
-  private Long current_challenge_id;
-  private ArrayList<Integer> challenge_statuses;
+  private String current_challenge_id;
+  //private ArrayList<Pair<String, Integer>> challenge_statuses;
+  private HashMap <String, Integer> challenge_statuses;
   private Key entity_key;
 
   public UserInfo(String id, String nickname, Key entity_key) {
@@ -47,13 +52,13 @@ public final class UserInfo {
     this.entity_key = entity_key;
     this.created_events = new ArrayList<Long>();
     this.bookmarked_events = new ArrayList<Long>();
-    this.current_challenge_id = 0L;
-    this.challenge_statuses = new ArrayList<Integer>();
+    this.current_challenge_id = "WAST_0";
+    this.challenge_statuses = new HashMap<>();
   }
 
   // ArrayList Params may be null
   public UserInfo(String id, String nickname, ArrayList<Long> created_events, ArrayList<Long> bookmarked_events, 
-    Long current_challenge_id, ArrayList<Integer> challenge_statuses, Key entity_key) {
+    Long current_challenge_id, HashMap<String, Integer> challenge_statuses, Key entity_key) {
     this.id = id;
     this.nickname = nickname;
     this.entity_key = entity_key;
@@ -67,8 +72,8 @@ public final class UserInfo {
     this.current_challenge_id = current_challenge_id;
 
     // @Erick May need to change this initialization if structure of challenge statuses changes
-    if (challenge_statuses == null) this.challenge_statuses = new ArrayList<Integer>();
-    else this.challenge_statuses = (ArrayList) challenge_statuses.clone();
+    if (challenge_statuses == null) this.challenge_statuses = new HashMap<String, Integer>();
+    else this.challenge_statuses = (HashMap) challenge_statuses.clone();
   }
   
 
@@ -81,13 +86,13 @@ public final class UserInfo {
       this.current_challenge_id = chal_id;
   }
 
-  public ArrayList<Integer> getChallengeStatuses() {
-      return (ArrayList) this.challenge_statuses;
+  public HashMap<String, Integer> getChallengeStatuses() {
+      return (HashMap) this.challenge_statuses;
   }
 
   // challenge_statuses param should not be null
-  public void setChallengeStatuses(ArrayList<Integer> challenge_statuses) {
-      this.challenge_statuses = (ArrayList) challenge_statuses.clone();
+  public void setChallengeStatuses(HashMap<String, Integer> challenge_statuses) {
+      this.challenge_statuses = (HashMap<String, Integer>) challenge_statuses.clone();
   }
 
   public static UserInfo convertEntitytoUserInfo(Entity entity, String userId) {
@@ -96,8 +101,7 @@ public final class UserInfo {
     Long currentChallengeId = (Long) entity.getProperty(CURRENT_CHALLENGE);
     ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(CREATED_EVENTS);
     ArrayList<Long> bookmarkedEvents = (ArrayList<Long>) entity.getProperty(BOOKMARKED_EVENTS);
-    ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(CHALLENGE_STATUSES);
-
+    HashMap<String, Integer> challengeStatuses = getChallengeStatusFromEntity(entity);
     UserInfo user = new UserInfo(userId, nickname, createdEvents, bookmarkedEvents, currentChallengeId, challengeStatuses, entity_key);
     return user;
   }
@@ -109,7 +113,7 @@ public final class UserInfo {
       userEntity.setProperty(ID, this.id);
       userEntity.setProperty(NICKNAME, this.nickname);
       userEntity.setProperty(CURRENT_CHALLENGE, this.current_challenge_id);
-      userEntity.setProperty(CHALLENGE_STATUSES, this.challenge_statuses);
+      userEntity.setProperty(CHALLENGE_STATUSES, embedChallengeStatuses());
       return userEntity;
   }
 
@@ -117,5 +121,27 @@ public final class UserInfo {
       Gson gson = new Gson();
       String json = gson.toJson(this);
       return json;
+  }
+
+  /* Function embeds array of challenge_statuses pairs into an Entity so it may
+  be stored in Datastore */
+  private EmbeddedEntity embedChallengeStatuses(){
+    EmbeddedEntity embedded_entity = new EmbeddedEntity();
+    for (String key: challenge_statuses.keySet()){
+      embedded_entity.setProperty(key, challenge_statuses.get(key));
+    }
+    return embedded_entity;
+  }
+
+  private static HashMap<String, Integer> getChallengeStatusFromEntity(Entity entity) {
+    EmbeddedEntity embedded_entity = (EmbeddedEntity)entity.getProperty(CHALLENGE_STATUSES);
+    HashMap<String, Integer> challenge_statuses = new HashMap<>();
+    if (embedded_entity != null){
+     for(String key : embedded_entity.getProperties().keySet()){
+       Long status = (Long) embedded_entity.getProperty(key);
+       challenge_statuses.put(key, status.intValue());
+     }
+    }
+    return challenge_statuses;
   }
 } 

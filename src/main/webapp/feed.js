@@ -43,7 +43,7 @@ function createMockChallenges() {
 }
 
 const CLIENT_ID = '605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com';
-const API_KEY = 'AIzaSyAUR8-gJeYJOCSDJTP6qgN7FsIDG3u-vgU';
+const API_KEY = 'AIzaSyD6wzCocrTQDd6J6WnK1eRvv7Gu3Jj_7dw';
 const SCOPES  = "https://www.googleapis.com/auth/calendar.app.created https://www.googleapis.com/auth/calendar.readonly";
 var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
 
@@ -53,7 +53,6 @@ let challenges;
 
 const projectTitle = "GEN Capstone";
 let calendarId = null; 
-
 
 let eventCategoryIcons = new Map();
 eventCategoryIcons.set("food_beverage", "🥑🍋🍏");
@@ -284,7 +283,8 @@ function createChallengeNavBarItem(challenge) {
 }
 
 async function getServerChallenges(numChallenges){
-  const response = await fetch('/challenges?num-challenges=' + numChallenges);
+  let id_token = getIdToken();
+  const response = await fetch(`/challenges?num-challenges=${numChallenges}&id-token=${id_token}`);
   const challengeJson = await response.json();
 
   var i;
@@ -374,13 +374,14 @@ async function showNewChallengeCompletePage(challenge) {
     let newChallengeId = findNextUncompletedChallenge(challenge.get("id"));
     if (newChallengeId == -1) {
         text.innerHTML = "All challenges complete!";
-        getServerChallenges(3);
+        await getServerChallenges(3);
     }
     else {
         text.innerHTML = `${challenge.get("title")} challenge complete!<br>Next up is the <b>${challenges[newChallengeId].get("title")}</b> challenge`;
     }
     let id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
     const putRequest = new Request(`/user?id_token=${id_token}&chal=${newChallengeId}`, {method: 'PUT'});
+    //instead of newChallengeID us key name from Challenge Data
     user = await fetch(putRequest).then(response => response.json());
 }
 
@@ -727,4 +728,8 @@ function showAddToCalendarButtons() {
 function hideAddToCalendarButtons() {
     const buttons = document.getElementsByClassName("add-to-calendar-div");
     for (btn of buttons) btn.style.display = "none";
+}
+
+function getIdToken() {
+  return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
 }

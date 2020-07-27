@@ -13,30 +13,89 @@
 // limitations under the License.
 
 package com.google.sps.servlets;
+import com.google.gson.*;
 
-import com.google.gson.Gson;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.json.JsonFactory;
+
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.QueryResultList;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+
 import com.google.sps.data.Challenge;
 import com.google.sps.data.ChallengeData;
+import com.google.sps.data.UserInfo;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javafx.util.Pair;
+
 /** Servlet that manages challenges **/
 @WebServlet("/challenges")
 public class ChallengesServlet extends HttpServlet {
+  private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
+  private static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
+  private static final JsonFactory JSON_FACTORY = new GsonFactory();
+  private static final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
+                       .setAudience(Collections.singletonList(CLIENT_ID))
+                       .build();
+
   private static final int NO_CHALLENGES = 0;
-  private static final String NUM_CHALLENGES = "";
-  private List<String> requested_challenge_list;
+  private static final String NUM_CHALLENGES = "num-challenges";
+  private static final String ID_TOKEN = "id-token";
+  private ArrayList<Challenge> requested_challenge_list = new ArrayList<>();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    int num_challenges = getNumChallenges(NUM_CHALLENGES);
+    int num_challenges = getNumChallenges(request);
+    GoogleIdToken id_token = verifyId(request.getParameter(ID_TOKEN));
+    if (id_token == null) {
+        System.out.println("Invalid ID token.");
+        response.setStatus(400);
+        return;
+    }
+  
+    Payload payload = id_token.getPayload();
+    String user_id = payload.getSubject();
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+    Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, user_id));
+    Entity entity = datastore.prepare(query).asSingleEntity();
+    UserInfo user = UserInfo.convertEntitytoUserInfo(entity, user_id);
+
+    HashMap<String, Integer> challenge_statuses = user.getChallengeStatuses();
+    for(String key : challenge_statuses.keySet()){
+      Challenge my_challenge = ChallengeData.CHALLENGES_MAP.get(key);
+      requested_challenge_list.add(my_challenge);
+    }
+    
 
     String json = convertToJsonUsingGson(requested_challenge_list);
     response.setContentType("application/json;");
@@ -49,19 +108,19 @@ public class ChallengesServlet extends HttpServlet {
   }
 
   /** Converts array of challenges into json format */
-  private String convertToJsonUsingGson(Challenge [] challenge_list){
+  private String convertToJsonUsingGson(ArrayList challenge_list){
     String json = new Gson().toJson(challenge_list);
     return json;
   }
 
-  private void appendChallengesToList(int num_challenges){
+ /* private void appendChallengesToList(int num_challenges){
     
     requested_challenge_list = new ArrayList<>();
     int count = 0; 
     for(int i = 0; i < ChallengeData.CHALLENGES.length; i++){
       requested_challenge_list.add();
     }
-  }
+  } */
 
   /**Returns the number of challenges requested; return 0 if number was invalid */
 
@@ -76,7 +135,7 @@ public class ChallengesServlet extends HttpServlet {
     
   
   */
-  private getNumChallenges(HttpServletRequest request){
+  private int getNumChallenges(HttpServletRequest request){
     String num_of_challenges_requested = request.getParameter(NUM_CHALLENGES);
 
     //convert num_challenges to an int
@@ -88,9 +147,19 @@ public class ChallengesServlet extends HttpServlet {
         return NO_CHALLENGES;
     }
 
-    if (num_challenges > ChallengeData.challenges.length){
+    if (num_challenges > ChallengeData.CHALLENGES.length){
       return NO_CHALLENGES; 
     }
-    return num_challenges
+    return num_challenges;
+  }
+
+  private GoogleIdToken verifyId (String idTokenString){
+   GoogleIdToken idToken = null;
+   try {
+    idToken = verifier.verify(idTokenString);
+   } catch (Exception e) {
+      System.err.println(e.getMessage());
+   }
+   return idToken;
   }
 }

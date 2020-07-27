@@ -62,19 +62,27 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+
+import javafx.util.Pair;
 
 import com.google.sps.data.UserInfo;
 
 /** Servlet that returns events sorted by most recent timestamp */
 @WebServlet("/user")
 public class UserServlet extends HttpServlet {
-
   static final String CHALLENGE_ID_PARAM = "chal";
   static final String CHALLENGE_STATUS_PARAM = "stat";
   static final String ID_TOKEN_PARAM = "id_token";
   static final String NAME = "name";
   private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
-
+  
+  /*private static final Pair<String, Integer> DEF_GARDENING_STATUS = <"Environmentally friendly fertilizer!", 0>;
+  private static final Pair<String, Integer> DEF_RECYCLE_STATUS = <>;
+  private static final Pair<String, Integer> DEF_WASTE_STATUS = <>; */
+  
+  private static final HashMap DEF_CHALLENGES_AND_STATUSES = createMap();
+  
   static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
   static final JsonFactory JSON_FACTORY = new GsonFactory();
 
@@ -112,6 +120,8 @@ public class UserServlet extends HttpServlet {
     response.getWriter().println(user.toJSON());
   }
 
+
+ /** Creates User */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
@@ -130,13 +140,14 @@ public class UserServlet extends HttpServlet {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
 
     Long currentChallengeId = 0L;
-    ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
+    //ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
 
-    datastore.put(new UserInfo(userId, userNickname, null, null, currentChallengeId, challengeStatuses, null).toEntity());
+    datastore.put(new UserInfo(userId, userNickname, null, null, currentChallengeId, DEF_CHALLENGES_AND_STATUSES, null).toEntity());
 
     response.sendRedirect("/feed.html");
   }
 
+  /** Updates userinfo */
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
       GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
@@ -166,7 +177,7 @@ public class UserServlet extends HttpServlet {
               challengeId = Long.parseLong(challengeIdParam);
               if (statusParam != null) {
                   newStatus = Integer.parseInt(statusParam);
-                  updateChallengeStatus(user, challengeId, newStatus);
+                  //updateChallengeStatus(user, (String)challengeId, newStatus);
               } else {
                   updateCurrentChallenge(user, challengeId);
               }
@@ -189,10 +200,10 @@ public class UserServlet extends HttpServlet {
   }
 
   // @Erick If challenge status structure changes, update this method
-  private void updateChallengeStatus(UserInfo user, Long id, int status) {
-      ArrayList<Integer> challengeStatuses = user.getChallengeStatuses();
-      challengeStatuses.set(id.intValue(), status);
-      user.setChallengeStatuses(challengeStatuses);
+  private void updateChallengeStatus(UserInfo user, String key, int status) {
+    HashMap<String, Integer> challengeStatuses = user.getChallengeStatuses();
+    challengeStatuses.put(key, status);
+    user.setChallengeStatuses(challengeStatuses);
   }
 
   private GoogleIdToken verifyId(String idTokenString) {
@@ -204,4 +215,12 @@ public class UserServlet extends HttpServlet {
     }
     return idToken;
   }
+
+  private static HashMap<String, Integer> createMap(){
+    HashMap<String,Integer> my_map = new HashMap<String, Integer>();
+    my_map.put("GARD_0",0);
+    my_map.put("RECY_0",0);
+    my_map.put("WAST_0",0);
+    return my_map;
+ }
 } 

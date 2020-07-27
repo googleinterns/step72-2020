@@ -47,7 +47,17 @@ public final class ChallengeTest {
 
   @Test
   public void toStringTestValid(){
-    System.out.println(challenge_list.get(1).toString());
+    //System.out.println(challenge_list.get(1).toString());
     Assert.assertTrue(challenge_list.get(1).toString().equals("Challenge Type: RECYCLE, Name: Old Electronics"));
+  }
+
+  @Test
+  public void getTypeTestValid(){
+    Assert.assertEquals(challenge_list.get(0).getType(), Challenge.Type.GARDENING);
+  }
+
+  @Test
+  public void getNameTestValid(){
+    Assert.assertEquals(challenge_list.get(0).getName(), "Environmentally friendly fertilizer!");
   }
 }
