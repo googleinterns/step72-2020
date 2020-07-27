@@ -73,27 +73,24 @@ public class UserServlet extends HttpServlet {
   static final String ID_TOKEN_PARAM = "id_token";
   static final String NAME = "name";
   
-  private IdHelper idHelper;
+  private IdHelper idHelper = new GoogleIdHelper();
+  private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
   public void setIdHelper(IdHelper idHelper) {
       this.idHelper = idHelper;
   }
 
+  public void setDatastoreService(DatastoreService service) {
+      this.datastore = service;
+  }
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // Payload payload = GoogleIdHelper.verifyId(request);
-    // if (payload == null) {
-    //     response.setStatus(400);
-    //     return;
-    // }
-    // String userId = payload.getSubject();
-    String userId = GoogleIdHelper.getUserId(request);
+    String userId = idHelper.getUserId(request);
     if (userId == null) {
           response.setStatus(400);
           return;
     }
-
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
     Entity entity = datastore.prepare(query).asSingleEntity();
@@ -115,22 +112,13 @@ public class UserServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // Payload payload = GoogleIdHelper.verifyId(request);
-    // if (payload == null) {
-    //     response.setStatus(400);
-    //     return;
-    // }
-    // String userId = payload.getSubject();
-    // String userNickname = (String) payload.get(NAME);
-    String userId = GoogleIdHelper.getUserId(request);
+    String userId = idHelper.getUserId(request);
     if (userId == null) {
           response.setStatus(400);
           return;
     }
-    String userNickname = GoogleIdHelper.getUserNickname(request);
+    String userNickname = idHelper.getUserNickname(request);
     
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
-
     Long currentChallengeId = 0L;
     // @Erick Change to get length of challenges (replace the 3)
     ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
@@ -148,13 +136,7 @@ public class UserServlet extends HttpServlet {
 
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    //   Payload payload = GoogleIdHelper.verifyId(request);
-    //   if (payload == null) {
-    //     response.setStatus(400);
-    //     return;
-    //   }
-    //   String userId = payload.getSubject();
-      String userId = GoogleIdHelper.getUserId(request);
+      String userId = idHelper.getUserId(request);
       if (userId == null) {
           response.setStatus(400);
           return;
@@ -168,8 +150,6 @@ public class UserServlet extends HttpServlet {
       Long challengeId;
       Integer newStatus;
       Long eventId;
-
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
 
       Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(query).asSingleEntity();

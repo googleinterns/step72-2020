@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.google.gson.*;
 
-interface IdHelper {
-    public static String getUserId(HttpServletRequest request);
-    public static String getUserNickname(HttpServletRequest request);
+public interface IdHelper {
+    public String getUserId(HttpServletRequest request);
+    public String getUserNickname(HttpServletRequest request);
 }

@@ -57,7 +57,7 @@ public final class GoogleIdHelper implements IdHelper {
         return payload;
     }
 
-    public static String getUserId(HttpServletRequest request) {
+    public String getUserId(HttpServletRequest request) {
         Payload payload = verifyId(request);
         if (payload == null) {
             return null;
@@ -65,7 +65,7 @@ public final class GoogleIdHelper implements IdHelper {
         return payload.getSubject();
     }
 
-    public static String getUserNickname(HttpServletRequest request) {
+    public String getUserNickname(HttpServletRequest request) {
         Payload payload = verifyId(request);
         if (payload == null) {
             return null;

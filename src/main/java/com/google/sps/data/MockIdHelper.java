@@ -37,7 +37,7 @@ public final class MockIdHelper implements IdHelper {
     private static Map<String, String> mockPayload = new HashMap<String, String>() {
         {
             put(USER_ID, "00");
-            put(NAME, "mock-username");
+            put(NAME, "Name");
         }
     };
 
@@ -56,7 +56,7 @@ public final class MockIdHelper implements IdHelper {
         return mockPayload;
     }
 
-    public static String getUserId(HttpServletRequest request) {
+    public String getUserId(HttpServletRequest request) {
         Map<String, String> payload = verifyId(request);
         if (payload == null) {
             return null;
@@ -64,7 +64,7 @@ public final class MockIdHelper implements IdHelper {
         return payload.get(USER_ID);
     }
 
-    public static String getUserNickname(HttpServletRequest request) {
+    public String getUserNickname(HttpServletRequest request) {
         Map<String, String> payload = verifyId(request);
         if (payload == null) {
             return null;

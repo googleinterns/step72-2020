@@ -107,14 +107,7 @@ public final class User {
    }
 
    private User() {
-      this.created_events = new ArrayList<Long>();
-      this.bookmarked_events = new ArrayList<Long>();
-      this.added_to_calendar_events = new ArrayList<Long>();
-      this.current_challenge_id = 0L;
-      this.challenge_statuses = new ArrayList<Integer>();
-      this.entity_key = null;
    }
-
 
 
   // @Erick May need to change the following methods if structure of challenge statuses or id changes
