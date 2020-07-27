@@ -1,0 +1,75 @@
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package com.google.sps.data;
+
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import javax.servlet.http.HttpServletRequest;
+import com.google.api.client.json.JsonFactory;
+import java.util.Collections;
+
+
+public final class MockIdHelper {
+
+    static final String ID_TOKEN_PARAM = "id_token";
+    static final String NAME = "name";
+    static final String USER_ID = "userId";
+
+    private Map<String, String> mockPayload = new Map<String, String>();
+    mockPayload.put(USER_ID, "00");
+    mockPayload.put(NAME, "mock-username");
+
+
+    public static Map<String, String> verifyId(HttpServletRequest request) {
+        GoogleIdToken idToken = null;
+        try {
+            idToken = request.getParameter(ID_TOKEN_PARAM);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+        if (idToken == null) {
+            System.out.println("Invalid ID token.");
+            return null;
+        }
+
+        return mockPayload;
+    }
+
+    public static String getUserId(HttpServletRequest request) {
+        Map<String, String> payload = verifyId(request);
+        if (payload == null) {
+            response.setStatus(400);
+            return null;
+        }
+        return payload.get(USER_ID);
+    }
+
+    public static String getUserNickname(HttpServletRequest request) {
+        Map<String, String> payload = verifyId(request);
+        if (payload == null) {
+            response.setStatus(400);
+            return null;
+        }
+        return payload.get(NAME);
+    }
+
+    public void setAcceptableIdToken(String token) {
+
+    }
+}

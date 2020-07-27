@@ -48,12 +48,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
-import com.google.api.client.json.gson.GsonFactory;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -64,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.sps.data.User;
+import com.google.sps.data.GoogleIdHelper;
 
 /** Servlet that returns events sorted by most recent timestamp */
 @WebServlet("/user")
@@ -75,12 +71,6 @@ public class UserServlet extends HttpServlet {
   static final String ADDED_TO_CALENDAR_PARAM = "add";
   static final String ID_TOKEN_PARAM = "id_token";
   static final String NAME = "name";
-
-  // OAuth credentials client ID, used to verify user ID token
-  private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
-
-  static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
-  static final JsonFactory JSON_FACTORY = new GsonFactory();
   
   private Verifier verifier;
 
@@ -88,20 +78,13 @@ public class UserServlet extends HttpServlet {
       this.verifier = verifier;
   }
 
-//   static final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
-//         .setAudience(Collections.singletonList(CLIENT_ID))
-//         .build();
-
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
-    if (idToken == null) {
-        System.out.println("Invalid ID token.");
+    Payload payload = GoogleIdHelper.verifyId(request);
+    if (payload == null) {
         response.setStatus(400);
         return;
     }
-
-    Payload payload = idToken.getPayload();
     String userId = payload.getSubject();
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -126,16 +109,11 @@ public class UserServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
-
-    if (idToken == null) {
-        System.out.println("Invalid ID token.");
+    Payload payload = GoogleIdHelper.verifyId(request);
+    if (payload == null) {
         response.setStatus(400);
         return;
     }
-    
-    Payload payload = idToken.getPayload();
-    
     String userId = payload.getSubject();
     String userNickname = (String) payload.get(NAME);
     
@@ -158,14 +136,11 @@ public class UserServlet extends HttpServlet {
 
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
-      if (idToken == null) {
-        System.out.println("Invalid ID token.");
+      Payload payload = GoogleIdHelper.verifyId(request);
+      if (payload == null) {
         response.setStatus(400);
         return;
       }
-
-      Payload payload = idToken.getPayload();
       String userId = payload.getSubject();
 
       String challengeIdParam = request.getParameter(CHALLENGE_ID_PARAM);
@@ -247,15 +222,4 @@ public class UserServlet extends HttpServlet {
       addedEvents.add(eventId);
       user.setAddedToCalendarEvents(addedEvents);
   }
-
-  private GoogleIdToken verifyId(String idTokenString) {
-    GoogleIdToken idToken = null;
-    try {
-        idToken = verifier.verify(idTokenString);
-    } catch (Exception e) {
-        System.err.println(e.getMessage());
-    }
-    return idToken;
-  }
-
 } 

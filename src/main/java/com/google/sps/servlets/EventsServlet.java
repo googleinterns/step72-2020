@@ -28,6 +28,7 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
 import com.google.sps.data.User;
+import com.google.sps.data.EventWrapper;
 
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
@@ -56,12 +57,8 @@ import com.google.api.services.calendar.model.Events;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Event.ExtendedProperties;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
-import com.google.api.client.json.gson.GsonFactory;
+import com.google.sps.data.GoogleIdHelper;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -80,43 +77,14 @@ import java.util.TimeZone;
 @WebServlet("/events")
 public class EventsServlet extends HttpServlet {
 
-    static final String EVENT = "Event";
-    static final String TIMESTAMP = "timestamp";
-    static final String SUMMARY = "summary";
-    static final String DESCRIPTION = "description";
-    static final String LOCATION = "location";
-    static final String DATETIME = "date_time";
-    static final String CATEGORY = "category";
-    static final String UTC_TIMEZONE = "UTC";
-    static final String DATE = "date";
-    static final String START_TIME = "start";
-    static final String END_TIME = "end";
-    static final String USER_TIMEZONE = "timezone";
-    static final String EVENT_CREATOR = "creator";
-    static final String EVENT_NUM = "EventNum";
-    static final String EVENT_NUM_VALUE = "value";
-    static final String EVENT_ID = "event_id";
-    static final String ID_TOKEN_PARAM = "id_token";
-
-    private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
-
-    static final List<String> CATEGORIES = new ArrayList<String>(
-        Arrays.asList("food_beverage", "nature", "water", "waste_cleanup", "other")
-    );
-
-    static final int MAX_STRING_BYTES = 1500;
-
-    static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
-    static final JsonFactory JSON_FACTORY = new GsonFactory();
-
-    static final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
-        .setAudience(Collections.singletonList(CLIENT_ID))
-        .build();
-
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    public static final String EVENT = "Event";
+    public static final String TIMESTAMP = "timestamp";
+    public static final String USER_TIMEZONE = "timezone";
+    public static final String DATE = "date";
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     FetchOptions fetchOptions = FetchOptions.Builder.withLimit(10);
     Query query = new Query(EVENT).addSort(TIMESTAMP, SortDirection.DESCENDING);
     PreparedQuery pq = datastore.prepare(query);
@@ -125,42 +93,7 @@ public class EventsServlet extends HttpServlet {
 
     List<Event> events = new ArrayList<>();
     for (Entity entity : results) {
-        long timestamp = (long) entity.getProperty(TIMESTAMP);
-        String summary = (String) entity.getProperty(SUMMARY);
-        String description = (String) entity.getProperty(DESCRIPTION);
-        String location = (String) entity.getProperty(LOCATION);
-        Date startTime = (Date) entity.getProperty(START_TIME);
-        Date endTime = (Date) entity.getProperty(END_TIME);
-        String category = (String) entity.getProperty(CATEGORY);
-        String userId = (String) entity.getProperty(EVENT_CREATOR);
-        long eventId = (long) entity.getProperty(EVENT_ID);
-
-        Query userQuery = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
-        Entity eventCreator = datastore.prepare(userQuery).asSingleEntity();
-        String nickname = (String) eventCreator.getProperty(User.NICKNAME);
-
-        DateTime startDateTime = new DateTime(startTime);
-        EventDateTime start = new EventDateTime()
-            .setDateTime(startDateTime)
-            .setTimeZone(UTC_TIMEZONE);
-        DateTime endDateTime = new DateTime(endTime);
-        EventDateTime end = new EventDateTime()
-            .setDateTime(endDateTime)
-            .setTimeZone(UTC_TIMEZONE);
-        Event event = new Event()
-            .setSummary(summary)
-            .setLocation(location)
-            .setDescription(description)
-            .setStart(start)
-            .setEnd(end);
-
-        ExtendedProperties ep = new ExtendedProperties();
-        ep.set(CATEGORY, category);
-        ep.set(EVENT_CREATOR, nickname);
-        ep.set(EVENT_ID, eventId);
-        event.setExtendedProperties(ep);
-    
-        events.add(event);
+        events.add(EventWrapper.convertEntityToEvent(entity));
     }
 
     response.setContentType("application/json; charset=UTF-8");
@@ -172,30 +105,26 @@ public class EventsServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
-      if (idToken == null) {
-        System.out.println("Invalid ID token.");
+      Payload payload = GoogleIdHelper.verifyId(request);
+      if (payload == null) {
         response.setStatus(400);
         return;
       }
-
-      Payload payload = idToken.getPayload();
       String userId = payload.getSubject();
 
-      String eventSummary = request.getParameter(SUMMARY);
-      String eventDescription = request.getParameter(DESCRIPTION);
-      String eventLocation = request.getParameter(LOCATION);
+      String eventSummary = request.getParameter(EventWrapper.SUMMARY);
+      String eventDescription = request.getParameter(EventWrapper.DESCRIPTION);
+      String eventLocation = request.getParameter(EventWrapper.LOCATION);
       String eventDateString = request.getParameter(DATE);
-      String eventStartTimeString = request.getParameter(START_TIME);
-      String eventEndTimeString = request.getParameter(END_TIME);
+      String eventStartTimeString = request.getParameter(EventWrapper.START_TIME);
+      String eventEndTimeString = request.getParameter(EventWrapper.END_TIME);
+      String category = request.getParameter(EventWrapper.CATEGORY);
+
       String timezoneOffset = request.getParameter(USER_TIMEZONE);
-      String category = request.getParameter(CATEGORY);
-
-      eventSummary = sanitizeInput(eventSummary);
-      eventDescription = sanitizeInput(eventDescription);
-      eventLocation = sanitizeInput(eventLocation);
-
-      if (!CATEGORIES.contains(category)) category = "other";
+      if (timezoneOffset == null) {
+          response.setStatus(400);
+          return;
+      }
   
       Date eventStartDateTime = getEventDateTime(eventDateString, eventStartTimeString, timezoneOffset);
       Date eventEndDateTime = getEventDateTime(eventDateString, eventEndTimeString, timezoneOffset);
@@ -206,24 +135,22 @@ public class EventsServlet extends HttpServlet {
           eventEndDateTime = temp;
       }
 
-      long timestamp = System.currentTimeMillis();
+      EventWrapper eventWrapper = new EventWrapper.Builder()
+        .setSummary(eventSummary)
+        .setDescription(eventDescription)
+        .setLocation(eventLocation)
+        .setStartDateTime(eventStartDateTime)
+        .setEndDateTime(eventEndDateTime)
+        .setCategory(category)
+        .setCreator(userId)
+        .build();
 
-      long eventId = getEventId();
-      updateUserCreatedEvents(userId, eventId);
-
-      Entity eventEntity = new Entity(EVENT);
-      eventEntity.setProperty(EVENT_ID, eventId);
-      eventEntity.setProperty(SUMMARY, eventSummary);
-      eventEntity.setProperty(TIMESTAMP, timestamp);
-      eventEntity.setProperty(LOCATION, eventLocation);
-      eventEntity.setProperty(DESCRIPTION, eventDescription);
-      eventEntity.setProperty(START_TIME, eventStartDateTime);
-      eventEntity.setProperty(END_TIME, eventEndDateTime);
-      eventEntity.setProperty(CATEGORY, category);
-      eventEntity.setProperty(EVENT_CREATOR, userId);
-
+      Entity eventEntity = eventWrapper.toEntity();
+        
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(eventEntity);
-
+      updateUserCreatedEvents(userId, eventEntity.getKey().getId());
+    
       response.sendRedirect("/index.html");
   }
 
@@ -255,35 +182,9 @@ public class EventsServlet extends HttpServlet {
       }
   }
 
-  public String sanitizeInput(String input) throws java.io.UnsupportedEncodingException {
-      input = new String( input.getBytes("UTF-8") , 0, Math.min(MAX_STRING_BYTES, input.length()), "UTF-8");
-      return input;
-  }
-
-  public long getEventId() {
-      Query query = new Query(EVENT_NUM);
-      PreparedQuery pq = datastore.prepare(query);
-      QueryResultList<Entity> eventNumResult = pq.asQueryResultList(FetchOptions.Builder.withDefaults());
-
-      Entity eventNumEntity;
-      long eventNumValue;
-      if (eventNumResult.size() == 0) {
-          eventNumEntity = new Entity(EVENT_NUM);
-          eventNumValue = 0;
-          eventNumEntity.setProperty(EVENT_NUM_VALUE, eventNumValue);
-          datastore.put(eventNumEntity);      
-      }
-      else {
-          eventNumEntity = eventNumResult.get(0);
-          eventNumValue = (long)eventNumEntity.getProperty(EVENT_NUM_VALUE)+1;
-          eventNumEntity.setProperty(EVENT_NUM_VALUE, eventNumValue);
-          datastore.put(eventNumEntity);
-      }
-
-      return eventNumValue;
-  }
 
   public void updateUserCreatedEvents(String userId, long eventId) {
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Query userQuery = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(userQuery).asSingleEntity();
       ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(User.CREATED_EVENTS);
@@ -293,13 +194,4 @@ public class EventsServlet extends HttpServlet {
       datastore.put(entity);
   }
 
-  private GoogleIdToken verifyId(String idTokenString) {
-    GoogleIdToken idToken = null;
-    try {
-        idToken = verifier.verify(idTokenString);
-    } catch (Exception e) {
-        System.err.println(e.getMessage());
-    }
-    return idToken;
-  }
 }
