@@ -35,6 +35,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Text;
 import com.google.gson.Gson;
 import com.google.sps.data.WaterSystem;
 
@@ -106,7 +107,7 @@ public class WaterPollutionServlet extends HttpServlet {
             IOException {
         ArrayList<WaterSystem> systems = new ArrayList<>();
 
-        byte[] contaminantsData = Base64.getDecoder().decode((String)waterPollutionEntity.getProperty(WATERSYSTEMS_PROPERTY));
+        byte[] contaminantsData = Base64.getDecoder().decode(((Text)waterPollutionEntity.getProperty(WATERSYSTEMS_PROPERTY)).getValue());
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(contaminantsData));
         ArrayList<Key> waterSystemKeys;
         try {
@@ -155,7 +156,6 @@ public class WaterPollutionServlet extends HttpServlet {
     }
 
     public Key addToDatabase(Key key, ArrayList<WaterSystem> systems) throws IOException {
-        // DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         Entity systemEntity = new Entity(WATER_POLLUTION_ENTITY, key.getName());
         ArrayList<Key> keyList = new ArrayList<Key>();
         for(WaterSystem system: systems){
@@ -165,7 +165,8 @@ public class WaterPollutionServlet extends HttpServlet {
         ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(keyList);
         oos.close();
-        systemEntity.setProperty(WATERSYSTEMS_PROPERTY, Base64.getEncoder().encodeToString(baos.toByteArray()));
+        systemEntity.setProperty(WATERSYSTEMS_PROPERTY, new Text(
+            Base64.getEncoder().encodeToString(baos.toByteArray())));
         datastore.put(systemEntity);
         return systemEntity.getKey();
     }

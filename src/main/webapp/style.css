@@ -5,7 +5,9 @@ html, body {
 }
 
 .content {
-    height: 100%;
+    height: -moz-calc(100% - 80.8px); /* Firefox */
+    height: -webkit-calc(100% - 80.8px); /* Chrome, Safari */
+    height: calc(100% - 80.8px); /* IE9+ and future browsers */
     position: absolute;
     width: 100%;
 }
@@ -451,8 +453,64 @@ html, body {
 .map_overlay {
     border: 20px;
     background-color: white;
+    opacity: 80%;
     overflow-y:auto;
     margin: 20px;
+    max-width: 40%;
+}
+
+.map_overlay h2 {
+    font-size: 18px;
+}
+
+.map_overlay h4, p {
+    font-size: 12px;;
+}
+
+.water_pollution * {
+    visibility: hidden;
+    height: 0px;
+    margin: 0px;
+    text-overflow: ellipsis;
+}
+
+.water_pollution h2 {
+    background-color: lightblue;
+    outline-color: blue;
+    outline-width: 3px;
+    width: fit-content;
+    height: auto;
+    visibility: visible;
+    margin: 10px;
+    border: 10px;
+}
+
+.water_pollution h4 {
+    text-align: right;
+    height: auto;
+    visibility: visible;
+    margin: 10px;
+}
+
+.selected_water_system h4 {
+    text-align: right;
+    height: auto;
+    visibility: visible;
+    margin: 10px;
+    font-size: 14px;
+}
+
+.selected_water_system h2 {
+    font-size: 22px;
+}
+
+.water_pollution h2:hover {
+    background-color: lightskyblue;
+}
+
+.selected_water_system * {
+    visibility: visible;
+    margin: 10px;
 }
 
 #authorize-button, #signout-button {
