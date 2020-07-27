@@ -49,7 +49,7 @@ var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/
 
 
 let user;
-let challenges;
+let challenges = [];
 
 const projectTitle = "GEN Capstone";
 let calendarId = null; 
@@ -65,18 +65,8 @@ eventCategoryIcons.set("other", "🥑🌲🐢");
 const badgeHeight = 120;
 let lastBoldedItem;
 
-async function loadPage() {
-    challenges = createMockChallenges();
 
-    const timezone = document.getElementById("user-timezone");
-    timezone.value = new Date().getTimezoneOffset();
-    const events = await fetch("/events").then(response => response.json());
-    const feed = document.getElementById("events-feed");
-    feed.innerHTML = "";
-    for (event of events) {
-        feed.appendChild(postEvent(event));
-    }
-    
+async function loadChallenges() {
     await getServerChallenges();
 
     setChallengeBox(user.current_challenge_id);
@@ -96,6 +86,21 @@ async function loadPage() {
     }
 }
 
+async function loadEvents() {
+     const timezone = document.getElementById("user-timezone");
+    timezone.value = new Date().getTimezoneOffset();
+
+    const idToken = document.getElementById("id-token");
+    idToken.value = getIdToken();
+
+    let events = await fetch("/events").then(response => response.json());
+    const feed = document.getElementById("events-feed");
+    feed.innerHTML = "";
+    for (event of events) {
+        feed.appendChild(postEvent(event));
+    }
+}
+
 function postEvent(event) {
     const eventEl = document.createElement('div');
     eventEl.className = "event-post";
@@ -111,9 +116,49 @@ function addEventAddToCalendarButton(event) {
     const addToCalDiv = document.createElement('div');
     addToCalDiv.style.height = 10;
     addToCalDiv.className = "add-to-calendar-div";
-    addToCalDiv.innerText = "+";
-    addToCalDiv.onclick = updateCalendar;
+    if (user.added_to_calendar_events.includes(event.extendedProperties.event_id)) checkAddToCalendarButton(addToCalDiv);
+    else {
+        addToCalDiv.innerText = "+";
+        addToCalDiv.onclick = () => { clickAddToCalendar(addToCalDiv, event); };
+        addToCalDiv.onmouseover = () => { addToCalDiv.appendChild(createAddToCalendarPopup()); };
+        addToCalDiv.onmouseout = () => { addToCalDiv.removeChild(addToCalDiv.childNodes[1]); };
+    }
+    
     return addToCalDiv;
+}
+
+async function clickAddToCalendar(addToCalDiv, event) {
+    checkAddToCalendarButton(addToCalDiv);
+
+    let idToken = getIdToken();
+    const putRequest = new Request(`/user?add=${event.extendedProperties.event_id}&id_token=${idToken}`, {method: 'PUT'});
+    user = await fetch(putRequest).then(response => response.json());
+
+    updateCalendar(event);
+}
+
+function checkAddToCalendarButton(addToCalDiv) {
+    const checkmark = document.createElement('img');
+    checkmark.className = "added-to-calendar-checkmark";
+    checkmark.src = "/resources/greencheckmark.png";
+    addToCalDiv.innerHTML = "";
+    addToCalDiv.appendChild(checkmark);
+    addToCalDiv.style.marginRight = "8px";
+    addToCalDiv.style.cursor = "auto";
+
+    addToCalDiv.onclick = () => {};
+    addToCalDiv.onmouseover = () => {};
+    addToCalDiv.onmouseout = () => {};
+}
+
+function createAddToCalendarPopup() {
+    const popup = document.createElement('div');
+    popup.className = "add-to-calendar-popup";
+    
+    popup.innerHTML += `<p class="add-to-calendar-popup-text">Add to Google Calendar</p>
+    <div class="popup-triangle"></div>`;
+    
+    return popup;
 }
 
 function addEventBookmark(event) {
@@ -139,7 +184,7 @@ function addEventUserText(event) {
     const eventUser = document.createElement('p');
     eventUser.className = "event-info";
     // eventUser.innerText = event.creator + " posted an event:";
-    eventUser.innerText = "USER" + " posted an event:";
+    eventUser.innerText = event.extendedProperties.creator + " posted an event:";
 
     return eventUser;
 }
@@ -377,8 +422,8 @@ async function showNewChallengeCompletePage(challenge) {
     else {
         text.innerHTML = `${challenge.get("title")} challenge complete!<br>Next up is the <b>${challenges[newChallengeId].get("title")}</b> challenge`;
     }
-    let id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
-    const putRequest = new Request(`/user?id_token=${id_token}&chal=${newChallengeId}`, {method: 'PUT'});
+    let idToken = getIdToken();
+    const putRequest = new Request(`/user?id_token=${idToken}&chal=${newChallengeId}`, {method: 'PUT'});
     user = await fetch(putRequest).then(response => response.json());
 }
 
@@ -436,8 +481,8 @@ function setNextButton(displayedStep, challenge) {
     nextButton.onclick = async ()=> {
         let currentStatus = user.challenge_statuses[challenge.get("id")];
         if (currentStatus+1 == displayedStep) {
-            let id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
-            const putRequest = new Request(`/user?id_token=${id_token}&chal=${challenge.get("id")}&stat=${currentStatus+1}`, {method: 'PUT'});
+            let idToken = getIdToken();
+            const putRequest = new Request(`/user?id_token=${idToken}&chal=${challenge.get("id")}&stat=${currentStatus+1}`, {method: 'PUT'});
             user = await fetch(putRequest).then(response => response.json());
 
             const navBarItemBackground = document.getElementById("challenges-nav-bar-item-background-"+user.current_challenge_id);
@@ -524,8 +569,8 @@ function checkCheckbox(challenge) {
 }
 
 async function updateUserCurrentChallenge(id) {
-    let id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
-    const putRequest = new Request(`/user?id_token=${id_token}&chal=${id}`, {method: 'PUT'});
+    let idToken = getIdToken();
+    const putRequest = new Request(`/user?id_token=${idToken}&chal=${id}`, {method: 'PUT'});
     user = await fetch(putRequest).then(response => response.json());
 
     setChallengeBox(id);
@@ -548,9 +593,9 @@ function closeCreateEventModal() {
     modal.style.display = "none";
 }
 
-function updateCalendar() {
+function updateCalendar(event) {
     gapi.client.calendar.calendarList.list().then(function(response) {
-          var calendars = response.result.items;
+          let calendars = response.result.items;
           for (calendar of calendars) {
               if (calendar.summary == projectTitle) {
                   calendarId = calendar.id;
@@ -558,52 +603,28 @@ function updateCalendar() {
           }
 
         if (calendarId == null) {
-            var calendarRequest = gapi.client.calendar.calendars.insert({
+            let calendarRequest = gapi.client.calendar.calendars.insert({
                 'summary': projectTitle
             });
 
             calendarRequest.execute(function(response) {
                 calendarId = response.id;
-            addEventToCalendar();
+            addEventToCalendar(event);
             });
         }
         else {
-            addEventToCalendar();
+            addEventToCalendar(event);
         };    
     });
-
 }
 
-function addEventToCalendar() {
-    var event = {
-        'summary': 'Google I/O 2015',
-        'location': '800 Howard St., San Francisco, CA 94103',
-        'description': 'A chance to hear more about Google\'s developer products.',
-        'start': {
-            'dateTime': '2020-07-12T09:00:00-07:00',
-            'timeZone': 'America/Los_Angeles'
-        },
-       'end': {
-          'dateTime': '2020-07-12T17:00:00-07:00',
-          'timeZone': 'America/Los_Angeles'
-        },
-        'recurrence': [
-            'RRULE:FREQ=DAILY;COUNT=2'
-        ],
-        'attendees': [
-            {'email': 'lpage@example.com'},
-            {'email': 'sbrin@example.com'}
-        ],
-        'reminders': {
-            'useDefault': false,
-            'overrides': [
-            {'method': 'email', 'minutes': 24 * 60},
-            {'method': 'popup', 'minutes': 10}
-            ]
-        }
-    };
+function addEventToCalendar(event) {
+    let start = moment(event.start.dateTime.value).format('YYYY-MM-DD[T]HH:mm:ssZZ');
+    event.start.dateTime = start;
+    let end = moment(event.end.dateTime.value).format('YYYY-MM-DD[T]HH:mm:ssZZ');
+    event.end.dateTime = end;
 
-    var request = gapi.client.calendar.events.insert({
+    let request = gapi.client.calendar.events.insert({
             'calendarId': calendarId,
             'resource': event
         });
@@ -611,15 +632,12 @@ function addEventToCalendar() {
 }
 
 async function getUserInfo() {
-    let auth2 = gapi.auth2.getAuthInstance();
-    let profile = auth2.currentUser.get().getBasicProfile();
-    let id_token = auth2.currentUser.get().getAuthResponse().id_token;
-    let response = await fetch(`/user?id_token=${id_token}`);
+    let idToken = getIdToken();
+    let response = await fetch(`/user?id_token=${idToken}`);
     if (response.status == 404) {
-        let name = profile.getName();
-        const postRequest = new Request(`/user?id_token=${id_token}`, {method: "POST"});
+        const postRequest = new Request(`/user?id_token=${idToken}`, {method: "POST"});
         await fetch(postRequest);
-        response = await fetch(`/user?id_token=${id_token}`)
+        response = await fetch(`/user?id_token=${idToken}`)
     }
     user = await response.json();
 }
@@ -653,7 +671,7 @@ function initClient() {
     signoutButton.onclick = handleSignoutClick;
     
 }, function(error) {
-        appendPre(JSON.stringify(error, null, 2));
+        console.log(JSON.stringify(error, null, 2));
     });
 }
 
@@ -670,13 +688,14 @@ if (isSignedIn) {
     signoutButton.style.display = 'block';
     feedRightSide.style.display = "block";  
     await getUserInfo();
-    await loadPage();
+    await loadEvents();
+    await loadChallenges();
     showAddToCalendarButtons();
 } else {
     authorizeButton.style.display = 'block';
     signoutButton.style.display = 'none';
     feedRightSide.style.display = "none";
-    await loadPage();
+    await loadEvents();
     hideAddToCalendarButtons();
 }
 }
@@ -695,18 +714,6 @@ function handleSignoutClick(event) {
     gapi.auth2.getAuthInstance().signOut();
 }
 
-/**
-* Append a pre element to the body containing the given message
-* as its text node. Used to display the results of the API call.
-*
-* @param {string} message Text to be placed in pre element.
-*/
-function appendPre(message) {
-    const pre = document.getElementById('content');
-    const textContent = document.createTextNode(message + '\n');
-    pre.appendChild(textContent);
-} 
-
 function showAddToCalendarButtons() {
     const buttons = document.getElementsByClassName("add-to-calendar-div");
     for (btn of buttons) btn.style.display = "block";
@@ -715,4 +722,8 @@ function showAddToCalendarButtons() {
 function hideAddToCalendarButtons() {
     const buttons = document.getElementsByClassName("add-to-calendar-div");
     for (btn of buttons) btn.style.display = "none";
+}
+
+function getIdToken() {
+    return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
 }
