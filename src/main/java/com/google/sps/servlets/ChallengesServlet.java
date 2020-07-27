@@ -37,7 +37,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 
 import com.google.sps.data.Challenge;
 import com.google.sps.data.ChallengeData;
-import com.google.sps.data.UserInfo;
+import com.google.sps.data.User;
 
 import java.io.IOException;
 import java.net.URL;
@@ -86,9 +86,9 @@ public class ChallengesServlet extends HttpServlet {
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-    Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, user_id));
+    Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, user_id));
     Entity entity = datastore.prepare(query).asSingleEntity();
-    UserInfo user = UserInfo.convertEntitytoUserInfo(entity, user_id);
+    User user = User.convertEntitytoUser(entity, user_id);
 
     HashMap<String, Integer> challenge_statuses = user.getChallengeStatuses();
     for(String key : challenge_statuses.keySet()){
@@ -96,7 +96,6 @@ public class ChallengesServlet extends HttpServlet {
       requested_challenge_list.add(my_challenge);
     }
     
-
     String json = convertToJsonUsingGson(requested_challenge_list);
     response.setContentType("application/json;");
     response.getWriter().println(json);

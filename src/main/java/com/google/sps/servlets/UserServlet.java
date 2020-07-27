@@ -48,12 +48,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
-import com.google.api.client.json.gson.GsonFactory;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -66,45 +61,33 @@ import java.util.HashMap;
 
 import javafx.util.Pair;
 
-import com.google.sps.data.UserInfo;
+import com.google.sps.data.User;
+import com.google.sps.data.GoogleIdHelper;
 
 /** Servlet that returns events sorted by most recent timestamp */
 @WebServlet("/user")
 public class UserServlet extends HttpServlet {
   static final String CHALLENGE_ID_PARAM = "chal";
   static final String CHALLENGE_STATUS_PARAM = "stat";
+  static final String BOOKMARKED_EVENT_PARAM = "book";
+  static final String ADDED_TO_CALENDAR_PARAM = "add";
   static final String ID_TOKEN_PARAM = "id_token";
   static final String NAME = "name";
-  private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
-  
-  /*private static final Pair<String, Integer> DEF_GARDENING_STATUS = <"Environmentally friendly fertilizer!", 0>;
-  private static final Pair<String, Integer> DEF_RECYCLE_STATUS = <>;
-  private static final Pair<String, Integer> DEF_WASTE_STATUS = <>; */
-  
-  private static final HashMap DEF_CHALLENGES_AND_STATUSES = createMap();
-  
-  static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
-  static final JsonFactory JSON_FACTORY = new GsonFactory();
 
-  static final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
-        .setAudience(Collections.singletonList(CLIENT_ID))
-        .build();
+  private static final HashMap DEF_CHALLENGES_AND_STATUSES = createMap();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
-    if (idToken == null) {
-        System.out.println("Invalid ID token.");
+    Payload payload = GoogleIdHelper.verifyId(request);
+    if (payload == null) {
         response.setStatus(400);
         return;
     }
-
-    Payload payload = idToken.getPayload();
     String userId = payload.getSubject();
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-    Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
+    Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
     Entity entity = datastore.prepare(query).asSingleEntity();
 
     if (entity == null) {
@@ -112,7 +95,7 @@ public class UserServlet extends HttpServlet {
         return;
     }
 
-    UserInfo user = UserInfo.convertEntitytoUserInfo(entity, userId);
+    User user = User.convertEntitytoUser(entity, userId);
 
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
@@ -124,53 +107,54 @@ public class UserServlet extends HttpServlet {
  /** Creates User */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
-
-    if (idToken == null) {
-        System.out.println("Invalid ID token.");
+    Payload payload = GoogleIdHelper.verifyId(request);
+    if (payload == null) {
         response.setStatus(400);
         return;
     }
-
-    Payload payload = idToken.getPayload();
-    
     String userId = payload.getSubject();
     String userNickname = (String) payload.get(NAME);
     
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
-
     Long currentChallengeId = 0L;
-    //ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
 
-    datastore.put(new UserInfo(userId, userNickname, null, null, currentChallengeId, DEF_CHALLENGES_AND_STATUSES, null).toEntity());
+    ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
 
-    response.sendRedirect("/feed.html");
+    User user = new User.Builder(userId)
+        .setNickname(userNickname)
+        .setCurrentChallengeId(currentChallengeId)
+        .setChallengeStatuses(DEF_CHALLENGES_AND_STATUSES)
+        .build();
+
+    datastore.put(user.toEntity());
+
+    response.sendRedirect("/index.html");
   }
 
   /** Updates userinfo */
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      GoogleIdToken idToken = verifyId(request.getParameter(ID_TOKEN_PARAM));
-      if (idToken == null) {
-        System.out.println("Invalid ID token.");
+      Payload payload = GoogleIdHelper.verifyId(request);
+      if (payload == null) {
         response.setStatus(400);
         return;
       }
-
-      Payload payload = idToken.getPayload();
       String userId = payload.getSubject();
 
       String challengeIdParam = request.getParameter(CHALLENGE_ID_PARAM);
       String statusParam = request.getParameter(CHALLENGE_STATUS_PARAM);
+      String bookmarkedEventParam = request.getParameter(BOOKMARKED_EVENT_PARAM);
+      String addedToCalendarParam = request.getParameter(ADDED_TO_CALENDAR_PARAM);
 
       Long challengeId;
       Integer newStatus;
+      Long eventId;
 
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
 
-      Query query = new Query(UserInfo.DATA_TYPE).setFilter(new FilterPredicate(UserInfo.ID, FilterOperator.EQUAL, userId));
+      Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(query).asSingleEntity();
-      UserInfo user = UserInfo.convertEntitytoUserInfo(entity, userId);
+      User user = User.convertEntitytoUser(entity, userId);
 
       if (challengeIdParam != null) {
           try {
@@ -181,6 +165,22 @@ public class UserServlet extends HttpServlet {
               } else {
                   updateCurrentChallenge(user, challengeId);
               }
+          } catch (Exception e) {
+              System.err.println(e.getMessage());
+          }
+      } 
+      else if (bookmarkedEventParam != null) {
+          try {
+              eventId = Long.parseLong(bookmarkedEventParam);
+              updateBookmarkedEvents(user, eventId);
+          } catch (Exception e) {
+              System.err.println(e.getMessage());
+          }
+      }
+      else if (addedToCalendarParam != null) {
+          try {
+              eventId = Long.parseLong(addedToCalendarParam);
+              updateAddedToCalendarEvents(user, eventId);
           } catch (Exception e) {
               System.err.println(e.getMessage());
           }
@@ -195,25 +195,29 @@ public class UserServlet extends HttpServlet {
   }
 
   // @Erick If challenge id structure changes, update this method
-  private void updateCurrentChallenge(UserInfo user, Long id) {
+  private void updateCurrentChallenge(User user, Long id) {
       user.setCurrentChallenge(id);
   }
 
-  // @Erick If challenge status structure changes, update this method
-  private void updateChallengeStatus(UserInfo user, String key, int status) {
+
+  private void updateChallengeStatus(User user, String key, int status) {
     HashMap<String, Integer> challengeStatuses = user.getChallengeStatuses();
     challengeStatuses.put(key, status);
     user.setChallengeStatuses(challengeStatuses);
   }
 
-  private GoogleIdToken verifyId(String idTokenString) {
-    GoogleIdToken idToken = null;
-    try {
-        idToken = verifier.verify(idTokenString);
-    } catch (Exception e) {
-        System.err.println(e.getMessage());
-    }
-    return idToken;
+  private void updateBookmarkedEvents(User user, Long eventId) {
+      ArrayList<Long> bookmarkedEvents = user.getBookmarkedEvents();
+      if (bookmarkedEvents == null) bookmarkedEvents = new ArrayList<Long>();
+      bookmarkedEvents.add(eventId);
+      user.setBookmarkedEvents(bookmarkedEvents);
+  }
+
+  private void updateAddedToCalendarEvents(User user, Long eventId) {
+      ArrayList<Long> addedEvents = user.getAddedToCalendarEvents();
+      if (addedEvents == null) addedEvents = new ArrayList<Long>();
+      addedEvents.add(eventId);
+      user.setAddedToCalendarEvents(addedEvents);
   }
 
   private static HashMap<String, Integer> createMap(){
