@@ -41,7 +41,7 @@ public final class User {
   private ArrayList<Long> created_events;
   private ArrayList<Long> bookmarked_events;
   private ArrayList<Long> added_to_calendar_events;
-  private Long current_challenge_id;
+  private String current_challenge_id;
   HashMap <String, Integer> challenge_statuses;
   /* Stored so that calls to datastore.put(entity) will overwrite the user with the
    same userId if such a user already exists -- prevents multiple instances of 
@@ -54,7 +54,7 @@ public final class User {
         private ArrayList<Long> created_events;
         private ArrayList<Long> bookmarked_events;
         private ArrayList<Long> added_to_calendar_events;
-        private Long current_challenge_id;
+        private String current_challenge_id;
         private HashMap <String, Integer> challenge_statuses;
         private Key entity_key;
 
@@ -80,7 +80,7 @@ public final class User {
             else this.added_to_calendar_events = (ArrayList) added_to_calendar_events.clone();
             return this;
         }
-        public Builder setCurrentChallengeId(Long current_challenge_id){
+        public Builder setCurrentChallengeId(String current_challenge_id){
             this.current_challenge_id = current_challenge_id;
             return this;
         }
@@ -113,17 +113,17 @@ public final class User {
       this.created_events = new ArrayList<Long>();
       this.bookmarked_events = new ArrayList<Long>();
       this.added_to_calendar_events = new ArrayList<Long>();
-      this.current_challenge_id = 0L;
+      this.current_challenge_id = "WAST_0";
       this.challenge_statuses = new HashMap<>();
       this.entity_key = null;
    }
 
   // @Erick May need to change the following methods if structure of challenge statuses or id changes
-  public Long getCurrentChallenge() {
+  public String getCurrentChallenge() {
       return this.current_challenge_id;
   }
 
-  public void setCurrentChallenge(Long chal_id) {
+  public void setCurrentChallenge(String chal_id) {
       this.current_challenge_id = chal_id;
   }
 
@@ -167,7 +167,7 @@ public final class User {
   public static User convertEntitytoUser(Entity entity, String userId) {
     Key entityKey = entity.getKey();
     String nickname = (String) entity.getProperty(NICKNAME);
-    Long currentChallengeId = (Long) entity.getProperty(CURRENT_CHALLENGE);
+    String currentChallengeId = (String) entity.getProperty(CURRENT_CHALLENGE);
     ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(CREATED_EVENTS);
     ArrayList<Long> bookmarkedEvents = (ArrayList<Long>) entity.getProperty(BOOKMARKED_EVENTS);
     ArrayList<Long> addedEvents = (ArrayList<Long>) entity.getProperty(ADDED_TO_CALENDAR_EVENTS);

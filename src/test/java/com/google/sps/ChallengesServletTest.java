@@ -18,6 +18,7 @@ import org.junit.runners.JUnit4;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito.*;
 
+
 @RunWith(JUnit4.class)
 public final class ChallengesServletTest {
   private ChallengesServlet servlet;
@@ -41,7 +42,7 @@ public final class ChallengesServletTest {
       when(response.getWriter()).thenReturn(pw);
       servlet.doGet(request, response);
       pw.flush();
-      Assert.assertEquals(new Gson().toJson(ChallengeData.CHALLENGES),
+      Assert.assertEquals(new Gson().toJson(ChallengeData.CHALLENGES_MAP),
                           writer.toString().trim());
     } catch (IOException e) {}
   }

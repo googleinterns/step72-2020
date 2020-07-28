@@ -60,25 +60,15 @@ public final class ChallengeData {
     
     public static final Map<String,Challenge> CHALLENGES_MAP = createMap();
 
-    public static final Challenge[] CHALLENGES = {
-        new Challenge(Challenge.Type.GARDENING, GARDENING_CHALLENGE_0, GARDENING_STEPS_0),
-        new Challenge(Challenge.Type.RECYCLE, RECYCLE_CHALLENGE_0, RECYCLE_STEPS_0),
-        new Challenge(Challenge.Type.WASTE, WASTE_CHALLENGE_0, WASTE_STEPS_0),
-        new Challenge(Challenge.Type.GARDENING, GARDENING_CHALLENGE_1, GARDENING_STEPS_1),
-        new Challenge(Challenge.Type.RECYCLE, RECYCLE_CHALLENGE_1, RECYCLE_STEPS_1),
-        new Challenge(Challenge.Type.WASTE, WASTE_CHALLENGE_1, WASTE_STEPS_1)
-    };
-
-
     /*To avoid unwanted behavior, a function is used for initialization. */
     private static Map<String, Challenge> createMap(){
       Map<String,Challenge> my_map = new HashMap<String, Challenge>();
-      my_map.put(GARD_0,new Challenge(Challenge.Type.GARDENING, GARDENING_CHALLENGE_0, GARDENING_STEPS_0));
-      my_map.put(GARD_1,new Challenge(Challenge.Type.GARDENING, GARDENING_CHALLENGE_1, GARDENING_STEPS_1));
-      my_map.put(RECY_0,new Challenge(Challenge.Type.RECYCLE, RECYCLE_CHALLENGE_0, RECYCLE_STEPS_0));
-      my_map.put(RECY_1,new Challenge(Challenge.Type.RECYCLE, RECYCLE_CHALLENGE_0, RECYCLE_STEPS_0));        
-      my_map.put(WAST_0,new Challenge(Challenge.Type.WASTE, WASTE_CHALLENGE_0, WASTE_STEPS_0));
-      my_map.put(WAST_1,new Challenge(Challenge.Type.WASTE, WASTE_CHALLENGE_1, WASTE_STEPS_1));
+      my_map.put(GARD_0,new Challenge(Challenge.Type.GARDENING,GARD_0,GARDENING_CHALLENGE_0, GARDENING_STEPS_0));
+      my_map.put(GARD_1,new Challenge(Challenge.Type.GARDENING,GARD_1,GARDENING_CHALLENGE_1, GARDENING_STEPS_1));
+      my_map.put(RECY_0,new Challenge(Challenge.Type.RECYCLE,RECY_0,RECYCLE_CHALLENGE_0, RECYCLE_STEPS_0));
+      my_map.put(RECY_1,new Challenge(Challenge.Type.RECYCLE,RECY_1,RECYCLE_CHALLENGE_0, RECYCLE_STEPS_0));        
+      my_map.put(WAST_0,new Challenge(Challenge.Type.WASTE,WAST_0,WASTE_CHALLENGE_0, WASTE_STEPS_0));
+      my_map.put(WAST_1,new Challenge(Challenge.Type.WASTE,WAST_1,WASTE_CHALLENGE_1, WASTE_STEPS_1));
       return my_map;
     }
 

@@ -116,9 +116,7 @@ public class UserServlet extends HttpServlet {
     String userNickname = (String) payload.get(NAME);
     
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
-    Long currentChallengeId = 0L;
-
-    ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
+    String currentChallengeId = "GARD_0";
 
     User user = new User.Builder(userId)
         .setNickname(userNickname)
@@ -146,7 +144,7 @@ public class UserServlet extends HttpServlet {
       String bookmarkedEventParam = request.getParameter(BOOKMARKED_EVENT_PARAM);
       String addedToCalendarParam = request.getParameter(ADDED_TO_CALENDAR_PARAM);
 
-      Long challengeId;
+      String challengeId;
       Integer newStatus;
       Long eventId;
 
@@ -158,12 +156,11 @@ public class UserServlet extends HttpServlet {
 
       if (challengeIdParam != null) {
           try {
-              challengeId = Long.parseLong(challengeIdParam);
               if (statusParam != null) {
                   newStatus = Integer.parseInt(statusParam);
-                  //updateChallengeStatus(user, (String)challengeId, newStatus);
+                  updateChallengeStatus(user, challengeIdParam, newStatus);
               } else {
-                  updateCurrentChallenge(user, challengeId);
+                  updateCurrentChallenge(user, challengeIdParam);
               }
           } catch (Exception e) {
               System.err.println(e.getMessage());
@@ -195,7 +192,7 @@ public class UserServlet extends HttpServlet {
   }
 
   // @Erick If challenge id structure changes, update this method
-  private void updateCurrentChallenge(User user, Long id) {
+  private void updateCurrentChallenge(User user, String id) {
       user.setCurrentChallenge(id);
   }
 

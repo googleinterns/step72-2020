@@ -112,28 +112,6 @@ public class ChallengesServlet extends HttpServlet {
     return json;
   }
 
- /* private void appendChallengesToList(int num_challenges){
-    
-    requested_challenge_list = new ArrayList<>();
-    int count = 0; 
-    for(int i = 0; i < ChallengeData.CHALLENGES.length; i++){
-      requested_challenge_list.add();
-    }
-  } */
-
-  /**Returns the number of challenges requested; return 0 if number was invalid */
-
-  /* Future reference for refactor: 
-  doGet(...,...) {
-    int num_gardening_challenges = getNumChallenges(request.getParameter(NUM_GARDENING_CHALLENGES), ChallengeData.GARDENING);
-    int num_waste_challenges = ...
-    int ...   
-    }
-  
-  getNumChallenges (String num_challenges, List challenges) {}
-    
-  
-  */
   private int getNumChallenges(HttpServletRequest request){
     String num_of_challenges_requested = request.getParameter(NUM_CHALLENGES);
 
@@ -146,7 +124,7 @@ public class ChallengesServlet extends HttpServlet {
         return NO_CHALLENGES;
     }
 
-    if (num_challenges > ChallengeData.CHALLENGES.length){
+    if (num_challenges > ChallengeData.CHALLENGES_MAP.size()){
       return NO_CHALLENGES; 
     }
     return num_challenges;
