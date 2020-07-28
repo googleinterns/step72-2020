@@ -43,6 +43,17 @@ public class WaterSystem {
     public static final String SPLITERATOR = "\",\"";
     public static final int TOTAL_CELL_COUNT = 21;
 
+    private static final int PUBLIC_WATER_SYSTEM_ID_COLUMN = 0;
+    private static final int NAME_COLUMN = 1;
+    private static final int STATE_COLUMN = 3;
+    private static final int CITY_COLUMN = 45;
+    private static final int COUNTY_COLUMN = 46;
+    private static final int POPULATION_COLUMN = 15;
+
+    private static final int CONTAMINANT_NAME_COLUMN = 7;
+    private static final int VIOLATION_COLUMN = 18;
+    private static final int ENFORCEMENT_ACTION_COLUMN = 17;
+
     public static final String WATER_SYSTEM_ENTITY = "WaterSystem";
     public static final String PWSID_PROPERTY = "pwsid";
     public static final String NAME_PROPERTY = "name";
@@ -59,8 +70,6 @@ public class WaterSystem {
     private String city;
     private String county;
     private int populationServed;
-
-    // DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     public WaterSystem(String pwsid, String name, String state, String city, String county, int populationServed) {
         this.pwsid = pwsid;
@@ -81,16 +90,17 @@ public class WaterSystem {
         URL url;
         try {
             url = new URL(EPA_WATERSYSTEM_LINK + pwsid + CSV_FORMAT);
-            Scanner scanner = new Scanner(url.openStream());
-            scanner.nextLine();
-            if (scanner.hasNextLine()) {
-                String[] cells = scanner.nextLine().split(SPLITERATOR);
-                this.name = cells[1];
-                this.state = cells[3];
-                this.city = cells[45];
-                this.county = cells[46];
-                this.populationServed = Integer.parseInt(cells[15]);
-            } else {
+            CSVParser csvParser = CSVParser.parse(url, Charset.defaultCharset(),
+            CSVFormat.EXCEL.withFirstRecordAsHeader());
+            try {
+                CSVRecord csvRecord = csvParser.getRecords().get(0);
+                this.name = csvRecord.get(NAME_COLUMN);
+                this.state = csvRecord.get(STATE_COLUMN);
+                this.city = csvRecord.get(CITY_COLUMN);
+                this.county = csvRecord.get(STATE_COLUMN);
+                this.populationServed = Integer.parseInt(csvRecord.get(POPULATION_COLUMN));
+                this.contaminants = new ArrayList<WaterContaminant>();
+            } catch (IndexOutOfBoundsException e) {
                 logger.error("There is no data for " + pwsid);
             }
         } catch (IOException e) {
@@ -99,12 +109,12 @@ public class WaterSystem {
     }
 
     public WaterSystem(CSVRecord csvRecord) {
-        this.pwsid = csvRecord.get(0);
-        this.name = csvRecord.get(1);
-        this.state = csvRecord.get(3);
-        this.city = csvRecord.get(45);
-        this.county = csvRecord.get(46);
-        this.populationServed = Integer.parseInt(csvRecord.get(15));
+        this.pwsid = csvRecord.get(PUBLIC_WATER_SYSTEM_ID_COLUMN);
+        this.name = csvRecord.get(NAME_COLUMN);
+        this.state = csvRecord.get(STATE_COLUMN);
+        this.city = csvRecord.get(CITY_COLUMN);
+        this.county = csvRecord.get(COUNTY_COLUMN);
+        this.populationServed = Integer.parseInt(csvRecord.get(POPULATION_COLUMN));
         this.contaminants = new ArrayList<WaterContaminant>();
     }
 
@@ -143,10 +153,10 @@ public class WaterSystem {
             CSVParser csvParser = CSVParser.parse(url, Charset.defaultCharset(),
                     CSVFormat.EXCEL.withFirstRecordAsHeader());
             for (CSVRecord csvRecord : csvParser.getRecords()) {
-                String contaminantName = csvRecord.get(7);
+                String contaminantName = csvRecord.get(CONTAMINANT_NAME_COLUMN);
                 contaminantsMap.putIfAbsent(contaminantName, new WaterContaminant(csvRecord));
-                String violationDate = csvRecord.get(18);
-                String enforcementAction = csvRecord.get(17);
+                String violationDate = csvRecord.get(VIOLATION_COLUMN);
+                String enforcementAction = csvRecord.get(ENFORCEMENT_ACTION_COLUMN);
                 contaminantsMap.get(contaminantName).addViolationInstance(violationDate, enforcementAction);
             }
             csvParser.close();
@@ -211,6 +221,13 @@ public class WaterSystem {
         public static final String DEFINITION_PROPERTY = "definition";
         public static final String HEALTH_PROPERTY = "health";
         public static final String VIOLATIONS_PROPERTY = "violations";
+
+        private static final int CONTAMINANT_CODE_COLUMN = 6;
+        private static final int CONTAMINANT_NAME_COLUMN = 7;
+        private static final int SOURCES_COLUMN = 8;
+        private static final int DEFINITION_COLUMN = 9;
+        private static final int HEALTH_EFFECTS_COLUMN = 10;
+
         private int contaminantCode;
         private String contaminantName;
         private String sources;
@@ -220,11 +237,11 @@ public class WaterSystem {
         private HashMap<String, ArrayList<String>> violations;
 
         public WaterContaminant(CSVRecord csvRecord) {
-            contaminantCode = Integer.parseInt(csvRecord.get(6));
-            contaminantName = csvRecord.get(7);
-            sources = csvRecord.get(8);
-            definition = csvRecord.get(9);
-            healthEffects = csvRecord.get(10);
+            contaminantCode = Integer.parseInt(csvRecord.get(CONTAMINANT_CODE_COLUMN));
+            contaminantName = csvRecord.get(CONTAMINANT_NAME_COLUMN);
+            sources = csvRecord.get(SOURCES_COLUMN);
+            definition = csvRecord.get(DEFINITION_COLUMN);
+            healthEffects = csvRecord.get(HEALTH_EFFECTS_COLUMN);
             violations = new HashMap<String, ArrayList<String>>();
         }
 
