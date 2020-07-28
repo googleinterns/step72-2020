@@ -73,6 +73,7 @@ public class UserServlet extends HttpServlet {
   static final String ADDED_TO_CALENDAR_PARAM = "add";
   static final String ID_TOKEN_PARAM = "id_token";
   static final String NAME = "name";
+  static final String DEF_CHALLENGE_ID = "GARD_0";
 
   private static final HashMap DEF_CHALLENGES_AND_STATUSES = createMap();
 
@@ -116,7 +117,7 @@ public class UserServlet extends HttpServlet {
     String userNickname = (String) payload.get(NAME);
     
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
-    String currentChallengeId = "GARD_0";
+    String currentChallengeId = DEF_CHALLENGE_ID;
 
     User user = new User.Builder(userId)
         .setNickname(userNickname)

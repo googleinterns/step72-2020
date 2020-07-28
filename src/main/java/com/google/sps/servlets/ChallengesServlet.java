@@ -101,9 +101,17 @@ public class ChallengesServlet extends HttpServlet {
     response.getWriter().println(json);
   }
 
+  
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+    int num_challenges = getNumChallenges(request);
+    GoogleIdToken id_token = verifyId(request.getParameter(ID_TOKEN));
+    if (id_token == null) {
+        System.out.println("Invalid ID token.");
+        response.setStatus(400);
+        return;
+    }
+    
   }
 
   /** Converts array of challenges into json format */

@@ -17,9 +17,11 @@ package com.google.sps.data;
 import com.google.gson.*;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+
 
 import com.google.appengine.api.datastore.EmbeddedEntity;
 import com.google.appengine.api.datastore.Entity;
@@ -42,7 +44,9 @@ public final class User {
   private ArrayList<Long> bookmarked_events;
   private ArrayList<Long> added_to_calendar_events;
   private String current_challenge_id;
-  HashMap <String, Integer> challenge_statuses;
+  private HashMap<String, Integer> challenge_statuses;
+  private HashSet<String> completed_challenges = new HashSet<>();
+
   /* Stored so that calls to datastore.put(entity) will overwrite the user with the
    same userId if such a user already exists -- prevents multiple instances of 
    same user being stored */
@@ -55,7 +59,8 @@ public final class User {
         private ArrayList<Long> bookmarked_events;
         private ArrayList<Long> added_to_calendar_events;
         private String current_challenge_id;
-        private HashMap <String, Integer> challenge_statuses;
+        private HashMap<String, Integer> challenge_statuses;
+        private HashSet<String> completed_challenges = new HashSet<>();
         private Key entity_key;
 
         public Builder(String id) {
@@ -85,7 +90,6 @@ public final class User {
             return this;
         }
         public Builder setChallengeStatuses(HashMap<String, Integer> challenge_statuses){
-            // @Erick May need to change this initialization if structure of challenge statuses changes
             if (challenge_statuses == null) this.challenge_statuses = new HashMap<String, Integer>();
             else this.challenge_statuses = (HashMap) challenge_statuses.clone();
             return this;
@@ -115,10 +119,10 @@ public final class User {
       this.added_to_calendar_events = new ArrayList<Long>();
       this.current_challenge_id = "";
       this.challenge_statuses = new HashMap<>();
+      this.completed_challenges = new HashSet<>();
       this.entity_key = null;
    }
 
-  // @Erick May need to change the following methods if structure of challenge statuses or id changes
   public String getCurrentChallenge() {
       return this.current_challenge_id;
   }
@@ -129,6 +133,10 @@ public final class User {
 
   public HashMap<String, Integer> getChallengeStatuses() {
       return (HashMap) this.challenge_statuses;
+  }
+
+  public HashSet<String> getCompletedChallenges(){
+      return (HashSet) this.completed_challenges;
   }
 
   // challenge_statuses param should not be null
