@@ -354,30 +354,6 @@ async function getServerChallenges(numChallenges){
         break;
     }
   }
-  /*var i;
-  for(i = 0; i < challengeJson.length; i++){
-    challenges[i] = new Map();
-    challenges[i].set("id", i);
-    challenges[i].set("key", challengeJson[i].index)
-    challenges[i].set("title", challengeJson[i].name);
-    challenges[i].set("type", challengeJson[i].challenge_type);
-    challenges[i].set("steps", challengeJson[i].steps_desc_pair);
-
-    switch (challenges[i].get("type")) {
-      case("RECYCLE"):
-        challenges[i].set("icon", "♻️");
-        break;
-      case("GARDENING"):
-        challenges[i].set("icon", "🌱");
-        break;
-      case("WASTE"):
-        challenges[i].set("icon", "🗑");
-        break;
-      default:
-        challenges[i].set("icon", "⚠");
-        break;
-    }
-  } */
 }
 
 function boldCurrentChallengeTitle(chosenItem) {

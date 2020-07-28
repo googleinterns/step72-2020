@@ -113,7 +113,7 @@ public final class User {
       this.created_events = new ArrayList<Long>();
       this.bookmarked_events = new ArrayList<Long>();
       this.added_to_calendar_events = new ArrayList<Long>();
-      this.current_challenge_id = "WAST_0";
+      this.current_challenge_id = "";
       this.challenge_statuses = new HashMap<>();
       this.entity_key = null;
    }
