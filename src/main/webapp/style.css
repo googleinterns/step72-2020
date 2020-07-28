@@ -157,6 +157,10 @@ html, body {
     margin-bottom: 30px;
 }
 
+.event-post:hover {
+    box-shadow: 0 0 8px grey;
+}
+
 .event-bookmark {
     height: 40px;
     width: 28px;
@@ -179,6 +183,7 @@ html, body {
     height: 30px;
     color: #004643;
 }
+
 
 .event-bookmark-num {
     width: 30px;
@@ -524,4 +529,41 @@ html, body {
     margin-right: 20px;
     font-size: 16px;
     font-family: 'Open Sans', sans-serif;
+}
+
+.add-to-calendar-popup {
+    display: block;
+    font-size: 12px;
+    position: relative;
+    right: 68px;
+    z-index: 1;
+    bottom: 220%;
+    border-radius: 15px;
+    width: 150px;
+    color: black;
+    background: #fafafa;
+    border: 1.5px solid #004643;
+    height: 30px;
+    animation: fadeIn 1s cubic-bezier(0.19, 1.66, 0.82, 1.4);
+}
+
+.add-to-calendar-popup-text {
+    margin: auto;
+    margin-left: 8px;
+}
+.popup-triangle {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #004643 transparent transparent transparent;
+    opacity: 80%;
+}
+
+@keyframes fadeIn {
+  0%{ opacity:0; }
+  100% { opacity:1; }
 }
