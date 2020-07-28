@@ -164,7 +164,14 @@ function addWaterSystem(areaType, zipCode){
                 if(!contaminants.has(contaminant.contaminantCode)){
                     contaminants.set(contaminant.contaminantCode, contaminant);
                 }
-                waterPollutionHTML += "<p  onclick=showContaminantInfo("+contaminant.contaminantCode+");>"+contaminant.contaminantName+"</p>";
+                waterPollutionHTML += "<p  onclick=showContaminantInfo("+contaminant.contaminantCode+");><strong>"+contaminant.contaminantName+"</strong></p>";
+                for([date, enforcements] of Object.entries(contaminant.violations)){
+                    waterPollutionHTML += "<p style='margin-left: 2em;'>&nbsp;"+date+": ";
+                    enforcements.forEach((enforcementAction) => {
+                        waterPollutionHTML += "&nbsp;&nbsp;&nbsp;&nbsp;"+enforcementAction;
+                    });
+                    waterPollutionHTML += "</p>";
+                };
             });
             waterPollutionHTML+="</div>";
         });

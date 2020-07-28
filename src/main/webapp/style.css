@@ -459,9 +459,10 @@ html, body {
     border: 20px;
     background-color: white;
     opacity: 80%;
-    overflow-y:auto;
+    overflow-y:scroll;
     margin: 20px;
     max-width: 40%;
+    max-height: 75vh;
 }
 
 .map_overlay h2 {
@@ -480,7 +481,7 @@ html, body {
 }
 
 .water_pollution h2 {
-    background-color: lightblue;
+    background-color: white;
     outline-color: blue;
     outline-width: 3px;
     width: fit-content;
@@ -506,6 +507,7 @@ html, body {
 }
 
 .selected_water_system h2 {
+    background-color: lightskyblue;
     font-size: 22px;
 }
 
