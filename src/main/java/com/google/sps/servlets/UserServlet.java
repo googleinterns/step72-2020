@@ -70,6 +70,7 @@ public class UserServlet extends HttpServlet {
   static final String CHALLENGE_STATUS_PARAM = "stat";
   static final String BOOKMARKED_EVENT_PARAM = "book";
   static final String ADDED_TO_CALENDAR_PARAM = "add";
+  static final String ADD_BOOKMARK_PARAM = "add";
   static final String EVENT = "Event";
   static final String EVENT_ID = "event_id";
   static final String BOOKMARKS = "bookmarks";
@@ -142,6 +143,7 @@ public class UserServlet extends HttpServlet {
       String statusParam = request.getParameter(CHALLENGE_STATUS_PARAM);
       String bookmarkedEventParam = request.getParameter(BOOKMARKED_EVENT_PARAM);
       String addedToCalendarParam = request.getParameter(ADDED_TO_CALENDAR_PARAM);
+      String addBookmarkParam = request.getParameter(ADD_BOOKMARK_PARAM);
 
       Long challengeId;
       Integer newStatus;
@@ -168,7 +170,8 @@ public class UserServlet extends HttpServlet {
       else if (bookmarkedEventParam != null) {
           try {
               eventId = Long.parseLong(bookmarkedEventParam);
-              updateBookmarkedEvents(user, eventId);
+              if (addBookmarkParam.equals("true")) addBookmark(user, eventId);
+              else if (addBookmarkParam.equals("false")) removeBookmark(user, eventId);
           } catch (Exception e) {
               System.err.println(e.getMessage());
           }
@@ -203,7 +206,7 @@ public class UserServlet extends HttpServlet {
 
   }
 
-  private void updateBookmarkedEvents(User user, Long eventId) {
+  private void addBookmark(User user, Long eventId) {
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       ArrayList<Long> bookmarkedEvents = user.getBookmarkedEvents();
       if (bookmarkedEvents == null) bookmarkedEvents = new ArrayList<Long>();
@@ -213,6 +216,18 @@ public class UserServlet extends HttpServlet {
       Query query = new Query(EVENT).setFilter(new FilterPredicate("__key__", FilterOperator.EQUAL, KeyFactory.createKey(EVENT, eventId)));
       Entity entity = datastore.prepare(query).asSingleEntity();
       entity.setProperty(BOOKMARKS, (long) entity.getProperty(BOOKMARKS)+1);
+      datastore.put(entity);
+  }
+
+  private void removeBookmark(User user, Long eventId) {
+      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      ArrayList<Long> bookmarkedEvents = user.getBookmarkedEvents();
+      bookmarkedEvents.remove(eventId);
+      user.setBookmarkedEvents(bookmarkedEvents);
+
+      Query query = new Query(EVENT).setFilter(new FilterPredicate("__key__", FilterOperator.EQUAL, KeyFactory.createKey(EVENT, eventId)));
+      Entity entity = datastore.prepare(query).asSingleEntity();
+      entity.setProperty(BOOKMARKS, (long) entity.getProperty(BOOKMARKS)-1);
       datastore.put(entity);
   }
 
