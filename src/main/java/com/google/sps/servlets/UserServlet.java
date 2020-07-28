@@ -27,6 +27,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
@@ -212,9 +213,13 @@ public class UserServlet extends HttpServlet {
       if (bookmarkedEvents == null) bookmarkedEvents = new ArrayList<Long>();
       bookmarkedEvents.add(eventId);
       user.setBookmarkedEvents(bookmarkedEvents);
-
-      Query query = new Query(EVENT).setFilter(new FilterPredicate("__key__", FilterOperator.EQUAL, KeyFactory.createKey(EVENT, eventId)));
-      Entity entity = datastore.prepare(query).asSingleEntity();
+      Entity entity;
+      try {
+          entity = datastore.get(KeyFactory.createKey(EVENT, eventId));
+      } catch (EntityNotFoundException e) {
+          System.err.println(e.getMessage());
+          return;
+      }
       entity.setProperty(BOOKMARKS, (long) entity.getProperty(BOOKMARKS)+1);
       datastore.put(entity);
   }
@@ -225,8 +230,13 @@ public class UserServlet extends HttpServlet {
       bookmarkedEvents.remove(eventId);
       user.setBookmarkedEvents(bookmarkedEvents);
 
-      Query query = new Query(EVENT).setFilter(new FilterPredicate("__key__", FilterOperator.EQUAL, KeyFactory.createKey(EVENT, eventId)));
-      Entity entity = datastore.prepare(query).asSingleEntity();
+      Entity entity;
+      try {
+          entity = datastore.get(KeyFactory.createKey(EVENT, eventId));
+      } catch (EntityNotFoundException e) {
+          System.err.println(e.getMessage());
+          return;
+      }
       entity.setProperty(BOOKMARKS, (long) entity.getProperty(BOOKMARKS)-1);
       datastore.put(entity);
   }
