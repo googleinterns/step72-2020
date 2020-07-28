@@ -63,6 +63,7 @@ eventCategoryIcons.set("waste_cleanup", "🗑♻️🥤");
 eventCategoryIcons.set("other", "🥑🌲🐢");
 
 const badgeHeight = 120;
+const NUM_BOOKMARKS_TEXT = 1;
 let lastBoldedItem;
 
 
@@ -172,7 +173,7 @@ function addEventBookmark(event) {
 
     if (gapi.auth2.getAuthInstance().isSignedIn.get() && user.bookmarked_events.includes(event.extendedProperties.event_id)) {
         bookmark.src="/resources/filled-bookmark.png"; 
-        bookmarkDiv.childNodes[1].style.color = "#fafafa";
+        bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].style.color = "#fafafa";
         bookmarkDiv.onclick = async () => {
             unclickBookmark(bookmark, bookmarkDiv, event);
         }
@@ -189,8 +190,8 @@ function addEventBookmark(event) {
 
 async function clickBookmark(bookmark, bookmarkDiv, event) {
     bookmark.src="/resources/filled-bookmark.png"; 
-    bookmarkDiv.childNodes[1].style.color = "#fafafa";
-    bookmarkDiv.childNodes[1].innerText = parseInt(bookmarkDiv.childNodes[1].innerText)+1;
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].style.color = "#fafafa";
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText = parseInt(bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText)+1;
 
     let idToken = getIdToken();
     const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}&add=true&id_token=${idToken}`, {method: 'PUT'});
@@ -205,8 +206,8 @@ async function clickBookmark(bookmark, bookmarkDiv, event) {
 
 async function unclickBookmark(bookmark, bookmarkDiv, event) {
     bookmark.src = "/resources/bookmark.png";
-    bookmarkDiv.childNodes[1].style.color = "#004643";
-    bookmarkDiv.childNodes[1].innerText = parseInt(bookmarkDiv.childNodes[1].innerText)-1;
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].style.color = "#004643";
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText = parseInt(bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText)-1;
 
     let idToken = getIdToken();
     const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}&add=false&id_token=${idToken}`, {method: 'PUT'});
