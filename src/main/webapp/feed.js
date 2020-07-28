@@ -43,7 +43,7 @@ function createMockChallenges() {
 }
 
 const CLIENT_ID = '605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com';
-const API_KEY = 'AIzaSyD6wzCocrTQDd6J6WnK1eRvv7Gu3Jj_7dw';
+const API_KEY = 'AIzaSyAUR8-gJeYJOCSDJTP6qgN7FsIDG3u-vgU';
 const SCOPES  = "https://www.googleapis.com/auth/calendar.app.created https://www.googleapis.com/auth/calendar.readonly";
 var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
 
