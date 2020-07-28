@@ -82,7 +82,8 @@ function zoomToArea(areaType, areaCode){
 }
 
 function setGeographicState(){
-    town = lastGeocode.address_components[1].short_name;
+    if(lastGeocode.postcode_localities != null) town = lastGeocode.postcode_localities[0];
+    else town = lastGeocode.address_components[lastGeocode.address_components.length-4].short_name;
     for(i in lastGeocode.address_components){
         if(lastGeocode.address_components[i].short_name.length === 2){
             state = lastGeocode.address_components[i].short_name;

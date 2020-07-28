@@ -20,6 +20,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import org.json.JSONObject;
 
@@ -36,6 +37,7 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
 public final class UserServletTest {
@@ -119,13 +121,12 @@ public final class UserServletTest {
 
       servlet.doPost(request, response);
       pw.flush();
-
+      
       query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
       entity = datastore.prepare(query).asSingleEntity();
       System.out.println(entity);
       User createdUser = User.convertEntitytoUser(entity, userId);
       JSONObject createdUserJson = new JSONObject(createdUser.toJSON());
-      System.out.println(createdUserJson);
       Assert.assertEquals(userJson.getString("id"),
                           createdUserJson.getString("id"));
       Assert.assertEquals(userJson.getString("nickname"),
@@ -135,23 +136,54 @@ public final class UserServletTest {
   }
 
 
-//   @Test
-//   public void updateBookmarkedEvents(){
-//     HttpServletRequest request = mock(HttpServletRequest.class);
-//     HttpServletResponse response = mock(HttpServletResponse.class);
+  @Test
+  public void addBookmarkedEvent(){
+    datastore.put(user.toEntity());
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
 
-//     when(request.getParameter("book")).thenReturn("5");
-//     when(request.getParameter("id_token")).thenReturn(idToken);
+    String eventId = "5";
 
-//     StringWriter writer = new StringWriter();
-//     PrintWriter pw = new PrintWriter(writer);
+    when(request.getParameter("book")).thenReturn(eventId);
+    when(request.getParameter("add")).thenReturn("true");
+    when(request.getParameter("id_token")).thenReturn(idToken);
 
-//     try {
-//       when(response.getWriter()).thenReturn(pw);
-//       servlet.doPut(request, response);
-//       pw.flush();
-//     //   Assert.assertEquals(new Gson().toJson(ChallengeData.challenges),
-//     //                       writer.toString().trim());
-//     } catch (IOException e) {}
-//   }
+    StringWriter writer = new StringWriter();
+    PrintWriter pw = new PrintWriter(writer);
+
+    try {
+      when(response.getWriter()).thenReturn(pw);
+      servlet.doPut(request, response);
+      pw.flush();
+      JSONObject responseJson = new JSONObject(writer.toString().trim());
+      System.out.println(responseJson);
+      Assert.assertTrue(responseJson.getJSONArray("bookmarked_events").toString().contains(eventId));
+    } catch (IOException e) {}
+  }
+
+  @Test
+  public void removeBookmarkedEvent(){
+    user.setBookmarkedEvents(new ArrayList<Long>(Arrays.asList(5L)));
+    datastore.put(user.toEntity());
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    String eventId = "5";
+
+    when(request.getParameter("book")).thenReturn(eventId);
+    when(request.getParameter("add")).thenReturn("false");
+    when(request.getParameter("id_token")).thenReturn(idToken);
+
+    StringWriter writer = new StringWriter();
+    PrintWriter pw = new PrintWriter(writer);
+
+    try {
+      when(response.getWriter()).thenReturn(pw);
+      servlet.doPut(request, response);
+      pw.flush();
+      JSONObject responseJson = new JSONObject(writer.toString().trim());
+      System.out.println(responseJson);
+      Assert.assertTrue(!responseJson.getJSONArray("bookmarked_events").toString().contains(eventId));
+    } catch (IOException e) {}
+  }
 }

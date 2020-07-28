@@ -22,6 +22,8 @@ import com.google.gson.*;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
+import org.apache.commons.lang3.StringUtils;
+
 public final class User {
 
   public static final String DATA_TYPE = "User";
@@ -200,5 +202,27 @@ public final class User {
       Gson gson = new Gson();
       String json = gson.toJson(this);
       return json;
+  }
+
+  // For array list, treats empty list and null values as equal
+  public boolean equals(User user) {
+      boolean idsEqual = StringUtils.equals(this.id, user.id);
+      boolean nicknamesEqual = StringUtils.equals(this.nickname, user.nickname);
+      boolean currentChallengeEqual = this.current_challenge_id == user.current_challenge_id;
+      boolean entityKeyEqual = (this.entity_key == null && user.entity_key == null) 
+        || (!(this.entity_key == null || user.entity_key == null) && this.entity_key.getId() == user.entity_key.getId());
+      boolean createdEventsEqual = (this.created_events == null && user.created_events == null)
+        || (this.created_events == null && user.created_events != null && user.created_events.isEmpty())
+        || (this.created_events != null && this.created_events.isEmpty() && user.created_events == null)
+        || (!(this.created_events == null || user.created_events == null) && this.created_events.equals(user.created_events));
+      boolean bookmarkedEventsEqual = (this.bookmarked_events == null && user.bookmarked_events == null) 
+        || (this.bookmarked_events == null && user.bookmarked_events != null && user.bookmarked_events.isEmpty())
+        || (this.bookmarked_events != null && this.bookmarked_events.isEmpty() && user.bookmarked_events == null)
+        || (!(this.bookmarked_events == null || user.bookmarked_events == null) && this.bookmarked_events.equals(user.bookmarked_events));
+      boolean addedEventsEqual = (this.added_to_calendar_events == null && user.added_to_calendar_events == null) 
+        || (this.added_to_calendar_events == null && user.added_to_calendar_events != null && user.added_to_calendar_events.isEmpty())
+        || (this.added_to_calendar_events != null && this.added_to_calendar_events.isEmpty() && user.added_to_calendar_events == null)
+        || (!(this.added_to_calendar_events == null || user.added_to_calendar_events == null) && this.added_to_calendar_events.equals(user.added_to_calendar_events));
+      return idsEqual && nicknamesEqual && currentChallengeEqual && entityKeyEqual && createdEventsEqual && bookmarkedEventsEqual && addedEventsEqual;
   }
 } 

@@ -76,7 +76,6 @@ import java.util.TimeZone;
 /** Servlet that returns events sorted by most recent timestamp */
 @WebServlet("/events")
 public class EventsServlet extends HttpServlet {
-
     public static final String EVENT = "Event";
     public static final String TIMESTAMP = "timestamp";
     public static final String USER_TIMEZONE = "timezone";
@@ -181,7 +180,6 @@ public class EventsServlet extends HttpServlet {
           return null;
       }
   }
-
 
   public void updateUserCreatedEvents(String userId, long eventId) {
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
