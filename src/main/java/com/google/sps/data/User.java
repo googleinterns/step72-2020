@@ -85,7 +85,6 @@ public final class User {
             return this;
         }
         public Builder setChallengeStatuses(HashMap<String, Integer> challenge_statuses){
-            // @Erick May need to change this initialization if structure of challenge statuses changes
             if (challenge_statuses == null) this.challenge_statuses = new HashMap<String, Integer>();
             else this.challenge_statuses = (HashMap) challenge_statuses.clone();
             return this;
@@ -118,7 +117,6 @@ public final class User {
       this.entity_key = null;
    }
 
-  // @Erick May need to change the following methods if structure of challenge statuses or id changes
   public String getCurrentChallenge() {
       return this.current_challenge_id;
   }

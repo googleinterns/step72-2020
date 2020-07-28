@@ -442,14 +442,6 @@ async function sendcompletedChallenges() {
 }
 
 function findNextUncompletedChallenge(prevChallengeId) {
-    /* for (i = 1; i < challenges.length; i++) {
-        let id = (prevChallengeId+i) % challenges.length;
-        let status = user.challenge_statuses[id];
-        if (status < challenges[id].steps.length) {
-            return id;
-        }
-    } */
-
     for(chalId of challengeMap.keys()) {
       if(chalId != prevChallengeId) {
         let status = user.challenge_statuses[chalId];

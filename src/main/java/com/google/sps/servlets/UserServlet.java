@@ -191,7 +191,6 @@ public class UserServlet extends HttpServlet {
       response.getWriter().println(user.toJSON());
   }
 
-  // @Erick If challenge id structure changes, update this method
   private void updateCurrentChallenge(User user, String id) {
       user.setCurrentChallenge(id);
   }
