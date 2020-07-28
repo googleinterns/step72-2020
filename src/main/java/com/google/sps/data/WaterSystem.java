@@ -9,6 +9,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.QueryResultList;
+import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 
@@ -126,7 +127,7 @@ public class WaterSystem {
         this.county = (String) entity.getProperty(COUNTY_PROPERTY);
         this.populationServed = ((Long) entity.getProperty(POPULATION_PROPERTY)).intValue();
         this.contaminants = new ArrayList<WaterContaminant>();
-        byte[] contaminantsData = Base64.getDecoder().decode((String)entity.getProperty(CONTAMINANTS_PROPERTY));
+        byte[] contaminantsData = Base64.getDecoder().decode(((Text)entity.getProperty(CONTAMINANTS_PROPERTY)).getValue());
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(contaminantsData));
         ArrayList<Key> contaminantKeys;
         try {
@@ -180,7 +181,8 @@ public class WaterSystem {
         oos.writeObject(keyList);
         oos.close();
             
-        systemEntity.setProperty(CONTAMINANTS_PROPERTY, Base64.getEncoder().encodeToString(baos.toByteArray()));
+        systemEntity.setProperty(CONTAMINANTS_PROPERTY, new Text(
+            Base64.getEncoder().encodeToString(baos.toByteArray())));
         systemEntity.setProperty(STATE_PROPERTY, state);
         systemEntity.setProperty(CITY_PROPERTY, city);
         systemEntity.setProperty(COUNTY_PROPERTY, county);
@@ -254,7 +256,7 @@ public class WaterSystem {
                 sources = (String) contamEntity.getProperty(SOURCES_PROPERTY);
                 definition = (String) contamEntity.getProperty(DEFINITION_PROPERTY);
                 healthEffects = (String) contamEntity.getProperty(HEALTH_PROPERTY);
-                byte[] violationData = Base64.getDecoder().decode((String)violationEntity.getProperty(VIOLATIONS_PROPERTY));
+                byte[] violationData = Base64.getDecoder().decode(((Text)violationEntity.getProperty(VIOLATIONS_PROPERTY)).getValue());
                 ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(violationData));
                 try {
                     violations = (HashMap<String, ArrayList<String>>) ois.readObject();
@@ -301,7 +303,8 @@ public class WaterSystem {
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(violations);
             oos.close();
-            violationEntity.setProperty(VIOLATIONS_PROPERTY, Base64.getEncoder().encodeToString(baos.toByteArray()));
+            violationEntity.setProperty(VIOLATIONS_PROPERTY, new Text(
+                Base64.getEncoder().encodeToString(baos.toByteArray())));
             datastore.put(violationEntity);
             return violationEntity.getKey();
         }
