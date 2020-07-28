@@ -174,23 +174,50 @@ function addEventBookmark(event) {
     if (gapi.auth2.getAuthInstance().isSignedIn.get() && user.bookmarked_events.includes(event.extendedProperties.event_id)) {
         bookmark.src="/resources/filled-bookmark.png"; 
         bookmarkDiv.childNodes[1].style.color = "#fafafa";
+        bookmarkDiv.onclick = async () => {
+            unclickBookmark(bookmark, bookmarkDiv, event);
+        }
     } else {
         bookmark.src = "/resources/bookmark.png";
         if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
             bookmarkDiv.onclick = async () => { 
-                bookmark.src="/resources/filled-bookmark.png"; 
-                bookmarkDiv.childNodes[1].style.color = "#fafafa";
-                bookmarkDiv.childNodes[1].innerText = parseInt(bookmarkDiv.childNodes[1].innerText)+1;
-
-                let idToken = getIdToken();
-                const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}&id_token=${idToken}`, {method: 'PUT'});
-                user = await fetch(putRequest).then(response => response.json());
-
-                bookmarkDiv.onclick = () => {};
+                clickBookmark(bookmark, bookmarkDiv, event);
             };
         }   
     }
     return bookmarkDiv;
+}
+
+async function clickBookmark(bookmark, bookmarkDiv, event) {
+    bookmark.src="/resources/filled-bookmark.png"; 
+    bookmarkDiv.childNodes[1].style.color = "#fafafa";
+    bookmarkDiv.childNodes[1].innerText = parseInt(bookmarkDiv.childNodes[1].innerText)+1;
+
+    let idToken = getIdToken();
+    const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}&add=true&id_token=${idToken}`, {method: 'PUT'});
+    user = await fetch(putRequest).then(response => response.json());
+
+    bookmarkDiv.onclick = async () => {
+        if (gapi.auth2.getAuthInstance().isSignedIn.get() && user.bookmarked_events.includes(event.extendedProperties.event_id)) {
+            await unclickBookmark(bookmark, bookmarkDiv, event);
+        }
+    };
+}
+
+async function unclickBookmark(bookmark, bookmarkDiv, event) {
+    bookmark.src = "/resources/bookmark.png";
+    bookmarkDiv.childNodes[1].style.color = "#004643";
+    bookmarkDiv.childNodes[1].innerText = parseInt(bookmarkDiv.childNodes[1].innerText)-1;
+
+    let idToken = getIdToken();
+    const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}&add=false&id_token=${idToken}`, {method: 'PUT'});
+    user = await fetch(putRequest).then(response => response.json());
+
+    bookmarkDiv.onclick = async () => {
+        if (gapi.auth2.getAuthInstance().isSignedIn.get() && !user.bookmarked_events.includes(event.extendedProperties.event_id)) {
+            await clickBookmark(bookmark, bookmarkDiv, event);
+        }
+    };
 }
 
 function addEventNumBookmarks(event) {
@@ -710,6 +737,7 @@ if (isSignedIn) {
     feedRightSide.style.display = "block";  
     await getUserInfo();
     await loadEvents();
+    await loadChallenges();
     showAddToCalendarButtons();
 } else {
     authorizeButton.style.display = 'block';
