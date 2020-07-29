@@ -105,7 +105,7 @@ public class UserServlet extends HttpServlet {
         return;
     }
 
-    User user = User.convertEntitytoUser(entity, userId);
+    User user = User.convertEntityToUser(entity, userId);
 
     System.out.println(user);
 
@@ -159,7 +159,7 @@ public class UserServlet extends HttpServlet {
 
       Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(query).asSingleEntity();
-      User user = User.convertEntitytoUser(entity, userId);
+      User user = User.convertEntityToUser(entity, userId);
 
       if (challengeIdParam != null) {
           try {

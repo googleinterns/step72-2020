@@ -22,38 +22,57 @@ import java.util.Collections;
 import org.json.JSONObject;
 
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
 public final class UserTest {
-  private String userId = "00";
+  private static final String USER_ID = "00";
+  private static final String NICKNAME = "Name";
+  private static final Long DEFAULT_CHALLENGE_ID = 0L;
+  private static final ArrayList<Integer> BLANK_CHALLENGE_STATUSES = new ArrayList<Integer>(Collections.nCopies(3, 0));
 
   private User user;
   private JSONObject userJson;
 
+  private final LocalServiceTestHelper helper =
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+
+  private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
   @Before
   public void setup(){
-    ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
+    helper.setUp();
+    
 
-    user = new User.Builder(userId)
-        .setNickname("Name")
-        .setCurrentChallengeId(0L)
-        .setChallengeStatuses(challengeStatuses)
+    user = new User.Builder(USER_ID)
+        .setNickname(NICKNAME)
+        .setCurrentChallengeId(DEFAULT_CHALLENGE_ID)
+        .setChallengeStatuses(BLANK_CHALLENGE_STATUSES)
         .build();
     
     userJson = new JSONObject(user.toJSON());
   }
 
+  @After
+  public void tearDown() {
+      helper.tearDown();
+  }
+
   @Test
   public void userEqualsTest(){
-    ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
-    User other = new User.Builder(userId)
-        .setNickname("Name")
-        .setCurrentChallengeId(0L)
+    User other = new User.Builder(USER_ID)
+        .setNickname(NICKNAME)
+        .setCurrentChallengeId(DEFAULT_CHALLENGE_ID)
         .setCreatedEvents(new ArrayList<Long>())
-        .setChallengeStatuses(challengeStatuses)
+        .setChallengeStatuses(BLANK_CHALLENGE_STATUSES)
         .build();
 
         Assert.assertTrue(user.equals(other));
@@ -61,12 +80,11 @@ public final class UserTest {
 
   @Test
   public void userNotEqualsTest(){
-    ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
-    User other = new User.Builder(userId)
-        .setNickname("Name")
-        .setCurrentChallengeId(0L)
+    User other = new User.Builder(USER_ID)
+        .setNickname(NICKNAME)
+        .setCurrentChallengeId(DEFAULT_CHALLENGE_ID)
         .setCreatedEvents(new ArrayList<Long>(Arrays.asList(1L)))
-        .setChallengeStatuses(challengeStatuses)
+        .setChallengeStatuses(BLANK_CHALLENGE_STATUSES)
         .build();
 
         Assert.assertTrue(!user.equals(other));
@@ -84,13 +102,47 @@ public final class UserTest {
     Assert.assertEquals(new ArrayList<Long>(Arrays.asList(1L, 2L, 3L)), user.getCreatedEvents());
   }
 
-//   @Test
-//   public void convertEntityToUserTest(){
-//     Entity entity;
-//     entity.setProperty(User.NICKNAME, "Name");
-//     entity.setProperty(User.CURRENT_CHALLENGE, 0L);
-//     entity.setProperty(User.CHALLENGE_STATUSES, new ArrayList<Integer>(Collections.nCopies(3, 0)));
-//     convertEntityToUser(entity, userId);
+  @Test
+  public void convertEntityToUserTest(){
+    Entity entity = new Entity(User.DATA_TYPE);
+    entity.setProperty(User.NICKNAME, NICKNAME);
+    entity.setProperty(User.CURRENT_CHALLENGE, DEFAULT_CHALLENGE_ID);
+    entity.setProperty(User.CHALLENGE_STATUSES, BLANK_CHALLENGE_STATUSES);
 
-//   }
+    User expected = new User.Builder(USER_ID)
+        .setNickname(NICKNAME)
+        .setEntityKey(entity.getKey())
+        .setChallengeStatuses(BLANK_CHALLENGE_STATUSES)
+        .setCurrentChallengeId(DEFAULT_CHALLENGE_ID)
+        .build();
+
+    User result = User.convertEntityToUser(entity, USER_ID);
+    Assert.assertTrue(result.equals(expected));
+  }
+
+  @Test
+  public void userToEntityTest(){
+    Entity entity = user.toEntity();
+    Assert.assertEquals((String) entity.getProperty(User.ID), USER_ID);
+    Assert.assertEquals((String) entity.getProperty(User.NICKNAME), NICKNAME);
+    Assert.assertEquals((Long) entity.getProperty(User.CURRENT_CHALLENGE), DEFAULT_CHALLENGE_ID);
+    Assert.assertEquals((ArrayList<Long>) entity.getProperty(User.CREATED_EVENTS), null);
+    Assert.assertEquals((ArrayList<Long>) entity.getProperty(User.BOOKMARKED_EVENTS), null);
+    Assert.assertEquals((ArrayList<Long>) entity.getProperty(User.ADDED_TO_CALENDAR_EVENTS), null);
+    Assert.assertEquals((ArrayList<Integer>) entity.getProperty(User.CHALLENGE_STATUSES), BLANK_CHALLENGE_STATUSES);
+  }
+
+  @Test
+  public void userToEntityTestWithArrayListValues(){
+    user.setCreatedEvents(new ArrayList<Long>(Arrays.asList(1L, 2L, 3L)));
+    user.setBookmarkedEvents(new ArrayList<Long>(Arrays.asList(1L)));
+    Entity entity = user.toEntity();
+    Assert.assertEquals((String) entity.getProperty(User.ID), USER_ID);
+    Assert.assertEquals((String) entity.getProperty(User.NICKNAME), NICKNAME);
+    Assert.assertEquals((Long) entity.getProperty(User.CURRENT_CHALLENGE), DEFAULT_CHALLENGE_ID);
+    Assert.assertEquals((ArrayList<Long>) entity.getProperty(User.CREATED_EVENTS), new ArrayList<Long>(Arrays.asList(1L, 2L, 3L)));
+    Assert.assertEquals((ArrayList<Long>) entity.getProperty(User.BOOKMARKED_EVENTS), new ArrayList<Long>(Arrays.asList(1L)));
+    Assert.assertEquals((ArrayList<Long>) entity.getProperty(User.ADDED_TO_CALENDAR_EVENTS), null);
+    Assert.assertEquals((ArrayList<Integer>) entity.getProperty(User.CHALLENGE_STATUSES), BLANK_CHALLENGE_STATUSES);
+  }
 }

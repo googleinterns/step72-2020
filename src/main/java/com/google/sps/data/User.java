@@ -111,6 +111,14 @@ public final class User {
    private User() {
    }
 
+   public String getId() {
+       return this.id;
+   }
+
+   public String getNickname() {
+       return this.nickname;
+   }
+
 
   // @Erick May need to change the following methods if structure of challenge statuses or id changes
   public Long getCurrentChallenge() {
@@ -158,7 +166,7 @@ public final class User {
   }
  
 
-  public static User convertEntitytoUser(Entity entity, String userId) {
+  public static User convertEntityToUser(Entity entity, String userId) {
     Key entityKey = entity.getKey();
     String nickname = (String) entity.getProperty(NICKNAME);
     Long currentChallengeId = (Long) entity.getProperty(CURRENT_CHALLENGE);

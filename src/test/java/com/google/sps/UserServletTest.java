@@ -125,13 +125,37 @@ public final class UserServletTest {
       query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
       entity = datastore.prepare(query).asSingleEntity();
       System.out.println(entity);
-      User createdUser = User.convertEntitytoUser(entity, userId);
+      User createdUser = User.convertEntityToUser(entity, userId);
       JSONObject createdUserJson = new JSONObject(createdUser.toJSON());
       Assert.assertEquals(userJson.getString("id"),
                           createdUserJson.getString("id"));
       Assert.assertEquals(userJson.getString("nickname"),
                           createdUserJson.getString("nickname"));
 
+    } catch (IOException e) {}
+  }
+
+  @Test
+  public void updateCurrentChallenge(){
+    datastore.put(user.toEntity());
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    String newChallengeId = "5";
+
+    when(request.getParameter("chal")).thenReturn(newChallengeId);
+    when(request.getParameter("id_token")).thenReturn(idToken);
+
+    StringWriter writer = new StringWriter();
+    PrintWriter pw = new PrintWriter(writer);
+
+    try {
+      when(response.getWriter()).thenReturn(pw);
+      servlet.doPut(request, response);
+      pw.flush();
+      JSONObject responseJson = new JSONObject(writer.toString().trim());
+      System.out.println(responseJson);
+      Assert.assertTrue(responseJson.getJSONArray("current_challenge_id").toString() == newChallengeId);
     } catch (IOException e) {}
   }
 
