@@ -47,11 +47,18 @@ const API_KEY = 'AIzaSyAUR8-gJeYJOCSDJTP6qgN7FsIDG3u-vgU';
 const SCOPES  = "https://www.googleapis.com/auth/calendar.app.created https://www.googleapis.com/auth/calendar.readonly";
 var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
 
+const CHALLENGE_TYPE = {
+    RECYCLE: "RECYCLE",
+    WASTE: "WASTE",
+    GARDENING: "GARDENING",
+};
+
 
 let user;
 let challenges = [];
 let challengeMap = new Map();
 const defaultNumChallenges = 3;
+
 
 
 const projectTitle = "GEN Capstone";
@@ -331,7 +338,7 @@ function createChallengeNavBarItem(challenge) {
 
 async function getServerChallenges(numChallenges){
   let id_token = getIdToken();
-  const response = await fetch(`/challenges?num-challenges=${numChallenges}&id-token=${id_token}`);
+  const response = await fetch(`/challenges?num-challenges=${numChallenges}&id_token=${id_token}`);
   const challengeJson = await response.json();
   
   for(var i = 0; i < challengeJson.length; i++) {
@@ -339,14 +346,14 @@ async function getServerChallenges(numChallenges){
     challengeMap.set(chalIndex,challengeJson[i]);
     
     switch (challengeMap.get(chalIndex).challenge_type){
-      case("RECYCLE"):
+      case(CHALLENGE_TYPE.RECYCLE):
         challengeMap.get(chalIndex)["icon"] = "♻️";
         console.log(challengeMap.get(chalIndex).icon);
         break;
-      case("GARDENING"):
+      case(CHALLENGE_TYPE.GARDENING):
         challengeMap.get(chalIndex)["icon"] = "🌱";
         break;
-      case("WASTE"):
+      case(CHALLENGE_TYPE.WASTE):
         challengeMap.get(chalIndex)["icon"] = "🗑";
         break;
       default:
@@ -431,14 +438,8 @@ async function showNewChallengeCompletePage(challenge) {
     user = await fetch(putRequest).then(response => response.json());
 }
 
-/*async function setnewChallenges(){
-    fetch('/challenges?num-challenges=' + 3);
-
-}
- */ 
-async function sendcompletedChallenges() {
-    fetch('/challenges', {methdo:'POST'});
-  
+async function sendCompletedChallenges() {
+    fetch('/challenges', {methdod:'POST'});
 }
 
 function findNextUncompletedChallenge(prevChallengeId) {
