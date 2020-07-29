@@ -107,17 +107,24 @@ function addSuperfundMarkers(areaType, areaCode){
     fetch('/superfund?area='+areaType+"&zip_code="+areaCode).then(response => response.json()).then((sites) => {
         sites.forEach((site) => {
 
-        bounds.extend({lat: site.lattitude, lng: site.longitude});
+            console.log(site);
+
+        bounds.extend({lat: site.latitude, lng: site.longitude});
 
         var marker = new google.maps.Marker(
-                    {position: {lat: site.lattitude, lng: site.longitude}, 
+                    {position: {lat: site.latitude, lng: site.longitude}, 
                     title: site.name,
                     icon: "resources/danger.png",
                     map: map});
                 var contentStr = "<h3>"+site.name+"</h3>" +
                     "<h4>"+site.city+", "+site.state+"</h4>";
-        var infoWindow = new google.maps.InfoWindow({
-                    content: contentStr
+                var siteId = ("0000000" + site.siteId);
+                siteId = siteId.substring(siteId.length - 7);
+                var iFrameString = "<iframe class='superfund_website' src='https://cumulis.epa.gov/supercpad/cursites/csitinfo.cfm?id="+siteId+"#main-content'"+
+                        +"onerror='lastInfoWindow..content = "+contentStr+"'>";
+                var infoWindowStr = "<div class='superfund_website'>"+iFrameString+"</div>";
+                var infoWindow = new google.maps.InfoWindow({
+                    content: infoWindowStr
                 });
             marker.addListener('click', () => {
                     if(lastInfoWindow != null) {lastInfoWindow.close();}

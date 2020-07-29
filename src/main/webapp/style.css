@@ -455,6 +455,15 @@ html, body {
     width: 100%;
 }
 
+.superfund_website {
+    max-width: 1020px;
+    max-height: 700px;
+    width: 700px;
+    height: 700px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
 .map_overlay {
     border: 20px;
     background-color: white;
