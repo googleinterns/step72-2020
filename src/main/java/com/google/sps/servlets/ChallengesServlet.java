@@ -37,6 +37,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 
 import com.google.sps.data.Challenge;
 import com.google.sps.data.ChallengeData;
+import com.google.sps.data.GoogleIdHelper;
 import com.google.sps.data.User;
 
 import java.io.IOException;
@@ -60,33 +61,24 @@ import javafx.util.Pair;
 /** Servlet that manages challenges **/
 @WebServlet("/challenges")
 public class ChallengesServlet extends HttpServlet {
-  private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
-  private static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
-  private static final JsonFactory JSON_FACTORY = new GsonFactory();
-  private static final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
-                       .setAudience(Collections.singletonList(CLIENT_ID))
-                       .build();
-
   private static final int NO_CHALLENGES = 0;
   private static final String NUM_CHALLENGES = "num-challenges";
-  private static final String ID_TOKEN = "id-token";
+  private static final String ID_TOKEN = "id_token";
   private static final String COMPLETED_CHALLENGES = "completed-chal";
   private static final String CURRENT_CHALLENGE = "current-chal";
+
   private ArrayList<Challenge> requested_challenge_list = new ArrayList<>();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     int num_challenges = getNumChallenges(request);
-    GoogleIdToken id_token = verifyId(request.getParameter(ID_TOKEN));
-    if (id_token == null) {
-        System.out.println("Invalid ID token.");
+    Payload payload = GoogleIdHelper.verifyId(request);
+    if (payload == null) {
         response.setStatus(400);
         return;
     }
-  
-    Payload payload = id_token.getPayload();
-    String user_id = payload.getSubject();
 
+    String user_id = payload.getSubject();
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, user_id));
@@ -112,17 +104,13 @@ public class ChallengesServlet extends HttpServlet {
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String completed_challenge_id = request.getParameter(COMPLETED_CHALLENGES);
     String current_challenge_id = request.getParameter(CURRENT_CHALLENGE);
-    GoogleIdToken id_token = verifyId(request.getParameter(ID_TOKEN));
-
-    if (id_token == null) {
-        System.out.println("Invalid ID token.");
+    Payload payload = GoogleIdHelper.verifyId(request);
+    if (payload == null) {
         response.setStatus(400);
         return;
     }
 
-    Payload payload = id_token.getPayload();
     String user_id = payload.getSubject();
-
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, user_id));
@@ -169,16 +157,6 @@ public class ChallengesServlet extends HttpServlet {
       }   
     }
   } 
-
-  private GoogleIdToken verifyId (String idTokenString){
-   GoogleIdToken idToken = null;
-   try {
-    idToken = verifier.verify(idTokenString);
-   } catch (Exception e) {
-      System.err.println(e.getMessage());
-   }
-   return idToken;
-  }
 
   /** Convert request parameter NUM_CHALLENGES into an Integeer */
   private int getNumChallenges(HttpServletRequest request){

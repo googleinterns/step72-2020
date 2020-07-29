@@ -73,7 +73,7 @@ public class UserServlet extends HttpServlet {
   static final String ADDED_TO_CALENDAR_PARAM = "add";
   static final String ID_TOKEN_PARAM = "id_token";
   static final String NAME = "name";
-  static final String DEF_CHALLENGE_ID = "GARD_0";
+  static final String DEF_CURRENT_CHALLENGE_ID = "GARD_0";
 
   private static final HashMap DEF_CHALLENGES_AND_STATUSES = createMap();
 
@@ -115,13 +115,12 @@ public class UserServlet extends HttpServlet {
     }
     String userId = payload.getSubject();
     String userNickname = (String) payload.get(NAME);
-    
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService(); 
-    String currentChallengeId = DEF_CHALLENGE_ID;
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     User user = new User.Builder(userId)
         .setNickname(userNickname)
-        .setCurrentChallengeId(currentChallengeId)
+        .setCurrentChallengeId(DEF_CURRENT_CHALLENGE_ID)
         .setChallengeStatuses(DEF_CHALLENGES_AND_STATUSES)
         .build();
 
@@ -218,10 +217,10 @@ public class UserServlet extends HttpServlet {
   }
 
   private static HashMap<String, Integer> createMap(){
-    HashMap<String,Integer> my_map = new HashMap<String, Integer>();
-    my_map.put("GARD_0",0);
-    my_map.put("RECY_0",0);
-    my_map.put("WAST_0",0);
-    return my_map;
+    HashMap<String,Integer> def_chal_map = new HashMap<String, Integer>();
+    def_chal_map.put("GARD_0",0);
+    def_chal_map.put("RECY_0",0);
+    def_chal_map.put("WAST_0",0);
+    return def_chal_map;
  }
 } 

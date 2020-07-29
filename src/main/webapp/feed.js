@@ -47,12 +47,16 @@ const API_KEY = 'AIzaSyAUR8-gJeYJOCSDJTP6qgN7FsIDG3u-vgU';
 const SCOPES  = "https://www.googleapis.com/auth/calendar.app.created https://www.googleapis.com/auth/calendar.readonly";
 var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
 
+const CHALLENGE_TYPE = {
+    RECYCLE: "RECYCLE",
+    WASTE: "WASTE",
+    GARDENING: "GARDENING",
+};
 
 let user;
 let challenges = [];
 let challengeMap = new Map();
 const defaultNumChallenges = 3;
-
 
 const projectTitle = "GEN Capstone";
 let calendarId = null; 
@@ -331,7 +335,7 @@ function createChallengeNavBarItem(challenge) {
 
 async function getServerChallenges(numChallenges){
   let id_token = getIdToken();
-  const response = await fetch(`/challenges?num-challenges=${numChallenges}&id-token=${id_token}`);
+  const response = await fetch(`/challenges?num-challenges=${numChallenges}&id_token=${id_token}`);
   const challengeJson = await response.json();
   
   for(var i = 0; i < challengeJson.length; i++) {
@@ -339,14 +343,14 @@ async function getServerChallenges(numChallenges){
     challengeMap.set(chalIndex,challengeJson[i]);
     
     switch (challengeMap.get(chalIndex).challenge_type){
-      case("RECYCLE"):
+      case(CHALLENGE_TYPE.RECYCLE):
         challengeMap.get(chalIndex)["icon"] = "♻️";
         console.log(challengeMap.get(chalIndex).icon);
         break;
-      case("GARDENING"):
+      case(CHALLENGE_TYPE.GARDENING):
         challengeMap.get(chalIndex)["icon"] = "🌱";
         break;
-      case("WASTE"):
+      case(CHALLENGE_TYPE.WASTE):
         challengeMap.get(chalIndex)["icon"] = "🗑";
         break;
       default:
@@ -432,14 +436,9 @@ async function showNewChallengeCompletePage(challenge) {
     await loadChallenges(1);
 }
 
-/*async function setnewChallenges(){
-    fetch('/challenges?num-challenges=' + 3);
-
-}
- */ 
 async function sendCompletedChallenges(complete_chal_id ,current_chal_id) {
     id_token = getIdToken();
-    put_request = new Request(`/challenges?id-token=${id_token}&completed-chal=${complete_chal_id}&current-chal=${current_chal_id}`, {method: "PUT"});
+    put_request = new Request(`/challenges?id_token=${id_token}&completed-chal=${complete_chal_id}&current-chal=${current_chal_id}`, {method: "PUT"});
     user = await fetch(put_request).then(response => response.json());
 }
 
