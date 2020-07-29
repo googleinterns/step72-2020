@@ -37,6 +37,7 @@ public final class User {
   public static final String ADDED_TO_CALENDAR_EVENTS = "added_to_calendar_events";
   public static final String CURRENT_CHALLENGE = "current_challenge";
   public static final String CHALLENGE_STATUSES = "challenge_statuses";
+  public static final String COMPLETED_CHALLENGES = "completed_challenges";
 
   private String id;
   private String nickname;
@@ -144,6 +145,14 @@ public final class User {
       this.challenge_statuses = (HashMap) challenge_statuses.clone();
   }
 
+  public void setCompletedChallenges(HashSet<String> completed_challenges) {
+      this.completed_challenges = (HashSet) completed_challenges.clone();
+  }
+
+  public void appendToCompletedChallenges(String id) {
+      this.completed_challenges.add(id);
+  }
+
   public ArrayList<Long> getCreatedEvents() {
       return (ArrayList) this.created_events;
   }
@@ -180,6 +189,7 @@ public final class User {
     ArrayList<Long> bookmarkedEvents = (ArrayList<Long>) entity.getProperty(BOOKMARKED_EVENTS);
     ArrayList<Long> addedEvents = (ArrayList<Long>) entity.getProperty(ADDED_TO_CALENDAR_EVENTS);
     HashMap<String, Integer> challengeStatuses = getChallengeStatusFromEntity(entity);
+    HashSet<String> completedChallenges = getCompletedChallengesFromEntity(entity);
 
     User user = new User.Builder(userId)
         .setNickname(nickname)
@@ -209,6 +219,7 @@ public final class User {
       userEntity.setProperty(ADDED_TO_CALENDAR_EVENTS, this.added_to_calendar_events);
       userEntity.setProperty(CURRENT_CHALLENGE, this.current_challenge_id);
       userEntity.setProperty(CHALLENGE_STATUSES, embedChallengeStatuses());
+      userEntity.setProperty(COMPLETED_CHALLENGES,  getCompletedChallengesAsArray());
       return userEntity;
   }
 
@@ -238,5 +249,21 @@ public final class User {
      }
     }
     return challenge_statuses;
+  }
+
+  private ArrayList<String> getCompletedChallengesAsArray(){
+    ArrayList<String> compl_challenges = new ArrayList<String>(completed_challenges);
+    return compl_challenges;
+  }
+
+  private static HashSet<String> getCompletedChallengesFromEntity(Entity entity) {
+    ArrayList<String> temp = (ArrayList<String>) entity.getProperty(COMPLETED_CHALLENGES);
+    HashSet<String> compl_challenges;
+    if (temp != null){
+      compl_challenges = new HashSet<String>(temp);
+    } else {
+      compl_challenges = new HashSet<String>();
+    }
+    return compl_challenges;
   }
 } 

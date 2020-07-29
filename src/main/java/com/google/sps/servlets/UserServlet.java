@@ -192,15 +192,14 @@ public class UserServlet extends HttpServlet {
       response.getWriter().println(user.toJSON());
   }
 
-  // @Erick If challenge id structure changes, update this method
   private void updateCurrentChallenge(User user, String id) {
       user.setCurrentChallenge(id);
   }
 
 
-  private void updateChallengeStatus(User user, String key, int status) {
+  private void updateChallengeStatus(User user, String id, int status) {
     HashMap<String, Integer> challengeStatuses = user.getChallengeStatuses();
-    challengeStatuses.put(key, status);
+    challengeStatuses.put(id, status);
     user.setChallengeStatuses(challengeStatuses);
   }
 
