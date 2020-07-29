@@ -107,8 +107,6 @@ public class UserServlet extends HttpServlet {
 
     User user = User.convertEntityToUser(entity, userId);
 
-    System.out.println(user);
-
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 

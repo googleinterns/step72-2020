@@ -219,18 +219,21 @@ public final class User {
       boolean currentChallengeEqual = this.current_challenge_id == user.current_challenge_id;
       boolean entityKeyEqual = (this.entity_key == null && user.entity_key == null) 
         || (!(this.entity_key == null || user.entity_key == null) && this.entity_key.getId() == user.entity_key.getId());
-      boolean createdEventsEqual = (this.created_events == null && user.created_events == null)
-        || (this.created_events == null && user.created_events != null && user.created_events.isEmpty())
-        || (this.created_events != null && this.created_events.isEmpty() && user.created_events == null)
-        || (!(this.created_events == null || user.created_events == null) && this.created_events.equals(user.created_events));
-      boolean bookmarkedEventsEqual = (this.bookmarked_events == null && user.bookmarked_events == null) 
-        || (this.bookmarked_events == null && user.bookmarked_events != null && user.bookmarked_events.isEmpty())
-        || (this.bookmarked_events != null && this.bookmarked_events.isEmpty() && user.bookmarked_events == null)
-        || (!(this.bookmarked_events == null || user.bookmarked_events == null) && this.bookmarked_events.equals(user.bookmarked_events));
-      boolean addedEventsEqual = (this.added_to_calendar_events == null && user.added_to_calendar_events == null) 
-        || (this.added_to_calendar_events == null && user.added_to_calendar_events != null && user.added_to_calendar_events.isEmpty())
-        || (this.added_to_calendar_events != null && this.added_to_calendar_events.isEmpty() && user.added_to_calendar_events == null)
-        || (!(this.added_to_calendar_events == null || user.added_to_calendar_events == null) && this.added_to_calendar_events.equals(user.added_to_calendar_events));
-      return idsEqual && nicknamesEqual && currentChallengeEqual && entityKeyEqual && createdEventsEqual && bookmarkedEventsEqual && addedEventsEqual;
+      boolean createdEventsEqual = checkIfArrayListsEqual(this.created_events, user.created_events);
+      boolean bookmarkedEventsEqual = checkIfArrayListsEqual(this.bookmarked_events, user.bookmarked_events);
+      boolean addedEventsEqual = checkIfArrayListsEqual(this.added_to_calendar_events, user.added_to_calendar_events);
+      boolean challengeStatusesEqual = (this.challenge_statuses == null && user.challenge_statuses == null) 
+        || (this.challenge_statuses == null && user.challenge_statuses != null && user.challenge_statuses.isEmpty())
+        || (this.challenge_statuses != null && this.challenge_statuses.isEmpty() && user.challenge_statuses == null)
+        || (!(this.challenge_statuses == null || user.challenge_statuses == null) && this.challenge_statuses.equals(user.challenge_statuses));
+      return idsEqual && nicknamesEqual && currentChallengeEqual && entityKeyEqual && createdEventsEqual && bookmarkedEventsEqual && addedEventsEqual && challengeStatusesEqual;
   }
+
+  private boolean checkIfArrayListsEqual(ArrayList<Long> arr1, ArrayList<Long> arr2) {
+      return (arr1 == null && arr2 == null) 
+        || (arr1 == null && arr2 != null && arr2.isEmpty())
+        || (arr1 != null && arr1.isEmpty() && arr2 == null)
+        || (!(arr1 == null || arr2 == null) && arr1.equals(arr2));
+  }
+
 } 
