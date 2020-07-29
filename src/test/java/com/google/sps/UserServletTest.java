@@ -155,7 +155,35 @@ public final class UserServletTest {
       pw.flush();
       JSONObject responseJson = new JSONObject(writer.toString().trim());
       System.out.println(responseJson);
-      Assert.assertTrue(responseJson.getJSONArray("current_challenge_id").toString() == newChallengeId);
+      Assert.assertTrue(responseJson.getLong("current_challenge_id") == Long.parseLong(newChallengeId));
+    } catch (IOException e) {}
+  }
+
+  @Test
+  public void updateChallengeStatuses(){
+    datastore.put(user.toEntity());
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    String challengeId = "0";
+    String newStatus = "1";
+
+    when(request.getParameter("chal")).thenReturn(challengeId);
+    when(request.getParameter("stat")).thenReturn(newStatus);
+    when(request.getParameter("id_token")).thenReturn(idToken);
+
+    StringWriter writer = new StringWriter();
+    PrintWriter pw = new PrintWriter(writer);
+
+    try {
+      when(response.getWriter()).thenReturn(pw);
+      servlet.doPut(request, response);
+      pw.flush();
+      JSONObject responseJson = new JSONObject(writer.toString().trim());
+      System.out.println(responseJson);
+      Assert.assertTrue((Integer) responseJson.getJSONArray("challenge_statuses").get(Integer.parseInt(challengeId)) == Integer.parseInt(newStatus));
+      Assert.assertTrue((Integer) responseJson.getJSONArray("challenge_statuses").get(1) == 0);
+      Assert.assertTrue((Integer) responseJson.getJSONArray("challenge_statuses").get(2) == 0);
     } catch (IOException e) {}
   }
 
