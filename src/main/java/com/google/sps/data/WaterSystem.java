@@ -43,16 +43,16 @@ public class WaterSystem {
     public static final String SPLITERATOR = "\",\"";
     public static final int TOTAL_CELL_COUNT = 21;
 
-    private static final int PUBLIC_WATER_SYSTEM_ID_COLUMN = 0;
-    private static final int NAME_COLUMN = 1;
-    private static final int STATE_COLUMN = 3;
-    private static final int CITY_COLUMN = 45;
-    private static final int COUNTY_COLUMN = 46;
-    private static final int POPULATION_COLUMN = 15;
+    private static final String PUBLIC_WATER_SYSTEM_ID_COLUMN = "WATER_SYSTEM.PWSID";
+    private static final String NAME_COLUMN = "WATER_SYSTEM.PWS_NAME";
+    private static final String STATE_COLUMN = "WATER_SYSTEM.PRIMACY_AGENCY_CODE";
+    private static final String CITY_COLUMN = "WATER_SYSTEM.CITIES_SERVED";
+    private static final String COUNTY_COLUMN = "WATER_SYSTEM.COUNTIES_SERVED";
+    private static final String POPULATION_COLUMN = "WATER_SYSTEM.POPULATION_SERVED_COUNT";
 
-    private static final int CONTAMINANT_NAME_COLUMN = 7;
-    private static final int VIOLATION_COLUMN = 18;
-    private static final int ENFORCEMENT_ACTION_COLUMN = 17;
+    private static final String CONTAMINANT_NAME_COLUMN = "SDW_CONTAM_VIOL_ZIP.CNAME";
+    private static final String VIOLATION_COLUMN = "SDW_CONTAM_VIOL_ZIP.ENFDATE";
+    private static final String ENFORCEMENT_ACTION_COLUMN = "SDW_CONTAM_VIOL_ZIP.ENFACTIONNAME";
 
     public static final String WATER_SYSTEM_ENTITY = "WaterSystem";
     public static final String PWSID_PROPERTY = "pwsid";
@@ -151,7 +151,7 @@ public class WaterSystem {
         try {
             URL url = new URL(EPA_VIOLATIONS_LINK + EPA_DATE_PARAMATER + EPA_PWSID_PARAMATER + pwsid + CSV_FORMAT);
             CSVParser csvParser = CSVParser.parse(url, Charset.defaultCharset(),
-                    CSVFormat.EXCEL.withFirstRecordAsHeader());
+                    CSVFormat.EXCEL.withFirstRecordAsHeader().withIgnoreEmptyLines(true));
             for (CSVRecord csvRecord : csvParser.getRecords()) {
                 String contaminantName = csvRecord.get(CONTAMINANT_NAME_COLUMN);
                 contaminantsMap.putIfAbsent(contaminantName, new WaterContaminant(csvRecord));
@@ -191,6 +191,10 @@ public class WaterSystem {
         return systemEntity.getKey();
     }
 
+    public ArrayList<WaterContaminant> getContaminants(){
+        return contaminants;
+    }
+
     public boolean equals(Object o) {
         if (this == o)
             return true;
@@ -222,11 +226,11 @@ public class WaterSystem {
         public static final String HEALTH_PROPERTY = "health";
         public static final String VIOLATIONS_PROPERTY = "violations";
 
-        private static final int CONTAMINANT_CODE_COLUMN = 6;
-        private static final int CONTAMINANT_NAME_COLUMN = 7;
-        private static final int SOURCES_COLUMN = 8;
-        private static final int DEFINITION_COLUMN = 9;
-        private static final int HEALTH_EFFECTS_COLUMN = 10;
+        private static final String CONTAMINANT_CODE_COLUMN = "SDW_CONTAM_VIOL_ZIP.CCODE";
+        private static final String CONTAMINANT_NAME_COLUMN = "SDW_CONTAM_VIOL_ZIP.CNAME";
+        private static final String SOURCES_COLUMN = "SDW_CONTAM_VIOL_ZIP.SOURCES";
+        private static final String DEFINITION_COLUMN = "SDW_CONTAM_VIOL_ZIP.DEFINITION";
+        private static final String HEALTH_EFFECTS_COLUMN = "SDW_CONTAM_VIOL_ZIP.HEALTH_EFFECTS";
 
         private int contaminantCode;
         private String contaminantName;

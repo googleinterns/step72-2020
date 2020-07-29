@@ -57,8 +57,6 @@ public class WaterPollutionServlet extends HttpServlet {
     public static final String EPA_STATE_PARAMETER = "/PRIMACY_AGENCY_CODE/";
     public static final String MIN_DATE = "/ENFDATE/>/01-JAN-14";
     public static final String CSV_FORMAT = "/Excel/";
-    public static final String SPLITERATOR = "\",\"";
-    public static final int TOTAL_CELL_COUNT = 47;
 
     public static final String WATER_POLLUTION_ENTITY = "WaterPollution";
     public static final String WATERSYSTEMS_PROPERTY = "watersystems";
@@ -69,8 +67,6 @@ public class WaterPollutionServlet extends HttpServlet {
     private static final String STATE_PARAMATER = "state";
 
     private static final String ZIP_PARAMETER = "zip_code";
-
-    public static final int DEFAULT_SCORE = 100;
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 

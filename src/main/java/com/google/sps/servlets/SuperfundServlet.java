@@ -14,9 +14,9 @@
 
 package com.google.sps.servlets;
 
-
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -28,6 +28,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 import com.google.sps.data.SuperfundSite;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +50,16 @@ public class SuperfundServlet extends HttpServlet {
     private static final String AREA_PARAMETER = "area";
     private static final String ZIP = "zip";
     private static final String STATE = "state";
+
+    private static final String NAME_COLUMN = "SEMS_ACTIVE_SITES.SITE_NAME";
+    private static final String ID_COLUMN = "SEMS_ACTIVE_SITES.SITE_ID";
+    private static final String STATE_COLUMN = "SEMS_ACTIVE_SITES.SITE_STATE";
+    private static final String CITY_COLUMN = "SEMS_ACTIVE_SITES.SITE_CITY_NAME";
+    private static final String COUNTY_COLUMN = "SEMS_ACTIVE_SITES.SITE_CNTY_NAME";
+    private static final String STATUS_COLUMN = "SEMS_ACTIVE_SITES.NPL";
+    private static final String LATITUDE_COLUMN = "SEMS_ACTIVE_SITES.LATITUDE";
+    private static final String LONGITUDE_COLUMN = "SEMS_ACTIVE_SITES.LONGITUDE";
+
 
     private static final String ZIP_PARAMETER = "zip_code";
 
@@ -95,35 +108,29 @@ public class SuperfundServlet extends HttpServlet {
 
     public ArrayList<SuperfundSite> parseSuperfundsFromURL(URL url) throws IOException{
         ArrayList<SuperfundSite> sites = new ArrayList<>();
-        Scanner scanner= new Scanner(url.openStream());
-        scanner.nextLine();
-        while(scanner.hasNextLine()){
-            String line = scanner.nextLine();
-            //cleans data to ignore new line characters within a cell
-            while(scanner.hasNextLine() && line.split(SPLITERATOR).length < TOTAL_CELL_COUNT){
-                line += scanner.nextLine();
-            }
-            String cells[] = line.split(SPLITERATOR);
-            if(cells.length < TOTAL_CELL_COUNT) continue;
-            String name = cells[3];
-            double score = DEFAULT_HAZARD_SCORE;
-            String state = cells[7];
-            String city = cells[6];
-            String county = cells[10];
-            String status = cells[15];
-            double lattitude, longitude;
+
+        CSVParser csvParser = CSVParser.parse(url, Charset.defaultCharset(),
+        CSVFormat.EXCEL.withFirstRecordAsHeader());
+        for (CSVRecord csvRecord : csvParser.getRecords()) {
+            String name = csvRecord.get(NAME_COLUMN);
+            int id = Integer.parseInt(csvRecord.get(ID_COLUMN));
+            String state = csvRecord.get(STATE_COLUMN);
+            String city = csvRecord.get(CITY_COLUMN);
+            String county = csvRecord.get(COUNTY_COLUMN);
+            String status = csvRecord.get(STATUS_COLUMN);
+            double latitude, longitude;
             try {
-                lattitude = Double.parseDouble(cells[12]);
-                longitude = Double.parseDouble(cells[13]);
+                latitude = Double.parseDouble(csvRecord.get(LATITUDE_COLUMN));
+                longitude = Double.parseDouble(csvRecord.get(LONGITUDE_COLUMN));
             } catch (Exception e){
                 // logger.info("Lat Long Issue for "+name +"\n The line of issue is: "+cells.toString());
-                lattitude = 0;
+                latitude = 0;
                 longitude = 0;
             }
-            SuperfundSite site = new SuperfundSite(name, score, state, city, county, status, lattitude, longitude);
+            SuperfundSite site = new SuperfundSite(name, id, state, city, county, status, latitude, longitude);
             sites.add(site);
         }
-        scanner.close();
+        csvParser.close();
         return sites;
     }
 
