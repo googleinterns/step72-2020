@@ -31,7 +31,7 @@ import java.lang.ClassCastException;
 public final class User {
 
   public static final String DATA_TYPE = "User";
-  public static final String ID = "userId";
+  public static final String ID = "user_id";
   public static final String NICKNAME = "nickname";
   public static final String CREATED_EVENTS = "created_events";
   public static final String BOOKMARKED_EVENTS = "bookmarked_events";
@@ -39,7 +39,7 @@ public final class User {
   public static final String CURRENT_CHALLENGE = "current_challenge";
   public static final String CHALLENGE_STATUSES = "challenge_statuses";
 
-  private String id;
+  private String user_id;
   private String nickname;
   private ArrayList<Long> created_events;
   private ArrayList<Long> bookmarked_events;
@@ -52,7 +52,7 @@ public final class User {
   private Key entity_key;
 
   public static class Builder {
-        private String id; 
+        private String user_id; 
         private String nickname;
         private ArrayList<Long> created_events;
         private ArrayList<Long> bookmarked_events;
@@ -61,8 +61,8 @@ public final class User {
         private HashMap <String, Integer> challenge_statuses;
         private Key entity_key;
 
-        public Builder(String id) {
-            this.id = id;
+        public Builder(String user_id) {
+            this.user_id = user_id;
         }
         public Builder setNickname(String nickname){
             this.nickname = nickname;
@@ -99,7 +99,7 @@ public final class User {
 
         public User build(){
             User user = new User();  
-            user.id = this.id;
+            user.user_id = this.user_id;
             user.nickname = this.nickname;
             user.entity_key = this.entity_key;
             user.created_events = this.created_events;
@@ -115,7 +115,7 @@ public final class User {
    }
 
    public String getId() {
-       return this.id;
+       return this.user_id;
    }
 
    public String getNickname() {
@@ -198,7 +198,7 @@ public final class User {
       if (this.entity_key == null) userEntity = new Entity(DATA_TYPE);
       else userEntity = new Entity(DATA_TYPE, this.entity_key.getId());
       this.entity_key = userEntity.getKey();
-      userEntity.setProperty(ID, this.id);
+      userEntity.setProperty(ID, this.user_id);
       userEntity.setProperty(NICKNAME, this.nickname);
       userEntity.setProperty(CREATED_EVENTS, this.created_events);
       userEntity.setProperty(BOOKMARKED_EVENTS, this.bookmarked_events);
@@ -216,7 +216,7 @@ public final class User {
 
   // For array list, treats empty list and null values as equal
   public boolean equals(User user) {
-      boolean idsEqual = StringUtils.equals(this.id, user.id);
+      boolean idsEqual = StringUtils.equals(this.user_id, user.user_id);
       boolean nicknamesEqual = StringUtils.equals(this.nickname, user.nickname);
       boolean currentChallengeEqual = this.current_challenge_id == user.current_challenge_id;
       boolean entityKeyEqual = (this.entity_key == null && user.entity_key == null) 

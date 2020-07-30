@@ -70,16 +70,15 @@ import com.google.sps.data.IdHelper;
 /** Servlet that returns events sorted by most recent timestamp */
 @WebServlet("/user")
 public class UserServlet extends HttpServlet {
-  static final String CHALLENGE_ID_PARAM = "chal";
-  static final String CHALLENGE_STATUS_PARAM = "stat";
-  static final String BOOKMARKED_EVENT_PARAM = "book";
-  static final String ADDED_TO_CALENDAR_PARAM = "add";
-  static final String ADD_BOOKMARK_PARAM = "add";
-  static final String EVENT = "Event";
-  static final String EVENT_ID = "event_id";
-  static final String BOOKMARKS = "bookmarks";
-  static final String ID_TOKEN_PARAM = "id_token";
-  static final String NAME = "name";
+  public static final String CHALLENGE_ID_PARAM = "chal";
+  public static final String CHALLENGE_STATUS_PARAM = "stat";
+  public static final String BOOKMARKED_EVENT_PARAM = "book";
+  public static final String ADDED_TO_CALENDAR_PARAM = "add_to_cal";
+  public static final String ADD_BOOKMARK_PARAM = "add";
+  public static final String EVENT = "Event";
+  public static final String EVENT_ID = "event_id";
+  public static final String BOOKMARKS = "bookmarks";
+  public static final String ID_TOKEN_PARAM = "id_token";
   
   private IdHelper idHelper = new GoogleIdHelper();
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();

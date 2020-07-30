@@ -45,8 +45,10 @@ import com.google.gson.*;
 @RunWith(JUnit4.class)
 public final class UserServletTest {
   private UserServlet servlet;
-  private String idToken = "123";;
-  private String userId = "00";
+  private static final String MOCK_ID_TOKEN = "123";;
+  private static final String MOCK_USER_ID = "00";
+  private static final String MOCK_NICKNAME = "Name";
+
 
   private static final HashMap<String, Integer> DEFAULT_CHALLENGE_STATUSES = new HashMap<String, Integer>();
   static {
@@ -70,8 +72,8 @@ public final class UserServletTest {
     servlet.setIdHelper(new MockIdHelper());
     servlet.setDatastoreService(datastore);
 
-    user = new User.Builder(userId)
-        .setNickname("Name")
+    user = new User.Builder(MOCK_USER_ID)
+        .setNickname(MOCK_NICKNAME)
         .setCurrentChallengeId("GARD_0")
         .setChallengeStatuses(DEFAULT_CHALLENGE_STATUSES)
         .build();
@@ -91,7 +93,7 @@ public final class UserServletTest {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
-    when(request.getParameter("id_token")).thenReturn(idToken);
+    when(request.getParameter(UserServlet.ID_TOKEN_PARAM)).thenReturn(MOCK_ID_TOKEN);
 
     StringWriter writer = new StringWriter();
     PrintWriter pw = new PrintWriter(writer);
@@ -102,11 +104,12 @@ public final class UserServletTest {
       pw.flush();
 
       JSONObject responseJson = new JSONObject(writer.toString().trim());
-
-      Assert.assertEquals(userJson.getString("id"),
-                          responseJson.getString("id"));
-      Assert.assertEquals(userJson.getString("nickname"),
-                          responseJson.getString("nickname"));
+        System.out.println(userJson);
+        System.out.println(responseJson);
+      Assert.assertEquals(userJson.getString(User.ID),
+                          responseJson.getString(User.ID));
+      Assert.assertEquals(userJson.getString(User.NICKNAME),
+                          responseJson.getString(User.NICKNAME));
     } catch (IOException e) {}
   }
 
@@ -115,7 +118,7 @@ public final class UserServletTest {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
-    when(request.getParameter("id_token")).thenReturn(idToken);
+    when(request.getParameter(UserServlet.ID_TOKEN_PARAM)).thenReturn(MOCK_ID_TOKEN);
 
     StringWriter writer = new StringWriter();
     PrintWriter pw = new PrintWriter(writer);
@@ -123,22 +126,21 @@ public final class UserServletTest {
     try {
       when(response.getWriter()).thenReturn(pw);
       // Confirm matching user does not already exist
-      Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
+      Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, MOCK_USER_ID));
       Entity entity = datastore.prepare(query).asSingleEntity();
       Assert.assertEquals(entity, null);
 
       servlet.doPost(request, response);
       pw.flush();
       
-      query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
+      query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, MOCK_USER_ID));
       entity = datastore.prepare(query).asSingleEntity();
-      System.out.println(entity);
-      User createdUser = User.convertEntityToUser(entity, userId);
+      User createdUser = User.convertEntityToUser(entity, MOCK_USER_ID);
       JSONObject createdUserJson = new JSONObject(createdUser.toJSON());
-      Assert.assertEquals(userJson.getString("id"),
-                          createdUserJson.getString("id"));
-      Assert.assertEquals(userJson.getString("nickname"),
-                          createdUserJson.getString("nickname"));
+      Assert.assertEquals(userJson.getString(User.ID),
+                          createdUserJson.getString(User.ID));
+      Assert.assertEquals(userJson.getString(User.NICKNAME),
+                          createdUserJson.getString(User.NICKNAME));
 
     } catch (IOException e) {}
   }
@@ -149,10 +151,10 @@ public final class UserServletTest {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
-    String newChallengeId = "5";
+    String newChallengeId = "RECY_0";
 
-    when(request.getParameter("chal")).thenReturn(newChallengeId);
-    when(request.getParameter("id_token")).thenReturn(idToken);
+    when(request.getParameter(UserServlet.CHALLENGE_ID_PARAM)).thenReturn(newChallengeId);
+    when(request.getParameter(UserServlet.ID_TOKEN_PARAM)).thenReturn(MOCK_ID_TOKEN);
 
     StringWriter writer = new StringWriter();
     PrintWriter pw = new PrintWriter(writer);
@@ -162,8 +164,7 @@ public final class UserServletTest {
       servlet.doPut(request, response);
       pw.flush();
       JSONObject responseJson = new JSONObject(writer.toString().trim());
-      System.out.println(responseJson);
-      Assert.assertTrue(responseJson.getString("current_challenge_id") == newChallengeId);
+      Assert.assertTrue(responseJson.getString("current_challenge_id").equals(newChallengeId));
     } catch (IOException e) {}
   }
 
@@ -173,12 +174,12 @@ public final class UserServletTest {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
-    String challengeId = "0";
+    String challengeId = "RECY_0";
     String newStatus = "1";
 
-    when(request.getParameter("chal")).thenReturn(challengeId);
-    when(request.getParameter("stat")).thenReturn(newStatus);
-    when(request.getParameter("id_token")).thenReturn(idToken);
+    when(request.getParameter(UserServlet.CHALLENGE_ID_PARAM)).thenReturn(challengeId);
+    when(request.getParameter(UserServlet.CHALLENGE_STATUS_PARAM)).thenReturn(newStatus);
+    when(request.getParameter(UserServlet.ID_TOKEN_PARAM)).thenReturn(MOCK_ID_TOKEN);
 
     StringWriter writer = new StringWriter();
     PrintWriter pw = new PrintWriter(writer);
@@ -188,12 +189,10 @@ public final class UserServletTest {
       servlet.doPut(request, response);
       pw.flush();
       JSONObject responseJson = new JSONObject(writer.toString().trim());
-      System.out.println(responseJson);
-      String challengeStatuses = responseJson.getString("challenge_statuses");
-      System.out.println(challengeStatuses);
-    //   Assert.assertTrue((Integer) responseJson.getJSONArray("challenge_statuses").get(Integer.parseInt(challengeId)) == Integer.parseInt(newStatus));
-    //   Assert.assertTrue((Integer) responseJson.getJSONArray("challenge_statuses").get(1) == 0);
-    //   Assert.assertTrue((Integer) responseJson.getJSONArray("challenge_statuses").get(2) == 0);
+      JSONObject challengeStatuses = responseJson.getJSONObject(User.CHALLENGE_STATUSES);
+      Assert.assertTrue((Integer) challengeStatuses.get(challengeId) == Integer.parseInt(newStatus));
+      Assert.assertTrue((Integer) challengeStatuses.get("GARD_0") == 0);
+      Assert.assertTrue((Integer) challengeStatuses.get("WAST_0") == 0);
     } catch (IOException e) {}
   }
 
@@ -206,9 +205,9 @@ public final class UserServletTest {
 
     String eventId = "5";
 
-    when(request.getParameter("book")).thenReturn(eventId);
-    when(request.getParameter("add")).thenReturn("true");
-    when(request.getParameter("id_token")).thenReturn(idToken);
+    when(request.getParameter(UserServlet.BOOKMARKED_EVENT_PARAM)).thenReturn(eventId);
+    when(request.getParameter(UserServlet.ADD_BOOKMARK_PARAM)).thenReturn("true");
+    when(request.getParameter(UserServlet.ID_TOKEN_PARAM)).thenReturn(MOCK_ID_TOKEN);
 
     StringWriter writer = new StringWriter();
     PrintWriter pw = new PrintWriter(writer);
@@ -218,8 +217,7 @@ public final class UserServletTest {
       servlet.doPut(request, response);
       pw.flush();
       JSONObject responseJson = new JSONObject(writer.toString().trim());
-      System.out.println(responseJson);
-      Assert.assertTrue(responseJson.getJSONArray("bookmarked_events").toString().contains(eventId));
+      Assert.assertTrue(responseJson.getJSONArray(User.BOOKMARKED_EVENTS).toString().contains(eventId));
     } catch (IOException e) {}
   }
 
@@ -232,9 +230,9 @@ public final class UserServletTest {
 
     String eventId = "5";
 
-    when(request.getParameter("book")).thenReturn(eventId);
-    when(request.getParameter("add")).thenReturn("false");
-    when(request.getParameter("id_token")).thenReturn(idToken);
+    when(request.getParameter(UserServlet.BOOKMARKED_EVENT_PARAM)).thenReturn(eventId);
+    when(request.getParameter(UserServlet.ADD_BOOKMARK_PARAM)).thenReturn("false");
+    when(request.getParameter(UserServlet.ID_TOKEN_PARAM)).thenReturn(MOCK_ID_TOKEN);
 
     StringWriter writer = new StringWriter();
     PrintWriter pw = new PrintWriter(writer);
@@ -244,8 +242,33 @@ public final class UserServletTest {
       servlet.doPut(request, response);
       pw.flush();
       JSONObject responseJson = new JSONObject(writer.toString().trim());
-      System.out.println(responseJson);
-      Assert.assertTrue(!responseJson.getJSONArray("bookmarked_events").toString().contains(eventId));
+      Assert.assertTrue(!responseJson.getJSONArray(User.BOOKMARKED_EVENTS).toString().contains(eventId));
     } catch (IOException e) {}
+  }
+
+  @Test
+  public void updateAddedToCalendarEvents() {
+    user.setAddedToCalendarEvents(new ArrayList<Long>(Arrays.asList(5L)));
+    datastore.put(user.toEntity());
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    String eventId = "5";
+
+    when(request.getParameter(UserServlet.ADDED_TO_CALENDAR_PARAM)).thenReturn(eventId);
+    when(request.getParameter(UserServlet.ID_TOKEN_PARAM)).thenReturn(MOCK_ID_TOKEN);
+
+    StringWriter writer = new StringWriter();
+    PrintWriter pw = new PrintWriter(writer);
+
+    try {
+      when(response.getWriter()).thenReturn(pw);
+      servlet.doPut(request, response);
+      pw.flush();
+      JSONObject responseJson = new JSONObject(writer.toString().trim());
+      Assert.assertTrue(responseJson.getJSONArray(User.ADDED_TO_CALENDAR_EVENTS).toString().contains(eventId));
+    } catch (IOException e) {}
+
   }
 }
