@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,6 +64,9 @@ public class ChallengesServlet extends HttpServlet {
   private static final int NO_CHALLENGES = 0;
   private static final String NUM_CHALLENGES = "num-challenges";
   private static final String ID_TOKEN = "id_token";
+  private static final String COMPLETED_CHALLENGES = "completed-chal";
+  private static final String CURRENT_CHALLENGE = "current-chal";
+
   private ArrayList<Challenge> requested_challenge_list = new ArrayList<>();
 
   @Override
@@ -92,16 +96,71 @@ public class ChallengesServlet extends HttpServlet {
     response.getWriter().println(json);
   }
 
+  /* remove challenge id from user status map
+     add new challenge id to user status map
+     add challenge id to user completed challenge map */
+
+  @Override
+  public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    String completed_challenge_id = request.getParameter(COMPLETED_CHALLENGES);
+    String current_challenge_id = request.getParameter(CURRENT_CHALLENGE);
+    Payload payload = GoogleIdHelper.verifyId(request);
+    if (payload == null) {
+        response.setStatus(400);
+        return;
+    }
+
+    String user_id = payload.getSubject();
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+    Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, user_id));
+    Entity entity = datastore.prepare(query).asSingleEntity();
+    User user = User.convertEntitytoUser(entity, user_id);
+
+    if(completed_challenge_id != null){
+      try{
+        updateUserChallenges(user, completed_challenge_id, current_challenge_id);
+        } catch(Exception e) {
+          System.err.println(e.getMessage());
+      }
+    }
+    datastore.put(user.toEntity());
+
+    response.setContentType("application/json; charset=UTF-8");
+    response.getWriter().println(user.toJSON());
+  }
+
   /** Converts array of challenges into json format */
-  private String convertToJsonUsingGson(ArrayList challenge_list){
+  private String convertToJsonUsingGson(ArrayList challenge_list) {
     String json = new Gson().toJson(challenge_list);
     return json;
   }
 
+  //This function Update's User's Current, and Completed challenges
+  // along with statuses
+  private void updateUserChallenges(User user, String compl_id, String cur_id) {
+    HashMap<String, Integer> challenge_statuses = user.getChallengeStatuses();
+    HashSet<String> completed_challenges = user.getCompletedChallenges();
+    user.setCurrentChallenge(cur_id);
+
+    //challenge_statuses.remove(compl_id);
+    user.appendToCompletedChallenges(compl_id);
+    
+    //add new challenge to challenge status.
+    for(String challenge_id : ChallengeData.CHALLENGES_MAP.keySet()){
+      if(!completed_challenges.contains(challenge_id) &&
+         !challenge_statuses.containsKey(challenge_id)){
+
+          challenge_statuses.put(challenge_id, 0);
+          user.setChallengeStatuses(challenge_statuses);
+          break;
+      }   
+    }
+  } 
+
+  /** Convert request parameter NUM_CHALLENGES into an Integeer */
   private int getNumChallenges(HttpServletRequest request){
     String num_of_challenges_requested = request.getParameter(NUM_CHALLENGES);
-
-    //convert num_challenges to an int
     int num_challenges;
     try{
       num_challenges = Integer.parseInt(num_of_challenges_requested);

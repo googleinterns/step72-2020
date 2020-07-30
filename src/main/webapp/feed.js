@@ -53,13 +53,10 @@ const CHALLENGE_TYPE = {
     GARDENING: "GARDENING",
 };
 
-
 let user;
 let challenges = [];
 let challengeMap = new Map();
 const defaultNumChallenges = 3;
-
-
 
 const projectTitle = "GEN Capstone";
 let calendarId = null; 
@@ -74,8 +71,8 @@ eventCategoryIcons.set("other", "🥑🌲🐢");
 const badgeHeight = 120;
 let lastBoldedItem;
 
-async function loadChallenges() {
-    await getServerChallenges(defaultNumChallenges);
+async function loadChallenges(num_challenges) {
+    await getServerChallenges(num_challenges);
 
     setChallengeBox(user.current_challenge_id);
 
@@ -442,21 +439,24 @@ async function showNewChallengeCompletePage(challenge) {
     let newChallengeId = findNextUncompletedChallenge(challenge.id);
     if (newChallengeId == -1) {
         text.innerHTML = "All challenges complete!";
-        await getServerChallenges(3);
     }
     else {
         text.innerHTML = `${challenge.challenge_type} challenge complete!<br>Next up is the <b>${challengeMap.get(newChallengeId).name}</b> challenge`;
+        //await sendCompletedChallenges(challenge.id, newChallengeId);
     }
 
     //instead of newChallengeID us key name from Challenge Data
-    let idToken = getIdToken();
-    const putRequest = new Request(`/user?id_token=${idToken}&chal=${newChallengeId}`, {method: 'PUT'});
-
-    user = await fetch(putRequest).then(response => response.json());
+    //let idToken = getIdToken();
+    //const putRequest = new Request(`/user?id_token=${idToken}&chal=${newChallengeId}`, {method: 'PUT'});
+    //user = await fetch(putRequest).then(response => response.json());
+    await sendCompletedChallenges(challenge.id, newChallengeId);
+    await loadChallenges(1);
 }
 
-async function sendCompletedChallenges() {
-    fetch('/challenges', {methdod:'POST'});
+async function sendCompletedChallenges(complete_chal_id ,current_chal_id) {
+    id_token = getIdToken();
+    put_request = new Request(`/challenges?id_token=${id_token}&completed-chal=${complete_chal_id}&current-chal=${current_chal_id}`, {method: "PUT"});
+    user = await fetch(put_request).then(response => response.json());
 }
 
 function findNextUncompletedChallenge(prevChallengeId) {
@@ -581,7 +581,7 @@ function openChallengesModal() {
     if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
 
     if (user.current_challenge_id == -1) {
-        //showChallengeCompletePage(challengeMap[], false);
+        //showChallengeCompletePage(challengeMap, false);
     }
 
     else {
@@ -734,7 +734,7 @@ if (isSignedIn) {
     feedRightSide.style.display = "block";  
     await getUserInfo();
     await loadEvents();
-    await loadChallenges();
+    await loadChallenges(defaultNumChallenges);
     showAddToCalendarButtons();
 } else {
     authorizeButton.style.display = 'block';

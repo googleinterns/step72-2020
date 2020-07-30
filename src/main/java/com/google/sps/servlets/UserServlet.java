@@ -115,7 +115,7 @@ public class UserServlet extends HttpServlet {
     }
     String userId = payload.getSubject();
     String userNickname = (String) payload.get(NAME);
-    
+
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     User user = new User.Builder(userId)
@@ -196,9 +196,9 @@ public class UserServlet extends HttpServlet {
   }
 
 
-  private void updateChallengeStatus(User user, String key, int status) {
+  private void updateChallengeStatus(User user, String id, int status) {
     HashMap<String, Integer> challengeStatuses = user.getChallengeStatuses();
-    challengeStatuses.put(key, status);
+    challengeStatuses.put(id, status);
     user.setChallengeStatuses(challengeStatuses);
   }
 
