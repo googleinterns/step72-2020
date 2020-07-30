@@ -133,7 +133,6 @@ public class UserServlet extends HttpServlet {
     Long currentChallengeId = 0L;
     // @Erick Change to get length of challenges (replace the 3)
     ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
-    String userNickname = (String) payload.get(NAME);
 
     User user = new User.Builder(userId)
         .setNickname(userNickname)
