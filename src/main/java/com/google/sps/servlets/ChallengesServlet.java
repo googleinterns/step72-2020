@@ -96,10 +96,8 @@ public class ChallengesServlet extends HttpServlet {
     response.getWriter().println(json);
   }
 
-  /* remove challenge id from user status map
-     add new challenge id to user status map
-     add challenge id to user completed challenge map */
-
+  /* add new challenge id to user status map, update current challenge id
+     and add challenge id to user completed challenge map */
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String completed_challenge_id = request.getParameter(COMPLETED_CHALLENGES);
