@@ -114,6 +114,46 @@ public final class UserServletTest {
   }
 
   @Test
+  public void getNonexistentUser(){
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    when(request.getParameter(UserServlet.ID_TOKEN_PARAM)).thenReturn(MOCK_ID_TOKEN);
+
+    StringWriter writer = new StringWriter();
+    PrintWriter pw = new PrintWriter(writer);
+
+    try {
+      when(response.getWriter()).thenReturn(pw);
+      servlet.doGet(request, response);
+      pw.flush();
+
+      Assert.assertEquals(writer.toString().trim(), "");
+
+    } catch (IOException e) {}
+  }
+
+  @Test
+  public void noIdToken(){
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+
+    when(request.getParameter(UserServlet.ID_TOKEN_PARAM)).thenReturn(null);
+
+    StringWriter writer = new StringWriter();
+    PrintWriter pw = new PrintWriter(writer);
+
+    try {
+      when(response.getWriter()).thenReturn(pw);
+      servlet.doGet(request, response);
+      pw.flush();
+      
+      Assert.assertEquals(writer.toString().trim(), "");
+
+    } catch (IOException e) {}
+  }
+
+  @Test
   public void createUser(){
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
