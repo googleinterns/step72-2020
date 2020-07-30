@@ -53,6 +53,7 @@ const CHALLENGE_TYPE = {
     GARDENING: "GARDENING",
 };
 
+
 let user;
 let challenges = [];
 let challengeMap = new Map();
@@ -354,7 +355,7 @@ async function getServerChallenges(numChallenges){
     switch (challengeMap.get(chalIndex).challenge_type){
       case(CHALLENGE_TYPE.RECYCLE):
         challengeMap.get(chalIndex)["icon"] = "♻️";
-        console.log(challengeMap.get(chalIndex).icon);
+        //console.log(challengeMap.get(chalIndex).icon);
         break;
       case(CHALLENGE_TYPE.GARDENING):
         challengeMap.get(chalIndex)["icon"] = "🌱";
