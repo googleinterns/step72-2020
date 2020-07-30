@@ -72,6 +72,7 @@ eventCategoryIcons.set("waste_cleanup", "🗑♻️🥤");
 eventCategoryIcons.set("other", "🥑🌲🐢");
 
 const badgeHeight = 120;
+const NUM_BOOKMARKS_TEXT = 1;
 let lastBoldedItem;
 
 async function loadChallenges() {
@@ -113,8 +114,8 @@ function postEvent(event) {
     const eventEl = document.createElement('div');
     eventEl.className = "event-post";
     eventEl.appendChild(addEventUserText(event));
+    eventEl.appendChild(addEventBookmark(event));
     eventEl.appendChild(addEventAddToCalendarButton(event));
-    // eventEl.appendChild(addEventBookmark(event));
     eventEl.appendChild(addEventMiddleSection(event));
     eventEl.appendChild(addEventInfo(event));
     return eventEl;
@@ -174,24 +175,71 @@ function addEventBookmark(event) {
     bookmarkDiv.style.height = 0;
     const bookmark = document.createElement('img');
     bookmark.className = "event-bookmark";
-    // add case for if user has bookmarked this event once users have been created
-    bookmark.src = "/resources/bookmark.png";
     bookmarkDiv.appendChild(bookmark);
     bookmarkDiv.appendChild(addEventNumBookmarks(event));
+    bookmarkDiv.onclick = () => {};
+
+    if (gapi.auth2.getAuthInstance().isSignedIn.get() && user.bookmarked_events.includes(event.extendedProperties.event_id)) {
+        bookmark.src="/resources/filled-bookmark.png"; 
+        bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].style.color = "#fafafa";
+        bookmarkDiv.onclick = async () => {
+            unclickBookmark(bookmark, bookmarkDiv, event);
+        }
+    } else {
+        bookmark.src = "/resources/bookmark.png";
+        if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+            bookmarkDiv.onclick = async () => { 
+                clickBookmark(bookmark, bookmarkDiv, event);
+            };
+        }   
+    }
     return bookmarkDiv;
+}
+
+async function clickBookmark(bookmark, bookmarkDiv, event) {
+    bookmark.src="/resources/filled-bookmark.png"; 
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].style.color = "#fafafa";
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText = parseInt(bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText)+1;
+
+    let idToken = getIdToken();
+    const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}&add=true&id_token=${idToken}`, {method: 'PUT'});
+    user = await fetch(putRequest).then(response => response.json());
+
+    bookmarkDiv.onclick = async () => {
+        if (gapi.auth2.getAuthInstance().isSignedIn.get() && user.bookmarked_events.includes(event.extendedProperties.event_id)) {
+            await unclickBookmark(bookmark, bookmarkDiv, event);
+        }
+    };
+}
+
+async function unclickBookmark(bookmark, bookmarkDiv, event) {
+    bookmark.src = "/resources/bookmark.png";
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].style.color = "#004643";
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText = parseInt(bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText)-1;
+
+    let idToken = getIdToken();
+    const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}&add=false&id_token=${idToken}`, {method: 'PUT'});
+    user = await fetch(putRequest).then(response => response.json());
+
+    bookmarkDiv.onclick = async () => {
+        if (gapi.auth2.getAuthInstance().isSignedIn.get() && !user.bookmarked_events.includes(event.extendedProperties.event_id)) {
+            await clickBookmark(bookmark, bookmarkDiv, event);
+        }
+    };
 }
 
 function addEventNumBookmarks(event) {
     const bookmarkNum = document.createElement('p');
     bookmarkNum.className = "event-bookmark-num";
-    bookmarkNum.innerText = event.get("bookmarks");
+    const bookmarks = event.extendedProperties.bookmarks;
+    if (bookmarks > 99) bookmarkNum.innerText = "99+";
+    else bookmarkNum.innerText = bookmarks;
     return bookmarkNum;
 }
 
 function addEventUserText(event) {
     const eventUser = document.createElement('p');
     eventUser.className = "event-info";
-    // eventUser.innerText = event.creator + " posted an event:";
     eventUser.innerText = event.extendedProperties.creator + " posted an event:";
 
     return eventUser;
