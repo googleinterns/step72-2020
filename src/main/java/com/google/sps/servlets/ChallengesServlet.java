@@ -90,7 +90,7 @@ public class ChallengesServlet extends HttpServlet {
       Challenge my_challenge = ChallengeData.CHALLENGES_MAP.get(key);
       requested_challenge_list.add(my_challenge);
     }
-    
+
     String json = convertToJsonUsingGson(requested_challenge_list);
     response.setContentType("application/json;");
     response.getWriter().println(json);
