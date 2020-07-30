@@ -28,7 +28,6 @@ import org.mockito.Mockito.*;
 public final class SuperfundTest {
 
     private SuperfundServlet servlet;
-
     private ArrayList<SuperfundSite> actonSites;
 
     private static final String AREA_PARAMETER = "area";

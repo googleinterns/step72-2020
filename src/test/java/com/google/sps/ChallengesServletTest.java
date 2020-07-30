@@ -18,9 +18,11 @@ import org.junit.runners.JUnit4;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito.*;
 
+
 @RunWith(JUnit4.class)
 public final class ChallengesServletTest {
   private ChallengesServlet servlet;
+  private String NUM_CHALLNEGES = "3"; 
 
   @Before
   public void setup(){
@@ -31,6 +33,8 @@ public final class ChallengesServletTest {
   public void ConvertJavaObjectToJsonTest(){
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+    when(request.getParameter(NUM_CHALLNEGES)).thenReturn("");
+
     StringWriter writer = new StringWriter();
     PrintWriter pw = new PrintWriter(writer);
 
@@ -38,7 +42,7 @@ public final class ChallengesServletTest {
       when(response.getWriter()).thenReturn(pw);
       servlet.doGet(request, response);
       pw.flush();
-      Assert.assertEquals(new Gson().toJson(ChallengeData.challenges),
+      Assert.assertEquals(new Gson().toJson(ChallengeData.CHALLENGES_MAP),
                           writer.toString().trim());
     } catch (IOException e) {}
   }
