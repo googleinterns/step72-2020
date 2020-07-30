@@ -47,14 +47,23 @@ const API_KEY = 'AIzaSyAUR8-gJeYJOCSDJTP6qgN7FsIDG3u-vgU';
 const SCOPES  = "https://www.googleapis.com/auth/calendar.app.created https://www.googleapis.com/auth/calendar.readonly";
 var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
 
+const CHALLENGE_TYPE = {
+    RECYCLE: "RECYCLE",
+    WASTE: "WASTE",
+    GARDENING: "GARDENING",
+};
+
 
 let user;
 let events;
 let challenges = [];
+let challengeMap = new Map();
+const defaultNumChallenges = 3;
+
+
 
 const projectTitle = "GEN Capstone";
 let calendarId = null; 
-
 
 let eventCategoryIcons = new Map();
 eventCategoryIcons.set("food_beverage", "🥑🍋🍏");
@@ -64,15 +73,15 @@ eventCategoryIcons.set("waste_cleanup", "🗑♻️🥤");
 eventCategoryIcons.set("other", "🥑🌲🐢");
 
 const badgeHeight = 120;
+const NUM_BOOKMARKS_TEXT = 1;
 let lastBoldedItem;
 
-
 async function loadChallenges() {
-    await getServerChallenges();
+    await getServerChallenges(defaultNumChallenges);
 
     setChallengeBox(user.current_challenge_id);
 
-    setChallengesNavBar(challenges);
+    setChallengesNavBar();
 
 
     window.onclick = function(event) {
@@ -173,7 +182,7 @@ function addEventBookmark(event) {
 
     if (gapi.auth2.getAuthInstance().isSignedIn.get() && user.bookmarked_events.includes(event.extendedProperties.event_id)) {
         bookmark.src="/resources/filled-bookmark.png"; 
-        bookmarkDiv.childNodes[1].style.color = "#fafafa";
+        bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].style.color = "#fafafa";
         bookmarkDiv.onclick = async () => {
             unclickBookmark(bookmark, bookmarkDiv, event);
         }
@@ -190,8 +199,8 @@ function addEventBookmark(event) {
 
 async function clickBookmark(bookmark, bookmarkDiv, event) {
     bookmark.src="/resources/filled-bookmark.png"; 
-    bookmarkDiv.childNodes[1].style.color = "#fafafa";
-    bookmarkDiv.childNodes[1].innerText = parseInt(bookmarkDiv.childNodes[1].innerText)+1;
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].style.color = "#fafafa";
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText = parseInt(bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText)+1;
 
     let idToken = getIdToken();
     const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}&add=true&id_token=${idToken}`, {method: 'PUT'});
@@ -206,8 +215,8 @@ async function clickBookmark(bookmark, bookmarkDiv, event) {
 
 async function unclickBookmark(bookmark, bookmarkDiv, event) {
     bookmark.src = "/resources/bookmark.png";
-    bookmarkDiv.childNodes[1].style.color = "#004643";
-    bookmarkDiv.childNodes[1].innerText = parseInt(bookmarkDiv.childNodes[1].innerText)-1;
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].style.color = "#004643";
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText = parseInt(bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText)-1;
 
     let idToken = getIdToken();
     const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}&add=false&id_token=${idToken}`, {method: 'PUT'});
@@ -302,10 +311,10 @@ function setChallengeBox(challengeId) {
     }
     else {
         //console.log("challenges length = " + challenges.length) ;
-        icon.innerText = challenges[challengeId].get("icon");
+        icon.innerText = challengeMap.get(challengeId).icon;
 
         const currentStep = user.challenge_statuses[challengeId];
-        const totalSteps = challenges[challengeId].get("steps").length;
+        const totalSteps = challengeMap.get(challengeId).steps.length;
         
         stepsText.style.fontSize = "20px";
         stepsText.innerText = currentStep + "/" + totalSteps;
@@ -330,18 +339,19 @@ function fillBadge(currentStep, totalSteps) {
 }
 
 //start here to implement (note for me)
-function setChallengesNavBar(challenges) {
+function setChallengesNavBar() {
     const navBar = document.getElementById("challenges-nav-bar");
     navBar.innerHTML = "<p id='challenges-nav-bar-header'>Challenges</p>";
 
-    for (challenge of challenges) {
-        navBar.appendChild(createChallengeNavBarItem(challenge));
+    //challenge [key, value]
+    for (challenge of challengeMap) {
+        navBar.appendChild(createChallengeNavBarItem(challenge[1]));
 
         const itemBackground = document.createElement('div');
-        itemBackground.id = "challenges-nav-bar-item-background-" + challenge.get("id");
+        itemBackground.id = "challenges-nav-bar-item-background-" + challenge[0];
         itemBackground.className = "challenges-nav-bar-item-background";
         let percentDone = 0;
-        if (challenge.get("steps").length != 0) percentDone = user.challenge_statuses[challenge.get("id")] / challenge.get("steps").length;
+        if (challenge[1].steps.length != 0) percentDone = user.challenge_statuses[challenge[0]] / challenge[1].steps.length;
         itemBackground.style.width = percentDone*100+"%";
         navBar.appendChild(itemBackground);
     }
@@ -350,22 +360,22 @@ function setChallengesNavBar(challenges) {
 function createChallengeNavBarItem(challenge) {
     const item = document.createElement('div');
     item.className = "challenges-nav-bar-item";
-    item.id = "challenges-nav-bar-item-" + challenge.get("id");
+    item.id = "challenges-nav-bar-item-" + challenge.id;
 
     const title = document.createElement('p');
     title.className = "challenges-nav-bar-item-title";
-    title.innerText = challenge.get("type");
+    title.innerText = challenge.challenge_type;
     item.appendChild(title);
 
     const icon = document.createElement('p');
     icon.className = "challenges-nav-bar-item-icon";
-    icon.innerText = challenge.get("icon");
+    icon.innerText = challenge.icon;
     item.appendChild(icon);
 
     item.addEventListener("click", () => {
         boldCurrentChallengeTitle(item);
-        const step = user.challenge_statuses[challenge.get("id")]+1;
-        if (step < challenge.get("steps").length+1) {
+        const step = user.challenge_statuses[challenge.id]+1;
+        if (step < challenge.steps.length+1) {
             showChallengeInfo(challenge, step);
         }
         else {
@@ -375,30 +385,28 @@ function createChallengeNavBarItem(challenge) {
     return item;
 }
 
-async function getServerChallenges(){
-  const response = await fetch('/challenges');
+async function getServerChallenges(numChallenges){
+  let id_token = getIdToken();
+  const response = await fetch(`/challenges?num-challenges=${numChallenges}&id_token=${id_token}`);
   const challengeJson = await response.json();
-
-  var i;
-  for(i = 0; i < challengeJson.length; i++){
-    challenges[i] = new Map();
-    challenges[i].set("id", i);
-    challenges[i].set("title", challengeJson[i].name);
-    challenges[i].set("type", challengeJson[i].challenge_type);
-    challenges[i].set("steps", challengeJson[i].steps_desc_pair);
-
-    switch (challenges[i].get("type")) {
-      case("RECYCLE"):
-        challenges[i].set("icon", "♻️");
+  
+  for(var i = 0; i < challengeJson.length; i++) {
+    let chalIndex = challengeJson[i].id;
+    challengeMap.set(chalIndex,challengeJson[i]);
+    
+    switch (challengeMap.get(chalIndex).challenge_type){
+      case(CHALLENGE_TYPE.RECYCLE):
+        challengeMap.get(chalIndex)["icon"] = "♻️";
+        console.log(challengeMap.get(chalIndex).icon);
         break;
-      case("GARDENING"):
-        challenges[i].set("icon", "🌱");
+      case(CHALLENGE_TYPE.GARDENING):
+        challengeMap.get(chalIndex)["icon"] = "🌱";
         break;
-      case("WASTE"):
-        challenges[i].set("icon", "🗑");
+      case(CHALLENGE_TYPE.WASTE):
+        challengeMap.get(chalIndex)["icon"] = "🗑";
         break;
       default:
-        challenges[i].set("icon", "⚠");
+        challengeMap.get(chalIndex)["icon"] = "⚠";
         break;
     }
   }
@@ -419,17 +427,17 @@ function showChallengeInfo(challenge, displayedStep) {
     inProgressContent.style.display = "flex";
 
     const header = document.getElementById("challenges-main-panel-header");
-    let stepsText = displayedStep + "/" + challenge.get("steps").length;
-    header.innerText = challenge.get("icon") + " " + challenge.get("title") + " " + stepsText;
+    let stepsText = displayedStep + "/" + challenge.steps.length;
+    header.innerText = challenge.icon + " " + challenge.name + " " + stepsText;
 
     const stepText = document.getElementById("challenges-main-panel-step");
-    stepText.innerText = challenge.get("steps")[displayedStep-1].key;
+    stepText.innerText = challenge.steps[displayedStep-1].key;
 
     setPrevButton(displayedStep, challenge);
     setNextButton(displayedStep, challenge);
     
     const description = document.getElementById("challenges-main-panel-description");
-    description.innerText = challenge.get("steps")[displayedStep-1].value;
+    description.innerText = challenge.steps[displayedStep-1].value;
 
     const resources = document.getElementById("challenges-main-panel-resources");
     //resources.innerText = challenge.get("resources")[displayedStep-1];
@@ -437,7 +445,7 @@ function showChallengeInfo(challenge, displayedStep) {
     createModalChallengesBadge(displayedStep, challenge);
 
     const setChallengeDiv = document.getElementById("challenges-modal-set-challenge-div");
-    if (displayedStep == user.challenge_statuses[challenge.get("id")]+1) {
+    if (displayedStep == user.challenge_statuses[challenge.id]+1) {
         setChallengeDiv.style.display = "flex";
         setCheckbox(challenge);
     }
@@ -458,37 +466,46 @@ function showChallengeCompletePage(challenge, newCompletion) {
 
     newCompletion ? showNewChallengeCompletePage(challenge) : showOldChallengeCompletePage(challenge);
 
-    setPrevButton(challenge.get("steps").length+1, challenge);
+    setPrevButton(challenge.steps.length+1, challenge);
 }
 
 async function showNewChallengeCompletePage(challenge) {
     const text = document.getElementById("challenge-complete-text");
-    let newChallengeId = findNextUncompletedChallenge(challenge.get("id"));
+    let newChallengeId = findNextUncompletedChallenge(challenge.id);
     if (newChallengeId == -1) {
         text.innerHTML = "All challenges complete!";
+        await getServerChallenges(3);
     }
     else {
-        text.innerHTML = `${challenge.get("title")} challenge complete!<br>Next up is the <b>${challenges[newChallengeId].get("title")}</b> challenge`;
+        text.innerHTML = `${challenge.challenge_type} challenge complete!<br>Next up is the <b>${challengeMap.get(newChallengeId).name}</b> challenge`;
     }
+
+    //instead of newChallengeID us key name from Challenge Data
     let idToken = getIdToken();
     const putRequest = new Request(`/user?id_token=${idToken}&chal=${newChallengeId}`, {method: 'PUT'});
+
     user = await fetch(putRequest).then(response => response.json());
 }
 
+async function sendCompletedChallenges() {
+    fetch('/challenges', {methdod:'POST'});
+}
+
 function findNextUncompletedChallenge(prevChallengeId) {
-    for (i = 1; i < challenges.length; i++) {
-        let id = (prevChallengeId+i) % challenges.length;
-        let status = user.challenge_statuses[id];
-        if (status < challenges[id].get("steps").length) {
-            return id;
+    for(chalId of challengeMap.keys()) {
+      if(chalId != prevChallengeId) {
+        let status = user.challenge_statuses[chalId];
+        if (status < challengeMap.get(chalId).steps.length) {
+          return chalId;
         }
+      }
     }
     return -1;
 }
 
 function showOldChallengeCompletePage(challenge) {
     const text = document.getElementById("challenge-complete-text");
-    text.innerHTML = `${challenge.get("title")} challenge complete!`;
+    text.innerHTML = `${challenge.name} challenge complete!`;
 }
 
 function setPrevButton(displayedStep, challenge) {
@@ -512,8 +529,8 @@ function setPrevButton(displayedStep, challenge) {
 function setNextButton(displayedStep, challenge) {
     const nextButton = document.getElementById("challenges-modal-next-step-button");
     
-    if (displayedStep == user.challenge_statuses[challenge.get("id")]+1) {
-        if (user.current_challenge_id != challenge.get("id")) {
+    if (displayedStep == user.challenge_statuses[challenge.id]+1) {
+        if (user.current_challenge_id != challenge.id) {
             nextButton.style.display = "none";
         }
         else {
@@ -527,30 +544,30 @@ function setNextButton(displayedStep, challenge) {
     }
 
     nextButton.onclick = async ()=> {
-        let currentStatus = user.challenge_statuses[challenge.get("id")];
+        let currentStatus = user.challenge_statuses[challenge.id];
         if (currentStatus+1 == displayedStep) {
             let idToken = getIdToken();
-            const putRequest = new Request(`/user?id_token=${idToken}&chal=${challenge.get("id")}&stat=${currentStatus+1}`, {method: 'PUT'});
+            const putRequest = new Request(`/user?id_token=${idToken}&chal=${challenge.id}&stat=${currentStatus+1}`, {method: 'PUT'});
             user = await fetch(putRequest).then(response => response.json());
 
-            const navBarItemBackground = document.getElementById("challenges-nav-bar-item-background-"+user.current_challenge_id);
-            let percentDone = user.challenge_statuses[challenge.get("id")] / challenge.get("steps").length;
+            const navBarItemBackground = document.getElementById("challenges-nav-bar-item-background-" + user.current_challenge_id);
+            let percentDone = user.challenge_statuses[challenge.id] / challenge.steps.length;
             navBarItemBackground.style.width = percentDone*100+"%";
 
-            setChallengeBox(challenge.get("id"));
+            setChallengeBox(challenge.id);
         }
-        if (displayedStep < challenge.get("steps").length) {
+        if (displayedStep < challenge.steps.length) {
             showChallengeInfo(challenge, displayedStep+1);
         }
         else {
-            const newCompletion = user.challenge_statuses[challenge.get("id")] == challenge.get("steps").length;
+            const newCompletion = user.challenge_statuses[challenge.id] == challenge.steps.length;
             showChallengeCompletePage(challenge, newCompletion);
         }    
     }; 
 } 
 
 function setCheckbox(challenge) {
-    if (challenge.get("id") == user.current_challenge_id) {
+    if (challenge.id == user.current_challenge_id) {
         checkCheckbox(challenge);
     }
     else {
@@ -560,16 +577,16 @@ function setCheckbox(challenge) {
     const checkbox = document.getElementById("challenges-modal-set-challenge-checkbox");
     checkbox.onclick =  async () => {
         checkCheckbox(challenge);
-        await updateUserCurrentChallenge(challenge.get("id"));
-        setNextButton(user.challenge_statuses[challenge.get("id")]+1, challenge);
+        await updateUserCurrentChallenge(challenge.id);
+        setNextButton(user.challenge_statuses[challenge.id]+1, challenge);
     };
 }
 
 function createModalChallengesBadge(currentStep, challenge) {
     const badge = document.getElementById("modal-challenges-badge");
     const icon = document.getElementById("modal-challenges-badge-icon");
-    icon.innerText = challenge.get("icon");
-    const totalSteps = challenge.get("steps").length;
+    icon.innerText = challenge.icon;
+    const totalSteps = challenge.steps.length;
     const badgeFilling = document.getElementById("modal-badge-filling");
     badgeFilling.style.height = 150*(currentStep/totalSteps) + "px";
     badgeFilling.style.bottom = 150*(currentStep/totalSteps) + "px";
@@ -596,11 +613,11 @@ function openChallengesModal() {
     if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
 
     if (user.current_challenge_id == -1) {
-        showChallengeCompletePage(challenges[0], false);
+        //showChallengeCompletePage(challengeMap[], false);
     }
 
     else {
-        const challenge = challenges[user.current_challenge_id];
+        const challenge = challengeMap.get(user.current_challenge_id);
         showChallengeInfo(challenge, user.challenge_statuses[user.current_challenge_id]+1);
         
         const navBarItem = document.getElementById("challenges-nav-bar-item-"+user.current_challenge_id);
