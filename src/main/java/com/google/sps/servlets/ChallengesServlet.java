@@ -131,14 +131,14 @@ public class ChallengesServlet extends HttpServlet {
   }
 
   /** Converts array of challenges into json format */
-  private String convertToJsonUsingGson(ArrayList challenge_list){
+  private String convertToJsonUsingGson(ArrayList challenge_list) {
     String json = new Gson().toJson(challenge_list);
     return json;
   }
 
   //This function Update's User's Current, and Completed challenges
   // along with statuses
-  private void updateUserChallenges(User user, String compl_id, String cur_id){
+  private void updateUserChallenges(User user, String compl_id, String cur_id) {
     HashMap<String, Integer> challenge_statuses = user.getChallengeStatuses();
     HashSet<String> completed_challenges = user.getCompletedChallenges();
     user.setCurrentChallenge(cur_id);
