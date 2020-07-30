@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html style="max-height:100vh;">
+<html style="max-height: 100vh;">
   <head>
     <meta charset="UTF-8">
     <title>Pollution Map</title>
@@ -9,9 +9,24 @@
   type="text/javascript"></script>
     <script src="map.js"></script>
   </head>
-  <body  onload="initMap();">
+  <body style="margin: 0;" onload="initMap();">
+    <div class="header">
+      <div id="left-side-header">
+        <h1 class="title">🌏project title</h1>
+        <div class="tabs">
+            <a class="tab" href="/index.html">Feed</a>
+            <a class="tab" href="/map.html">Pollution Map</a>
+        </div>
+      </div>
+      <div id="right-side-header">
+        <button id="authorize-button" style="display: none;">Sign In</button>
+        <button id="signout-button" style="display: none;">Sign Out</button>  
+      </div>
+    </div>
     <div class="content">
-      <div>
+        <div id="map"></div>
+        <div id="water" class="map_overlay"></div>
+        <div id="content_form" class="map_overlay">
           <form id="area_form" onsubmit="loadAreaDataFromForm()">
               <label for="zip_code">Zip code: </label>
               <input type="text" id="zip_code" rows="1" cols="5">
@@ -19,8 +34,9 @@
               <input type="submit" value="Enter">
           </form>
           <button id="view_state_button" onclick="viewState()">View State</button>
+          <h2>Click on any Superfund marker, Water System name, or Contaminant to get more information</h2>
         </div>
-        <div id="map"></div>
-    </div>
+        <div id="contaminant" class="map_overlay"></div>
+      </div>
   </body>
 </html>
