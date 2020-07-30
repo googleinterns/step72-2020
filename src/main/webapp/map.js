@@ -2,7 +2,9 @@ google.charts.load('current', {packages: ['corechart']});
 
 const zipCodeRegex = /(^\d{5}$)|(^\d{5}-\d{4}$)/;
 var geocoder;
-var lastGeocode = null
+var lastGeocode = null;
+var lastWaterSystem = null;
+var contaminants = new Map();
 var map;
 var lastInfoWindow = null;
 var bounds;
@@ -44,6 +46,7 @@ function initMap() {
 
     map.controls[google.maps.ControlPosition.LEFT_TOP].push(document.getElementById("content_form"));
     map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(document.getElementById("water"));
+    map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById("contaminant"));
 }
 
 function loadAreaDataFromForm(){
@@ -109,7 +112,7 @@ function addSuperfundMarkers(areaType, areaCode){
         var marker = new google.maps.Marker(
                     {position: {lat: site.lattitude, lng: site.longitude}, 
                     title: site.name,
-                    icon: iconUrl(site.score),
+                    icon: "resources/danger.png",
                     map: map});
                 var contentStr = "<h3>"+site.name+"</h3>" +
                     "<h4>"+site.city+", "+site.state+"</h4>";
@@ -153,12 +156,45 @@ function addWaterSystem(areaType, zipCode){
             console.log(system);
             console.log(system.contaminants);
             waterPollutionHTML += 
-                "<h2>"+system.name+"</h2>"+
-                "<h4>Serves "+system.populationServed+"</h4>";
+                "<div id='"+system.pwsid+"' class='water_pollution'>"+
+                "<h2  onclick=expandWaterSystemInformation('"+system.pwsid+"');>"+system.name+"</h2>"+
+                "<h4>Serves "+system.populationServed+"</h4>"+
+                "<h4>"+system.contaminants.length+" Contaminants in Violation</h4>";
             system.contaminants.forEach((contaminant) => {
-                waterPollutionHTML += "<p>"+contaminant.contaminantName+"</p>";
+                if(!contaminants.has(contaminant.contaminantCode)){
+                    contaminants.set(contaminant.contaminantCode, contaminant);
+                }
+                waterPollutionHTML += "<p  onclick=showContaminantInfo("+contaminant.contaminantCode+");><strong>"+contaminant.contaminantName+"</strong></p>";
+                for([date, enforcements] of Object.entries(contaminant.violations)){
+                    waterPollutionHTML += "<p style='margin-left: 2em;'>&nbsp;"+date+": ";
+                    enforcements.forEach((enforcementAction) => {
+                        waterPollutionHTML += "&nbsp;&nbsp;&nbsp;&nbsp;"+enforcementAction;
+                    });
+                    waterPollutionHTML += "</p>";
+                };
             });
+            waterPollutionHTML+="</div>";
         });
         waterElement.innerHTML = waterPollutionHTML;
     });
+}
+
+function expandWaterSystemInformation(pwsid) {
+    const systemElement = document.getElementById(pwsid);
+    if(lastWaterSystem != null){
+        lastWaterSystem.className = 'water_pollution';
+    }
+    systemElement.className = 'selected_water_system';
+    lastWaterSystem = systemElement;
+}
+
+function showContaminantInfo(contaminantCode){
+    if(!contaminants.has(contaminantCode)) return;
+    const contaminant = contaminants.get(contaminantCode);
+    const contaminantElement = document.getElementById("contaminant");
+    contaminantElement.innerHTML = "<h2>"+contaminant.contaminantName+"</h2>"+
+        "<p><strong>Sources: </strong>"+contaminant.sources+"</p>"+
+        "<p><strong>Definition: </strong>"+contaminant.definition+"</p>"+
+        "<p><strong>Health Effects: </strong>"+contaminant.healthEffects+"</p>";
+    console.log(contaminant.contaminantName);
 }
