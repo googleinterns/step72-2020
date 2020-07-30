@@ -59,6 +59,9 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+
+import javafx.util.Pair;
 
 import com.google.sps.data.User;
 import com.google.sps.data.GoogleIdHelper;
@@ -66,7 +69,6 @@ import com.google.sps.data.GoogleIdHelper;
 /** Servlet that returns events sorted by most recent timestamp */
 @WebServlet("/user")
 public class UserServlet extends HttpServlet {
-
   static final String CHALLENGE_ID_PARAM = "chal";
   static final String CHALLENGE_STATUS_PARAM = "stat";
   static final String BOOKMARKED_EVENT_PARAM = "book";
@@ -77,6 +79,9 @@ public class UserServlet extends HttpServlet {
   static final String BOOKMARKS = "bookmarks";
   static final String ID_TOKEN_PARAM = "id_token";
   static final String NAME = "name";
+  static final String DEF_CURRENT_CHALLENGE_ID = "GARD_0";
+
+  private static final HashMap DEF_CHALLENGES_AND_STATUSES = createMap();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -104,6 +109,8 @@ public class UserServlet extends HttpServlet {
     response.getWriter().println(user.toJSON());
   }
 
+
+ /** Creates User */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -112,18 +119,17 @@ public class UserServlet extends HttpServlet {
         response.setStatus(400);
         return;
     }
-    String userId = payload.getSubject();
-    String userNickname = (String) payload.get("name");
-        
+    String userId = payload.getSubject(); 
 
     Long currentChallengeId = 0L;
     // @Erick Change to get length of challenges (replace the 3)
     ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
+    String userNickname = (String) payload.get(NAME);
 
     User user = new User.Builder(userId)
         .setNickname(userNickname)
-        .setCurrentChallengeId(currentChallengeId)
-        .setChallengeStatuses(challengeStatuses)
+        .setCurrentChallengeId(DEF_CURRENT_CHALLENGE_ID)
+        .setChallengeStatuses(DEF_CHALLENGES_AND_STATUSES)
         .build();
 
     datastore.put(user.toEntity());
@@ -131,6 +137,7 @@ public class UserServlet extends HttpServlet {
     response.sendRedirect("/index.html");
   }
 
+  /** Updates userinfo */
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
       Payload payload = GoogleIdHelper.verifyId(request);
@@ -146,7 +153,7 @@ public class UserServlet extends HttpServlet {
       String addedToCalendarParam = request.getParameter(ADDED_TO_CALENDAR_PARAM);
       String addBookmarkParam = request.getParameter(ADD_BOOKMARK_PARAM);
 
-      Long challengeId;
+      String challengeId;
       Integer newStatus;
       Long eventId;
       
@@ -157,12 +164,11 @@ public class UserServlet extends HttpServlet {
 
       if (challengeIdParam != null) {
           try {
-              challengeId = Long.parseLong(challengeIdParam);
               if (statusParam != null) {
                   newStatus = Integer.parseInt(statusParam);
-                  updateChallengeStatus(user, challengeId, newStatus);
+                  updateChallengeStatus(user, challengeIdParam, newStatus);
               } else {
-                  updateCurrentChallenge(user, challengeId);
+                  updateCurrentChallenge(user, challengeIdParam);
               }
           } catch (Exception e) {
               System.err.println(e.getMessage());
@@ -194,17 +200,15 @@ public class UserServlet extends HttpServlet {
       response.getWriter().println(user.toJSON());
   }
 
-  // @Erick If challenge id structure changes, update this method
-  private void updateCurrentChallenge(User user, Long id) {
+  private void updateCurrentChallenge(User user, String id) {
       user.setCurrentChallenge(id);
   }
 
-  // @Erick If challenge status structure changes, update this method
-  private void updateChallengeStatus(User user, Long id, int status) {
-      ArrayList<Integer> challengeStatuses = user.getChallengeStatuses();
-      challengeStatuses.set(id.intValue(), status);
-      user.setChallengeStatuses(challengeStatuses);
 
+  private void updateChallengeStatus(User user, String key, int status) {
+    HashMap<String, Integer> challengeStatuses = user.getChallengeStatuses();
+    challengeStatuses.put(key, status);
+    user.setChallengeStatuses(challengeStatuses);
   }
 
   private void addBookmark(User user, Long eventId) {
@@ -247,4 +251,12 @@ public class UserServlet extends HttpServlet {
       addedEvents.add(eventId);
       user.setAddedToCalendarEvents(addedEvents);
   }
+
+  private static HashMap<String, Integer> createMap(){
+    HashMap<String,Integer> def_chal_map = new HashMap<String, Integer>();
+    def_chal_map.put("GARD_0",0);
+    def_chal_map.put("RECY_0",0);
+    def_chal_map.put("WAST_0",0);
+    return def_chal_map;
+ }
 } 

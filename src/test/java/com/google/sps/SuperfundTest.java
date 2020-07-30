@@ -28,7 +28,6 @@ import org.mockito.Mockito.*;
 public final class SuperfundTest {
 
     private SuperfundServlet servlet;
-
     private ArrayList<SuperfundSite> actonSites;
 
     private static final String AREA_PARAMETER = "area";
@@ -42,9 +41,9 @@ public final class SuperfundTest {
         servlet = new SuperfundServlet();
         
         actonSites = new ArrayList<>();
-        actonSites.add(new SuperfundSite("W.R. GRACE & CO., INC. (ACTON PLANT)", SuperfundServlet.DEFAULT_HAZARD_SCORE, "MA", "ACTON", "MIDDLESEX", "Currently on the Final NPL", 42.45055, -71.427781));
-        actonSites.add(new SuperfundSite("W R GRACE DARAMIC PLANT", SuperfundServlet.DEFAULT_HAZARD_SCORE, "MA", "ACTON", "MIDDLESEX", "Not on the NPL", 0, 0));
-        actonSites.add(new SuperfundSite("AGWAY/KRESS PROPERTY", SuperfundServlet.DEFAULT_HAZARD_SCORE, "MA", "ACTON", "MIDDLESEX", "Not on the NPL", 0, 0));
+        actonSites.add(new SuperfundSite("W.R. GRACE & CO., INC. (ACTON PLANT)", 100350, "MA", "ACTON", "MIDDLESEX", "Currently on the Final NPL", 42.45055, -71.427781));
+        actonSites.add(new SuperfundSite("W R GRACE DARAMIC PLANT", 100780, "MA", "ACTON", "MIDDLESEX", "Not on the NPL", 0, 0));
+        actonSites.add(new SuperfundSite("AGWAY/KRESS PROPERTY", 100885, "MA", "ACTON", "MIDDLESEX", "Not on the NPL", 0, 0));
 
     }
 
