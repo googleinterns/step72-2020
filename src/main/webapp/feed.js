@@ -97,14 +97,6 @@ async function loadChallenges(num_challenges) {
           default:
             break;  
         }
-        
-        
-        /*if (event.target == challengesModal) {
-            closeChallengesModal();
-        }
-        else if (event.target == createEventModal) {
-            closeCreateEventModal();
-        } */
     }
 }
 
@@ -628,7 +620,7 @@ function closeCreateEventModal() {
 
 function openBadgesModal(){
     const modal = document.getElementById("badges-modal");
-    modal.style.display = "block"; // or flex
+    modal.style.display = "flex"; // or flex
 
     const galleryItems = document.getElementsByClassName("gallery");
 }
