@@ -57,7 +57,7 @@ public final class ChallengeData {
       new Pair<String, String>("step 2", "Invest in a cloth bag to use for groceries instead of accumulating plastic grocery bags"),
       new Pair<String, String>("step 3", "Use containers to store leftovers and lunches instead of wasteful plastic wraps."));
 
-    
+    //Each challenge will be linked to a unique id
     public static final Map<String,Challenge> CHALLENGES_MAP = createMap();
 
     /*To avoid unwanted behavior, a function is used for initialization. */
