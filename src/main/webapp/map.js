@@ -116,12 +116,11 @@ function addSuperfundMarkers(areaType, areaCode){
                     title: site.name,
                     icon: "resources/danger.png",
                     map: map});
-                var contentStr = "<h3>"+site.name+"</h3>" +
-                    "<h4>"+site.city+", "+site.state+"</h4>";
+                // var contentStr = "<h3>"+site.name+"</h3>" +
+                //     "<h4>"+site.city+", "+site.state+"</h4>";
                 var siteId = ("0000000" + site.siteId);
                 siteId = siteId.substring(siteId.length - 7);
-                var iFrameString = "<iframe class='superfund_website' src='https://cumulis.epa.gov/supercpad/cursites/csitinfo.cfm?id="+siteId+"#main-content'"+
-                        +"onerror='lastInfoWindow..content = "+contentStr+"'>";
+                var iFrameString = "<iframe class='superfund_website' src='https://cumulis.epa.gov/supercpad/cursites/csitinfo.cfm?id="+siteId+"#main-content'>";
                 var infoWindowStr = "<div class='superfund_website'>"+iFrameString+"</div>";
                 var infoWindow = new google.maps.InfoWindow({
                     content: infoWindowStr
@@ -141,19 +140,19 @@ function addSuperfundMarkers(areaType, areaCode){
     });
 }
 
-const low_danger = 25;
-const medium_danger = 40;
-const high_danger = 55;
+// const low_danger = 25;
+// const medium_danger = 40;
+// const high_danger = 55;
 
-function iconUrl(score){
-	var url = "https://maps.google.com/mapfiles/ms/icons/";
-	if(score < low_danger) url+= "green";
-	else if(score < medium_danger) url += "yellow";
-	else if (score < high_danger) url +="orange";
-    else url +="red";
-	url += "-dot.png";
-	return url;
-}
+// function iconUrl(score){
+// 	var url = "https://maps.google.com/mapfiles/ms/icons/";
+// 	if(score < low_danger) url+= "green";
+// 	else if(score < medium_danger) url += "yellow";
+// 	else if (score < high_danger) url +="orange";
+//     else url +="red";
+// 	url += "-dot.png";
+// 	return url;
+// }
 
 function addWaterSystem(areaType, zipCode){
     fetch("/water?town="+town+"&state="+state).then(response => response.json()).then((systems) => {
