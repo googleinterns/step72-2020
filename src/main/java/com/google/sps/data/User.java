@@ -26,6 +26,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 import org.apache.commons.lang3.StringUtils;
+import java.lang.ClassCastException;
 
 public final class User {
 
@@ -252,8 +253,14 @@ public final class User {
     HashMap<String, Integer> challenge_statuses = new HashMap<>();
     if (embedded_entity != null){
      for(String key : embedded_entity.getProperties().keySet()){
-       Long status = (Long) embedded_entity.getProperty(key);
-       challenge_statuses.put(key, status.intValue());
+       try {
+           Long status = (Long) embedded_entity.getProperty(key);
+           challenge_statuses.put(key, status.intValue());
+       } catch (ClassCastException e) {
+           Integer status = (Integer) embedded_entity.getProperty(key);
+           challenge_statuses.put(key, status.intValue());
+       }
+       
      }
     }
     return challenge_statuses;
