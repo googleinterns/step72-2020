@@ -72,17 +72,22 @@ public class ChallengesServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     int num_challenges = getNumChallenges(request);
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Payload payload = GoogleIdHelper.verifyId(request);
     if (payload == null) {
         response.setStatus(400);
         return;
     }
-
     String user_id = payload.getSubject();
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
 
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, user_id));
     Entity entity = datastore.prepare(query).asSingleEntity();
+
+    if(entity == null){
+      response.setStatus(404);
+      return;
+    }
     User user = User.convertEntitytoUser(entity, user_id);
 
     HashMap<String, Integer> challenge_statuses = user.getChallengeStatuses();
