@@ -126,7 +126,8 @@ function addEventAddToCalendarButton(event) {
     const addToCalDiv = document.createElement('div');
     addToCalDiv.style.height = 10;
     addToCalDiv.className = "add-to-calendar-div";
-    if (user.added_to_calendar_events.includes(event.extendedProperties.event_id)) checkAddToCalendarButton(addToCalDiv);
+    let signedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
+    if (signedIn && user.added_to_calendar_events.includes(event.extendedProperties.event_id)) checkAddToCalendarButton(addToCalDiv);
     else {
         addToCalDiv.innerText = "+";
         addToCalDiv.onclick = () => { clickAddToCalendar(addToCalDiv, event); };
@@ -200,7 +201,8 @@ function addEventBookmark(event) {
 async function clickBookmark(bookmark, bookmarkDiv, event) {
     bookmark.src="/resources/filled-bookmark.png"; 
     bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].style.color = "#fafafa";
-    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText = parseInt(bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText)+1;
+    event.extendedProperties.bookmarks+=1;
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText = event.extendedProperties.bookmarks;
 
     let idToken = getIdToken();
     const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}&add=true&id_token=${idToken}`, {method: 'PUT'});
@@ -216,7 +218,8 @@ async function clickBookmark(bookmark, bookmarkDiv, event) {
 async function unclickBookmark(bookmark, bookmarkDiv, event) {
     bookmark.src = "/resources/bookmark.png";
     bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].style.color = "#004643";
-    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText = parseInt(bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText)-1;
+    event.extendedProperties.bookmarks-=1;
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText = event.extendedProperties.bookmarks;
 
     let idToken = getIdToken();
     const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}&add=false&id_token=${idToken}`, {method: 'PUT'});
