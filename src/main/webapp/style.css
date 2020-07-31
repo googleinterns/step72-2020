@@ -135,6 +135,7 @@ html, body {
     border: none;
     font-family: 'Open Sans', sans-serif;
     font-size: 20px;
+    width: 75px;
 }
 
 #events-searchbar-input:focus {
@@ -571,4 +572,13 @@ html, body {
 @keyframes fadeIn {
   0%{ opacity:0; }
   100% { opacity:1; }
+}
+
+#zipcode-submit-button {
+    font-size: 24px;
+    font-weight: bold;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    outline: none;
 }

@@ -55,6 +55,7 @@ const CHALLENGE_TYPE = {
 
 
 let user;
+let events;
 let challenges = [];
 let challengeMap = new Map();
 const defaultNumChallenges = 3;
@@ -102,7 +103,7 @@ async function loadEvents() {
     const idToken = document.getElementById("id-token");
     idToken.value = getIdToken();
 
-    let events = await fetch("/events").then(response => response.json());
+    events = await fetch("/events").then(response => response.json());
     const feed = document.getElementById("events-feed");
     feed.innerHTML = "";
     for (event of events) {
@@ -789,5 +790,50 @@ function hideAddToCalendarButtons() {
 }
 
 function getIdToken() {
-  return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+    return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+}
+
+async function sortEventsByDistance(location) {
+    const getDistanceMatrix = (service, data) => new Promise((resolve, reject) => {
+        service.getDistanceMatrix(data, (response, status) => {
+            if (status == "OK") {
+                resolve(response);
+            } else {
+                reject(response);
+            }
+        })
+    });
+
+    const service = new google.maps.DistanceMatrixService;
+    for (event of events) {
+        const result = await getDistanceMatrix(service, {
+            origins: [location],
+            destinations: [event.location],
+            travelMode: 'DRIVING',
+            unitSystem: google.maps.UnitSystem.METRIC,
+            avoidHighways: false,
+            avoidTolls: false
+        });
+        event.distance = result.rows[0].elements[0].distance.value;
+    }
+    
+
+    function compareByDistance(a, b) {
+        if (a.distance == null && b.distance == null || a.distance == b.distance) return 0;
+        else if (a.distance == null || a.distance < b.distance) return -1;
+        else return 1;
+    }
+
+    events.sort(compareByDistance);
+}
+
+async function getLocalEvents(location) {
+    await sortEventsByDistance(location);
+
+    const feed = document.getElementById("events-feed");
+    feed.innerHTML = "";
+    for (event of events) {
+        feed.appendChild(postEvent(event));
+    }
+    if (gapi.auth2.getAuthInstance().isSignedIn.get()) showAddToCalendarButtons();
 }
