@@ -104,8 +104,6 @@ public final class UserServletTest {
       pw.flush();
 
       JSONObject responseJson = new JSONObject(writer.toString().trim());
-        System.out.println(userJson);
-        System.out.println(responseJson);
       Assert.assertEquals(userJson.getString(User.ID),
                           responseJson.getString(User.ID));
       Assert.assertEquals(userJson.getString(User.NICKNAME),
