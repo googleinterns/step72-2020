@@ -14,25 +14,34 @@
 
 package com.google.sps.servlets;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.Base64;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Text;
 import com.google.gson.Gson;
 import com.google.sps.data.WaterSystem;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang3.CharSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,12 +52,14 @@ public class WaterPollutionServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(WaterPollutionServlet.class);
     
     public static final String EPA_WATERSYSTEM_LINK = "https://enviro.epa.gov/enviro/efservice/WATER_SYSTEM/";
-    public static final String EPA_CITY_PARAMETER = "CITIES_SERVED/CONTAINS/";
+    public static final String EPA_CITY_PARAMETER = "CITIES_SERVED/CONTAINING/";
+    public static final String EPA_BACKUP_CITY_PARAMATER = "/CITIES_SERVED/Not%20Reported/CITY_NAME/CONTAINING/";
     public static final String EPA_STATE_PARAMETER = "/PRIMACY_AGENCY_CODE/";
     public static final String MIN_DATE = "/ENFDATE/>/01-JAN-14";
     public static final String CSV_FORMAT = "/Excel/";
-    public static final String SPLITERATOR = "\",\"";
-    public static final int TOTAL_CELL_COUNT = 47;
+
+    public static final String WATER_POLLUTION_ENTITY = "WaterPollution";
+    public static final String WATERSYSTEMS_PROPERTY = "watersystems";
 
     private static final String AREA_PARAMETER = "area";
     private static final String ZIP = "zip";
@@ -57,7 +68,7 @@ public class WaterPollutionServlet extends HttpServlet {
 
     private static final String ZIP_PARAMETER = "zip_code";
 
-    public static final int DEFAULT_SCORE = 100;
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     @Override
     public void init() {
@@ -66,14 +77,48 @@ public class WaterPollutionServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json");
+        Entity entity;
         try {
-        String json = new Gson().toJson(
-            retrieveSDWViolations(request.getParameter(TOWN_PARAMATER), request.getParameter(STATE_PARAMATER)));
-        response.getWriter().write(json);
-        } catch (IOException e){
-            response.sendError(500);
+			entity = datastore.get(getKeyFromLocality(request.getParameter(TOWN_PARAMATER), request.getParameter(STATE_PARAMATER)));
+            String json = new Gson().toJson(
+                retrieveSDWViolations(entity));
+            response.getWriter().write(json);
+        } catch (EntityNotFoundException e1) {
+            logger.error(e1.getMessage());
+			try {
+                ArrayList<WaterSystem> systems = retrieveSDWViolations(request.getParameter(TOWN_PARAMATER), request.getParameter(STATE_PARAMATER));
+                String json = new Gson().toJson(systems);
+                response.getWriter().write(json);
+                Key key = getKeyFromLocality(request.getParameter(TOWN_PARAMATER), request.getParameter(STATE_PARAMATER));
+                addToDatabase(key, systems);
+            } catch (IOException e){
+                response.sendError(500);
+                logger.error(e.getMessage());
+            }
+		}
+        
+    }
+
+    public ArrayList<WaterSystem> retrieveSDWViolations(Entity waterPollutionEntity) throws EntityNotFoundException,
+            IOException {
+        ArrayList<WaterSystem> systems = new ArrayList<>();
+
+        byte[] contaminantsData = Base64.getDecoder().decode(((Text)waterPollutionEntity.getProperty(WATERSYSTEMS_PROPERTY)).getValue());
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(contaminantsData));
+        ArrayList<Key> waterSystemKeys;
+        try {
+            waterSystemKeys = (ArrayList<Key>) ois.readObject();
+        } catch (ClassNotFoundException e) {
+            waterSystemKeys = new ArrayList<Key>();
             logger.error(e.getMessage());
         }
+        ois.close();
+        
+        for(Entity waterSystemEntity: datastore.get(waterSystemKeys).values()){
+            systems.add(new WaterSystem(waterSystemEntity));
+        }
+        logger.info("Receive violations from DB");
+        return systems;
     }
 
     /**
@@ -84,8 +129,14 @@ public class WaterPollutionServlet extends HttpServlet {
     * @return the list of superfund sites pulled from the EPA API
     */
     public ArrayList<WaterSystem> retrieveSDWViolations(String town, String state) throws IOException{
+        logger.info("Start receiving water violations from EPA for "+town+", "+state);
         URL url = new URL(EPA_WATERSYSTEM_LINK+EPA_CITY_PARAMETER+town.toUpperCase()+EPA_STATE_PARAMETER+state + CSV_FORMAT);
-        return parseViolationsFromURL(url);
+        ArrayList<WaterSystem> systems = parseViolationsFromURL(url);
+        //backup setup to pull data, leaving here in case I want to reenable it
+        // URL urlPostal = new URL(EPA_WATERSYSTEM_LINK+EPA_STATE_PARAMETER+state +EPA_BACKUP_CITY_PARAMATER+town.toUpperCase() + CSV_FORMAT);
+        // systems.addAll(parseViolationsFromURL(urlPostal));
+        logger.info("Completed receiving water violations from EPA for "+town+", "+state);
+        return systems;
     }
 
     public ArrayList<WaterSystem> parseViolationsFromURL(URL url) throws IOException {
@@ -98,6 +149,27 @@ public class WaterPollutionServlet extends HttpServlet {
         }
         csvParser.close();
         return waterSystems;
+    }
+
+    public Key addToDatabase(Key key, ArrayList<WaterSystem> systems) throws IOException {
+        Entity systemEntity = new Entity(WATER_POLLUTION_ENTITY, key.getName());
+        ArrayList<Key> keyList = new ArrayList<Key>();
+        for(WaterSystem system: systems){
+            keyList.add(system.addToDatabase());
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(keyList);
+        oos.close();
+        systemEntity.setProperty(WATERSYSTEMS_PROPERTY, new Text(
+            Base64.getEncoder().encodeToString(baos.toByteArray())));
+        datastore.put(systemEntity);
+        return systemEntity.getKey();
+    }
+
+    public Key getKeyFromLocality(String city, String state){
+        String keyName = state+" "+city;
+        return KeyFactory.createKey(WATER_POLLUTION_ENTITY, keyName);
     }
 
 }

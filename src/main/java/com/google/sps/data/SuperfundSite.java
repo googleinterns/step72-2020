@@ -5,34 +5,34 @@ package com.google.sps.data;
 public class SuperfundSite {
 
     private String name;
-    private double score;
+    private int siteId;
     private String state;
     private String city;
     private String county;
     private String status;
-    private double lattitude;
+    private double latitude;
     private double longitude;
 
     public SuperfundSite(String name,
-        double score,
+        int siteId,
         String state,
         String city,
         String county,
         String status,
-        double lattitude,
+        double latitude,
         double longitude){
         this.name = name;
-        this.score = score;
+        this.siteId = siteId;
         this.state = state;
         this.city = city;
         this.county = county;
         this.status = status;
-        this.lattitude = lattitude;
+        this.latitude = latitude;
         this.longitude = longitude;
     }
 
     public boolean isValidSite(){
-        return lattitude != 0 && longitude != 0 && !status.equalsIgnoreCase("Not on the NPL");
+        return latitude != 0 && longitude != 0 && !status.equalsIgnoreCase("Not on the NPL");
     }
 
     public boolean equals(Object o){
@@ -46,12 +46,12 @@ public class SuperfundSite {
             state.equals(otherSite.state) &&
             city.equals(otherSite.city) &&
             county.equals(otherSite.county) &&
-            lattitude == otherSite.lattitude &&
+            latitude == otherSite.latitude &&
             longitude == otherSite.longitude;
     }
 
     public String toString(){
-        return name+" in "+city+", "+state+" at "+lattitude +", "+ longitude;
+        return name+" in "+city+", "+state+" at "+latitude +", "+ longitude;
     }
     
 }

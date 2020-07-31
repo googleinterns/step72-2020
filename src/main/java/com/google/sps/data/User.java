@@ -14,11 +14,14 @@
 
 package com.google.sps.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.gson.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.appengine.api.datastore.EmbeddedEntity;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
@@ -38,8 +41,8 @@ public final class User {
   private ArrayList<Long> created_events;
   private ArrayList<Long> bookmarked_events;
   private ArrayList<Long> added_to_calendar_events;
-  private Long current_challenge_id;
-  private ArrayList<Integer> challenge_statuses;
+  private String current_challenge_id;
+  HashMap <String, Integer> challenge_statuses;
   /* Stored so that calls to datastore.put(entity) will overwrite the user with the
    same userId if such a user already exists -- prevents multiple instances of 
    same user being stored */
@@ -51,8 +54,8 @@ public final class User {
         private ArrayList<Long> created_events;
         private ArrayList<Long> bookmarked_events;
         private ArrayList<Long> added_to_calendar_events;
-        private Long current_challenge_id;
-        private ArrayList<Integer> challenge_statuses;
+        private String current_challenge_id;
+        private HashMap <String, Integer> challenge_statuses;
         private Key entity_key;
 
         public Builder(String id) {
@@ -77,14 +80,13 @@ public final class User {
             else this.added_to_calendar_events = (ArrayList) added_to_calendar_events.clone();
             return this;
         }
-        public Builder setCurrentChallengeId(Long current_challenge_id){
+        public Builder setCurrentChallengeId(String current_challenge_id){
             this.current_challenge_id = current_challenge_id;
             return this;
         }
-        public Builder setChallengeStatuses(ArrayList<Integer> challenge_statuses){
-            // @Erick May need to change this initialization if structure of challenge statuses changes
-            if (challenge_statuses == null) this.challenge_statuses = new ArrayList<Integer>();
-            else this.challenge_statuses = (ArrayList) challenge_statuses.clone();
+        public Builder setChallengeStatuses(HashMap<String, Integer> challenge_statuses){
+            if (challenge_statuses == null) this.challenge_statuses = new HashMap<String, Integer>();
+            else this.challenge_statuses = (HashMap) challenge_statuses.clone();
             return this;
         }
         public Builder setEntityKey(Key entity_key) {
@@ -110,29 +112,26 @@ public final class User {
       this.created_events = new ArrayList<Long>();
       this.bookmarked_events = new ArrayList<Long>();
       this.added_to_calendar_events = new ArrayList<Long>();
-      this.current_challenge_id = 0L;
-      this.challenge_statuses = new ArrayList<Integer>();
+      this.current_challenge_id = "";
+      this.challenge_statuses = new HashMap<>();
       this.entity_key = null;
    }
 
-
-
-  // @Erick May need to change the following methods if structure of challenge statuses or id changes
-  public Long getCurrentChallenge() {
+  public String getCurrentChallenge() {
       return this.current_challenge_id;
   }
 
-  public void setCurrentChallenge(Long chal_id) {
+  public void setCurrentChallenge(String chal_id) {
       this.current_challenge_id = chal_id;
   }
 
-  public ArrayList<Integer> getChallengeStatuses() {
-      return (ArrayList) this.challenge_statuses;
+  public HashMap<String, Integer> getChallengeStatuses() {
+      return (HashMap) this.challenge_statuses;
   }
 
   // challenge_statuses param should not be null
-  public void setChallengeStatuses(ArrayList<Integer> challenge_statuses) {
-      this.challenge_statuses = (ArrayList) challenge_statuses.clone();
+  public void setChallengeStatuses(HashMap<String, Integer> challenge_statuses) {
+      this.challenge_statuses = (HashMap) challenge_statuses.clone();
   }
 
   public ArrayList<Long> getCreatedEvents() {
@@ -166,11 +165,11 @@ public final class User {
   public static User convertEntitytoUser(Entity entity, String userId) {
     Key entityKey = entity.getKey();
     String nickname = (String) entity.getProperty(NICKNAME);
-    Long currentChallengeId = (Long) entity.getProperty(CURRENT_CHALLENGE);
+    String currentChallengeId = (String) entity.getProperty(CURRENT_CHALLENGE);
     ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(CREATED_EVENTS);
     ArrayList<Long> bookmarkedEvents = (ArrayList<Long>) entity.getProperty(BOOKMARKED_EVENTS);
     ArrayList<Long> addedEvents = (ArrayList<Long>) entity.getProperty(ADDED_TO_CALENDAR_EVENTS);
-    ArrayList<Integer> challengeStatuses = (ArrayList<Integer>) entity.getProperty(CHALLENGE_STATUSES);
+    HashMap<String, Integer> challengeStatuses = getChallengeStatusFromEntity(entity);
 
     User user = new User.Builder(userId)
         .setNickname(nickname)
@@ -199,7 +198,7 @@ public final class User {
       userEntity.setProperty(BOOKMARKED_EVENTS, this.bookmarked_events);
       userEntity.setProperty(ADDED_TO_CALENDAR_EVENTS, this.added_to_calendar_events);
       userEntity.setProperty(CURRENT_CHALLENGE, this.current_challenge_id);
-      userEntity.setProperty(CHALLENGE_STATUSES, this.challenge_statuses);
+      userEntity.setProperty(CHALLENGE_STATUSES, embedChallengeStatuses());
       return userEntity;
   }
 
@@ -207,5 +206,27 @@ public final class User {
       Gson gson = new Gson();
       String json = gson.toJson(this);
       return json;
+  }
+
+  /* Function embeds Map of challenge_statuses into an Entity so it may
+  be stored in Datastore */
+  private EmbeddedEntity embedChallengeStatuses(){
+    EmbeddedEntity embedded_entity = new EmbeddedEntity();
+    for (String key: challenge_statuses.keySet()){
+      embedded_entity.setProperty(key, challenge_statuses.get(key));
+    }
+    return embedded_entity;
+  }
+
+  private static HashMap<String, Integer> getChallengeStatusFromEntity(Entity entity) {
+    EmbeddedEntity embedded_entity = (EmbeddedEntity)entity.getProperty(CHALLENGE_STATUSES);
+    HashMap<String, Integer> challenge_statuses = new HashMap<>();
+    if (embedded_entity != null){
+     for(String key : embedded_entity.getProperties().keySet()){
+       Long status = (Long) embedded_entity.getProperty(key);
+       challenge_statuses.put(key, status.intValue());
+     }
+    }
+    return challenge_statuses;
   }
 } 
