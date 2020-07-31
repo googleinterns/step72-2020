@@ -32,18 +32,14 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 @RunWith(JUnit4.class)
 public final class UserTest {
   private static final String USER_ID = "00";
   private static final String NICKNAME = "Name";
   private static final String DEFAULT_CHALLENGE_ID = "GARD_0";;
-  private static final HashMap<String, Integer> DEFAULT_CHALLENGE_STATUSES = new HashMap<String, Integer>();
-  static {
-    DEFAULT_CHALLENGE_STATUSES.put("GARD_0",0);
-    DEFAULT_CHALLENGE_STATUSES.put("RECY_0",0);
-    DEFAULT_CHALLENGE_STATUSES.put("WAST_0",0);
-  }
+  private static final HashMap<String, Integer> DEFAULT_CHALLENGE_STATUSES = getDefaultChallengeStatuses();
 
   private User user;
   private JSONObject userJson;
@@ -92,7 +88,7 @@ public final class UserTest {
         .setChallengeStatuses(DEFAULT_CHALLENGE_STATUSES)
         .build();
 
-        Assert.assertTrue(!user.equals(other));
+        Assert.assertFalse(user.equals(other));
   }
 
   @Test
@@ -171,5 +167,13 @@ public final class UserTest {
      }
     }
     return challenge_statuses;
+  }
+
+  private static HashMap<String, Integer> getDefaultChallengeStatuses() {
+      HashMap<String, Integer> statuses = new HashMap<String, Integer>();
+      statuses.put("GARD_0",0);
+      statuses.put("RECY_0",0);
+      statuses.put("WAST_0",0);
+      return statuses;
   }
 }

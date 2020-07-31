@@ -50,12 +50,7 @@ public final class UserServletTest {
   private static final String MOCK_NICKNAME = "Name";
 
 
-  private static final HashMap<String, Integer> DEFAULT_CHALLENGE_STATUSES = new HashMap<String, Integer>();
-  static {
-    DEFAULT_CHALLENGE_STATUSES.put("GARD_0",0);
-    DEFAULT_CHALLENGE_STATUSES.put("RECY_0",0);
-    DEFAULT_CHALLENGE_STATUSES.put("WAST_0",0);
-  }
+  private static final HashMap<String, Integer> DEFAULT_CHALLENGE_STATUSES = getDefaultChallengeStatuses();
 
   private final LocalServiceTestHelper helper =
       new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
@@ -307,6 +302,13 @@ public final class UserServletTest {
       JSONObject responseJson = new JSONObject(writer.toString().trim());
       Assert.assertTrue(responseJson.getJSONArray(User.ADDED_TO_CALENDAR_EVENTS).toString().contains(eventId));
     } catch (IOException e) {}
+  }
 
+  private static HashMap<String, Integer> getDefaultChallengeStatuses() {
+      HashMap<String, Integer> statuses = new HashMap<String, Integer>();
+      statuses.put("GARD_0",0);
+      statuses.put("RECY_0",0);
+      statuses.put("WAST_0",0);
+      return statuses;
   }
 }
