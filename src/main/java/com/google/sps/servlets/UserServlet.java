@@ -65,6 +65,7 @@ import javafx.util.Pair;
 
 import com.google.sps.data.User;
 import com.google.sps.data.GoogleIdHelper;
+import com.google.sps.data.ChallengeData;
 import com.google.sps.data.IdHelper;
 
 /** Servlet that returns events sorted by most recent timestamp */
@@ -90,9 +91,6 @@ public class UserServlet extends HttpServlet {
   public void setDatastoreService(DatastoreService service) {
       this.datastore = service;
   }
-  static final String DEF_CURRENT_CHALLENGE_ID = "GARD_0";
-
-  private static final HashMap DEF_CHALLENGES_AND_STATUSES = createMap();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -114,7 +112,6 @@ public class UserServlet extends HttpServlet {
 
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
-
     response.getWriter().println(user.toJSON());
   }
 
@@ -127,20 +124,15 @@ public class UserServlet extends HttpServlet {
           response.setStatus(400);
           return;
     }
-    String userNickname = idHelper.getUserNickname(request);
-    
-    Long currentChallengeId = 0L;
-    // @Erick Change to get length of challenges (replace the 3)
-    ArrayList<Integer> challengeStatuses = new ArrayList<Integer>(Collections.nCopies(3, 0));
 
+    String userNickname = idHelper.getUserNickname(request);
     User user = new User.Builder(userId)
         .setNickname(userNickname)
-        .setCurrentChallengeId(DEF_CURRENT_CHALLENGE_ID)
-        .setChallengeStatuses(DEF_CHALLENGES_AND_STATUSES)
+        .setCurrentChallengeId(ChallengeData.DEF_CURRENT_CHALLENGE_ID)
+        .setChallengeStatuses(ChallengeData.DEF_CHALLENGES_AND_STATUSES)
         .build();
 
     datastore.put(user.toEntity());
-
     response.sendRedirect("/index.html");
   }
 
@@ -210,9 +202,9 @@ public class UserServlet extends HttpServlet {
   }
 
 
-  private void updateChallengeStatus(User user, String key, int status) {
+  private void updateChallengeStatus(User user, String id, int status) {
     HashMap<String, Integer> challengeStatuses = user.getChallengeStatuses();
-    challengeStatuses.put(key, status);
+    challengeStatuses.put(id, status);
     user.setChallengeStatuses(challengeStatuses);
   }
 
@@ -256,12 +248,4 @@ public class UserServlet extends HttpServlet {
       addedEvents.add(eventId);
       user.setAddedToCalendarEvents(addedEvents);
   }
-
-  private static HashMap<String, Integer> createMap(){
-    HashMap<String,Integer> def_chal_map = new HashMap<String, Integer>();
-    def_chal_map.put("GARD_0",0);
-    def_chal_map.put("RECY_0",0);
-    def_chal_map.put("WAST_0",0);
-    return def_chal_map;
- }
 } 
