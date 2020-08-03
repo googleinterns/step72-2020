@@ -135,6 +135,7 @@ html, body {
     border: none;
     font-family: 'Open Sans', sans-serif;
     font-size: 20px;
+    width: 75px;
 }
 
 #events-searchbar-input:focus {
@@ -166,6 +167,7 @@ html, body {
     width: 28px;
     float: right;
     position: relative;
+    right: 28px;
     margin-right: 10px;
     bottom: 55px;
     cursor: pointer;
@@ -176,6 +178,7 @@ html, body {
     width: 28px;
     float: right;
     position: relative;
+    left: 40px;
     bottom: 60px;
     cursor: pointer;
     font-size: 30px;
@@ -189,7 +192,7 @@ html, body {
     width: 30px;
     text-align: center;
     position: relative;
-    left: 91.3%;
+    left: 85%;
     bottom: 50px;
     color: #004643;
     cursor: pointer;
@@ -211,6 +214,7 @@ html, body {
     height: 220px;
     font-size: 24px;
     margin-left: 4%;
+    margin-right: 4%;
 }
 
 .event-icon {
@@ -478,7 +482,7 @@ html, body {
     font-size: 18px;
 }
 
-.map_overlay h4, p {
+.map_overlay h4, .map_overlay p {
     font-size: 12px;;
 }
 
@@ -577,4 +581,13 @@ html, body {
 @keyframes fadeIn {
   0%{ opacity:0; }
   100% { opacity:1; }
+}
+
+#zipcode-submit-button {
+    font-size: 24px;
+    font-weight: bold;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    outline: none;
 }

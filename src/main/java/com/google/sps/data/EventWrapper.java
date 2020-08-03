@@ -62,6 +62,7 @@ public final class EventWrapper {
   public static final String END_TIME = "end";
   public static final String EVENT_CREATOR = "creator";
   public static final String EVENT_ID = "event_id";
+  public static final String BOOKMARKS = "bookmarks";
 
   public static final List<String> CATEGORIES = new ArrayList<String>(
         Arrays.asList("food_beverage", "nature", "water", "waste_cleanup", "other")
@@ -76,6 +77,7 @@ public final class EventWrapper {
   private Date end;
   private String category;
   private String creator_id;
+  private Long bookmarks;
   /* Stored in order to retrieve consistent ID for the event */
   private Key entity_key;
 
@@ -88,6 +90,7 @@ public final class EventWrapper {
         private Date end;
         private String category;
         private String creator_id;
+        private Long bookmarks;
 
         public Builder() {
         }
@@ -136,6 +139,11 @@ public final class EventWrapper {
             return this;
         }
 
+        public Builder setBookmarks(Long bookmarks) {
+            this.bookmarks = bookmarks;
+            return this;
+        }
+
         public Builder setCategory(String category) {
             if (!CATEGORIES.contains(category)) category = "other";
             this.category = category;
@@ -157,12 +165,13 @@ public final class EventWrapper {
             eventWrapper.entity_key = this.entity_key;
             eventWrapper.category = this.category;
             eventWrapper.creator_id = this.creator_id;
+            if (this.bookmarks != null) eventWrapper.bookmarks = this.bookmarks;
+            else eventWrapper.bookmarks = 0L;
             return eventWrapper;
         }
    }
 
    private EventWrapper() {
-      this.entity_key = null;
    }
 
    public Event toEvent() {
@@ -185,6 +194,7 @@ public final class EventWrapper {
        ep.set(CATEGORY, this.category);
        ep.set(EVENT_CREATOR, getEventCreatorName(this.creator_id));
        ep.set(EVENT_ID, this.entity_key.getId());
+       ep.set(BOOKMARKS, this.bookmarks);
        event.setExtendedProperties(ep);
        return event;
    }
@@ -199,6 +209,7 @@ public final class EventWrapper {
     Date endTime = (Date) entity.getProperty(END_TIME);
     String category = (String) entity.getProperty(CATEGORY);
     String userId = (String) entity.getProperty(EVENT_CREATOR);
+    Long bookmarks = (Long) entity.getProperty(BOOKMARKS);
 
     DateTime startDateTime = new DateTime(startTime);
     EventDateTime start = new EventDateTime()
@@ -219,6 +230,7 @@ public final class EventWrapper {
     ep.set(CATEGORY, category);
     ep.set(EVENT_CREATOR, getEventCreatorName(userId));
     ep.set(EVENT_ID, entityKey.getId());
+    ep.set(BOOKMARKS, bookmarks);
     event.setExtendedProperties(ep);
 
     return event;
@@ -238,6 +250,7 @@ public final class EventWrapper {
       eventEntity.setProperty(END_TIME, this.end);
       eventEntity.setProperty(CATEGORY, this.category);
       eventEntity.setProperty(EVENT_CREATOR, this.creator_id);
+      eventEntity.setProperty(BOOKMARKS, this.bookmarks);
       return eventEntity;
   }
 
