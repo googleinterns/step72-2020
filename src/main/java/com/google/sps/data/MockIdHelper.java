@@ -24,27 +24,28 @@ import javax.servlet.http.HttpServletRequest;
 import com.google.api.client.json.JsonFactory;
 import java.util.Collections;
 
+import java.util.Map;
+import java.util.HashMap;
 
-public final class GoogleIdHelper implements IdHelper {
-    
-    // OAuth credentials client ID, used to verify user ID token
-    private static final String CLIENT_ID = "605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com";
+
+public final class MockIdHelper implements IdHelper {
 
     static final String ID_TOKEN_PARAM = "id_token";
     static final String NAME = "name";
+    static final String USER_ID = "userId";
 
-    static final HttpTransport HTTP_TRANSPORT = new UrlFetchTransport();
-    static final JsonFactory JSON_FACTORY = new GsonFactory();
-    
+    private static Map<String, String> mockPayload = new HashMap<String, String>() {
+        {
+            put(USER_ID, "00");
+            put(NAME, "Name");
+        }
+    };
 
-    static final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
-        .setAudience(Collections.singletonList(CLIENT_ID))
-        .build();
 
-    public static Payload verifyId(HttpServletRequest request) {
-        GoogleIdToken idToken = null;
+    public static Map<String, String> verifyId(HttpServletRequest request) {
+        String idToken = null;
         try {
-            idToken = verifier.verify(request.getParameter(ID_TOKEN_PARAM));
+            idToken = request.getParameter(ID_TOKEN_PARAM);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -52,24 +53,22 @@ public final class GoogleIdHelper implements IdHelper {
             System.out.println("Invalid ID token.");
             return null;
         }
-
-        Payload payload = idToken.getPayload();
-        return payload;
+        return mockPayload;
     }
 
     public String getUserId(HttpServletRequest request) {
-        Payload payload = verifyId(request);
+        Map<String, String> payload = verifyId(request);
         if (payload == null) {
             return null;
         }
-        return payload.getSubject();
+        return payload.get(USER_ID);
     }
 
     public String getUserNickname(HttpServletRequest request) {
-        Payload payload = verifyId(request);
+        Map<String, String> payload = verifyId(request);
         if (payload == null) {
             return null;
         }
-        return (String) payload.get(NAME);
+        return payload.get(NAME);
     }
 }

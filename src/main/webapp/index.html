@@ -10,6 +10,9 @@
       onload="this.onload=function(){};handleClientLoad()"
       onreadystatechange="if (this.readyState === 'complete') this.onload()">
     </script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAUR8-gJeYJOCSDJTP6qgN7FsIDG3u-vgU">
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&display=swap" rel="stylesheet">
 
   </head>
@@ -28,7 +31,12 @@
           </div>
     </div>
     <div id="feed">
-        <div class="feed-heading"><div class="events-searchbar">find local events:<input type="text" id="events-searchbar-input" placeholder="city or zip code"></input></div></div>
+        <div class="feed-heading">
+            <div class="events-searchbar">find local events:
+                <input type="text" name="zipcode" id="events-searchbar-input" placeholder="zip code"></input>
+                <button id="zipcode-submit-button" onclick="getLocalEvents(document.getElementById('events-searchbar-input').value)">→</button>
+            </div>
+        </div>
         <div id="events-feed"></div>
         <div id="feed-right-side">
             <div class="feed-box create-event-box" onclick="openCreateEventModal()"><div class="feed-box-content create-event-box-content"><p class="icon">📅</p><p class="create-event-text">create an event</p></div></div>

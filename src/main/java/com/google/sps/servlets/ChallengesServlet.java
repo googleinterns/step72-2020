@@ -39,6 +39,7 @@ import com.google.sps.data.Challenge;
 import com.google.sps.data.ChallengeData;
 import com.google.sps.data.GoogleIdHelper;
 import com.google.sps.data.User;
+import com.google.sps.data.IdHelper;
 
 import java.io.IOException;
 import java.net.URL;
@@ -67,28 +68,26 @@ public class ChallengesServlet extends HttpServlet {
   private static final String COMPLETED_CHALLENGES = "completed-chal";
   private static final String CURRENT_CHALLENGE = "current-chal";
 
+  private IdHelper idHelper = new GoogleIdHelper();
+  private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
  
-
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     int num_challenges = getNumChallenges(request);
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Payload payload = GoogleIdHelper.verifyId(request);
-    if (payload == null) {
-        response.setStatus(400);
-        return;
+    String user_id = idHelper.getUserId(request);
+    if (user_id == null) {
+      response.setStatus(400);
+      return;
     }
-    String user_id = payload.getSubject();
-
 
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, user_id));
     Entity entity = datastore.prepare(query).asSingleEntity();
-
     if(entity == null){
       response.setStatus(404);
       return;
     }
-    User user = User.convertEntitytoUser(entity, user_id);
+    User user = User.convertEntityToUser(entity, user_id);
+
 
     HashMap<String, Integer> challenge_statuses = user.getChallengeStatuses();
     ArrayList<Challenge> requested_challenge_list = new ArrayList<>();
@@ -108,18 +107,15 @@ public class ChallengesServlet extends HttpServlet {
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String completed_challenge_id = request.getParameter(COMPLETED_CHALLENGES);
     String current_challenge_id = request.getParameter(CURRENT_CHALLENGE);
-    Payload payload = GoogleIdHelper.verifyId(request);
-    if (payload == null) {
-        response.setStatus(400);
-        return;
+    String user_id = idHelper.getUserId(request);
+    if (user_id == null) {
+      response.setStatus(400);
+      return;
     }
-
-    String user_id = payload.getSubject();
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, user_id));
     Entity entity = datastore.prepare(query).asSingleEntity();
-    User user = User.convertEntitytoUser(entity, user_id);
+    User user = User.convertEntityToUser(entity, user_id);
 
     if(completed_challenge_id != null){
       try{

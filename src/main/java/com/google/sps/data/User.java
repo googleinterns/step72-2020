@@ -27,10 +27,13 @@ import com.google.appengine.api.datastore.EmbeddedEntity;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
+import org.apache.commons.lang3.StringUtils;
+import java.lang.ClassCastException;
+
 public final class User {
 
   public static final String DATA_TYPE = "User";
-  public static final String ID = "userId";
+  public static final String ID = "user_id";
   public static final String NICKNAME = "nickname";
   public static final String CREATED_EVENTS = "created_events";
   public static final String BOOKMARKED_EVENTS = "bookmarked_events";
@@ -39,7 +42,7 @@ public final class User {
   public static final String CHALLENGE_STATUSES = "challenge_statuses";
   public static final String COMPLETED_CHALLENGES = "completed_challenges";
 
-  private String id;
+  private String user_id;
   private String nickname;
   private ArrayList<Long> created_events;
   private ArrayList<Long> bookmarked_events;
@@ -54,7 +57,7 @@ public final class User {
   private Key entity_key;
 
   public static class Builder {
-        private String id; 
+        private String user_id; 
         private String nickname;
         private ArrayList<Long> created_events;
         private ArrayList<Long> bookmarked_events;
@@ -64,8 +67,8 @@ public final class User {
         private HashSet<String> completed_challenges = new HashSet<>();
         private Key entity_key;
 
-        public Builder(String id) {
-            this.id = id;
+        public Builder(String user_id) {
+            this.user_id = user_id;
         }
         public Builder setNickname(String nickname){
             this.nickname = nickname;
@@ -102,7 +105,7 @@ public final class User {
 
         public User build(){
             User user = new User();  
-            user.id = this.id;
+            user.user_id = this.user_id;
             user.nickname = this.nickname;
             user.entity_key = this.entity_key;
             user.created_events = this.created_events;
@@ -114,15 +117,16 @@ public final class User {
         }
    }
 
-   private User() {
-      this.created_events = new ArrayList<Long>();
-      this.bookmarked_events = new ArrayList<Long>();
-      this.added_to_calendar_events = new ArrayList<Long>();
-      this.current_challenge_id = "";
-      this.challenge_statuses = new HashMap<>();
-      this.completed_challenges = new HashSet<>();
-      this.entity_key = null;
+   private User() {}
+
+   public String getId() {
+       return this.user_id;
    }
+
+   public String getNickname() {
+       return this.nickname;
+   }
+
 
   public String getCurrentChallenge() {
       return this.current_challenge_id;
@@ -181,7 +185,7 @@ public final class User {
   }
  
 
-  public static User convertEntitytoUser(Entity entity, String userId) {
+  public static User convertEntityToUser(Entity entity, String userId) {
     Key entityKey = entity.getKey();
     String nickname = (String) entity.getProperty(NICKNAME);
     String currentChallengeId = (String) entity.getProperty(CURRENT_CHALLENGE);
@@ -212,7 +216,7 @@ public final class User {
       if (this.entity_key == null) userEntity = new Entity(DATA_TYPE);
       else userEntity = new Entity(DATA_TYPE, this.entity_key.getId());
       this.entity_key = userEntity.getKey();
-      userEntity.setProperty(ID, this.id);
+      userEntity.setProperty(ID, this.user_id);
       userEntity.setProperty(NICKNAME, this.nickname);
       userEntity.setProperty(CREATED_EVENTS, this.created_events);
       userEntity.setProperty(BOOKMARKED_EVENTS, this.bookmarked_events);
@@ -227,6 +231,30 @@ public final class User {
       Gson gson = new Gson();
       String json = gson.toJson(this);
       return json;
+  }
+
+  // For array list, treats empty list and null values as equal
+  public boolean equals(User user) {
+      boolean idsEqual = StringUtils.equals(this.user_id, user.user_id);
+      boolean nicknamesEqual = StringUtils.equals(this.nickname, user.nickname);
+      boolean currentChallengeEqual = this.current_challenge_id == user.current_challenge_id;
+      boolean entityKeyEqual = (this.entity_key == null && user.entity_key == null) 
+        || (!(this.entity_key == null || user.entity_key == null) && this.entity_key.getId() == user.entity_key.getId());
+      boolean createdEventsEqual = checkIfArrayListsEqual(this.created_events, user.created_events);
+      boolean bookmarkedEventsEqual = checkIfArrayListsEqual(this.bookmarked_events, user.bookmarked_events);
+      boolean addedEventsEqual = checkIfArrayListsEqual(this.added_to_calendar_events, user.added_to_calendar_events);
+      boolean challengeStatusesEqual = (this.challenge_statuses == null && user.challenge_statuses == null) 
+        || (this.challenge_statuses == null && user.challenge_statuses != null && user.challenge_statuses.isEmpty())
+        || (this.challenge_statuses != null && this.challenge_statuses.isEmpty() && user.challenge_statuses == null)
+        || (!(this.challenge_statuses == null || user.challenge_statuses == null) && this.challenge_statuses.equals(user.challenge_statuses));
+      return idsEqual && nicknamesEqual && currentChallengeEqual && entityKeyEqual && createdEventsEqual && bookmarkedEventsEqual && addedEventsEqual && challengeStatusesEqual;
+  }
+
+  private boolean checkIfArrayListsEqual(ArrayList<Long> arr1, ArrayList<Long> arr2) {
+      return (arr1 == null && arr2 == null) 
+        || (arr1 == null && arr2 != null && arr2.isEmpty())
+        || (arr1 != null && arr1.isEmpty() && arr2 == null)
+        || (!(arr1 == null || arr2 == null) && arr1.equals(arr2));
   }
 
   /* Function embeds Map of challenge_statuses into an Entity so it may
@@ -244,8 +272,14 @@ public final class User {
     HashMap<String, Integer> challenge_statuses = new HashMap<>();
     if (embedded_entity != null){
      for(String key : embedded_entity.getProperties().keySet()){
-       Long status = (Long) embedded_entity.getProperty(key);
-       challenge_statuses.put(key, status.intValue());
+       try {
+           Long status = (Long) embedded_entity.getProperty(key);
+           challenge_statuses.put(key, status.intValue());
+       } catch (ClassCastException e) {
+           Integer status = (Integer) embedded_entity.getProperty(key);
+           challenge_statuses.put(key, status.intValue());
+       }
+       
      }
     }
     return challenge_statuses;
