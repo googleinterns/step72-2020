@@ -103,7 +103,6 @@ public class UserServlet extends HttpServlet {
 
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
-
     response.getWriter().println(user.toJSON());
   }
 
