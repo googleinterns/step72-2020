@@ -61,8 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
-import javafx.util.Pair;
-
 import com.google.sps.data.User;
 import com.google.sps.data.GoogleIdHelper;
 import com.google.sps.data.ChallengeData;
