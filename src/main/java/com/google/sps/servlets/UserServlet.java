@@ -66,30 +66,39 @@ import javafx.util.Pair;
 import com.google.sps.data.User;
 import com.google.sps.data.GoogleIdHelper;
 import com.google.sps.data.ChallengeData;
+import com.google.sps.data.IdHelper;
 
 /** Servlet that returns events sorted by most recent timestamp */
 @WebServlet("/user")
 public class UserServlet extends HttpServlet {
-  static final String CHALLENGE_ID_PARAM = "chal";
-  static final String CHALLENGE_STATUS_PARAM = "stat";
-  static final String BOOKMARKED_EVENT_PARAM = "book";
-  static final String ADDED_TO_CALENDAR_PARAM = "add";
-  static final String ADD_BOOKMARK_PARAM = "add";
-  static final String EVENT = "Event";
-  static final String EVENT_ID = "event_id";
-  static final String BOOKMARKS = "bookmarks";
-  static final String ID_TOKEN_PARAM = "id_token";
-  static final String NAME = "name";
+  public static final String CHALLENGE_ID_PARAM = "chal";
+  public static final String CHALLENGE_STATUS_PARAM = "stat";
+  public static final String BOOKMARKED_EVENT_PARAM = "book";
+  public static final String ADDED_TO_CALENDAR_PARAM = "add_to_cal";
+  public static final String ADD_BOOKMARK_PARAM = "add";
+  public static final String EVENT = "Event";
+  public static final String EVENT_ID = "event_id";
+  public static final String BOOKMARKS = "bookmarks";
+  public static final String ID_TOKEN_PARAM = "id_token";
+  
+  private IdHelper idHelper = new GoogleIdHelper();
+  private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+  public void setIdHelper(IdHelper idHelper) {
+      this.idHelper = idHelper;
+  }
+
+  public void setDatastoreService(DatastoreService service) {
+      this.datastore = service;
+  }
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Payload payload = GoogleIdHelper.verifyId(request);
-    if (payload == null) {
-        response.setStatus(400);
-        return;
+    String userId = idHelper.getUserId(request);
+    if (userId == null) {
+          response.setStatus(400);
+          return;
     }
-    String userId = payload.getSubject();
 
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
     Entity entity = datastore.prepare(query).asSingleEntity();
@@ -99,7 +108,7 @@ public class UserServlet extends HttpServlet {
         return;
     }
 
-    User user = User.convertEntitytoUser(entity, userId);
+    User user = User.convertEntityToUser(entity, userId);
 
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
@@ -111,14 +120,13 @@ public class UserServlet extends HttpServlet {
  /** Creates User */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Payload payload = GoogleIdHelper.verifyId(request);
-    if (payload == null) {
-        response.setStatus(400);
-        return;
+    String userId = idHelper.getUserId(request);
+    if (userId == null) {
+          response.setStatus(400);
+          return;
     }
-    String userId = payload.getSubject(); 
-    String userNickname = (String) payload.get(NAME);
+
+    String userNickname = idHelper.getUserNickname(request);
     User user = new User.Builder(userId)
         .setNickname(userNickname)
         .setCurrentChallengeId(ChallengeData.DEF_CURRENT_CHALLENGE_ID)
@@ -133,12 +141,11 @@ public class UserServlet extends HttpServlet {
   /** Updates userinfo */
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      Payload payload = GoogleIdHelper.verifyId(request);
-      if (payload == null) {
-        response.setStatus(400);
-        return;
+      String userId = idHelper.getUserId(request);
+      if (userId == null) {
+          response.setStatus(400);
+          return;
       }
-      String userId = payload.getSubject();
 
       String challengeIdParam = request.getParameter(CHALLENGE_ID_PARAM);
       String statusParam = request.getParameter(CHALLENGE_STATUS_PARAM);
@@ -149,11 +156,10 @@ public class UserServlet extends HttpServlet {
       String challengeId;
       Integer newStatus;
       Long eventId;
-      
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
       Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(query).asSingleEntity();
-      User user = User.convertEntitytoUser(entity, userId);
+      User user = User.convertEntityToUser(entity, userId);
 
       if (challengeIdParam != null) {
           try {

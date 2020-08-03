@@ -15,29 +15,31 @@
 package com.google.sps.servlets;
 import com.google.gson.*;
 
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.json.JsonFactory;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.SortDirection;
-import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.QueryResultList;
-import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.SortDirection;
+
 
 import com.google.sps.data.Challenge;
 import com.google.sps.data.ChallengeData;
 import com.google.sps.data.GoogleIdHelper;
+import com.google.sps.data.IdHelper;
 import com.google.sps.data.User;
 
 import java.io.IOException;
@@ -66,27 +68,27 @@ public class ChallengesServlet extends HttpServlet {
   private static final String ID_TOKEN = "id_token";
   private static final String COMPLETED_CHALLENGES = "completed-chal";
   private static final String CURRENT_CHALLENGE = "current-chal";
+  
+  private IdHelper id_helper = new GoogleIdHelper();
+  private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     int num_challenges = getNumChallenges(request);
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Payload payload = GoogleIdHelper.verifyId(request);
-    if (payload == null) {
-        response.setStatus(400);
-        return;
+    String user_id = id_helper.getUserId(request);
+    if (user_id == null) {
+      response.setStatus(400);
+      return;
     }
-    String user_id = payload.getSubject();
-
-
+   
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, user_id));
     Entity entity = datastore.prepare(query).asSingleEntity();
-
     if(entity == null){
       response.setStatus(404);
       return;
     }
-    User user = User.convertEntitytoUser(entity, user_id);
+
+    User user = User.convertEntityToUser(entity, user_id);
 
     ArrayList<Challenge> requested_challenge_list = new ArrayList<>();
     HashMap<String, Integer> challenge_statuses = user.getChallengeStatuses();
@@ -107,18 +109,15 @@ public class ChallengesServlet extends HttpServlet {
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String completed_challenge_id = request.getParameter(COMPLETED_CHALLENGES);
     String current_challenge_id = request.getParameter(CURRENT_CHALLENGE);
-    Payload payload = GoogleIdHelper.verifyId(request);
-    if (payload == null) {
-        response.setStatus(400);
-        return;
+    String user_id = id_helper.getUserId(request);
+    if (user_id == null) {
+      response.setStatus(400);
+      return;
     }
-
-    String user_id = payload.getSubject();
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, user_id));
     Entity entity = datastore.prepare(query).asSingleEntity();
-    User user = User.convertEntitytoUser(entity, user_id);
+    User user = User.convertEntityToUser(entity, user_id);
 
     if(completed_challenge_id != null && current_challenge_id != null){
       try{

@@ -204,7 +204,7 @@ async function clickAddToCalendar(addToCalDiv, event) {
     checkAddToCalendarButton(addToCalDiv);
 
     let idToken = getIdToken();
-    const putRequest = new Request(`/user?add=${event.extendedProperties.event_id}&id_token=${idToken}`, {method: 'PUT'});
+    const putRequest = new Request(`/user?add_to_cal=${event.extendedProperties.event_id}&id_token=${idToken}`, {method: 'PUT'});
     user = await fetch(putRequest).then(response => response.json());
 
     updateCalendar(event);
