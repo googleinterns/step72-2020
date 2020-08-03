@@ -65,6 +65,7 @@ import javafx.util.Pair;
 
 import com.google.sps.data.User;
 import com.google.sps.data.GoogleIdHelper;
+import com.google.sps.data.ChallengeData;
 
 /** Servlet that returns events sorted by most recent timestamp */
 @WebServlet("/user")
@@ -79,9 +80,6 @@ public class UserServlet extends HttpServlet {
   static final String BOOKMARKS = "bookmarks";
   static final String ID_TOKEN_PARAM = "id_token";
   static final String NAME = "name";
-  static final String DEF_CURRENT_CHALLENGE_ID = "GARD_0";
-
-  private static final HashMap DEF_CHALLENGES_AND_STATUSES = createMap();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -124,8 +122,8 @@ public class UserServlet extends HttpServlet {
     
     User user = new User.Builder(userId)
         .setNickname(userNickname)
-        .setCurrentChallengeId(DEF_CURRENT_CHALLENGE_ID)
-        .setChallengeStatuses(DEF_CHALLENGES_AND_STATUSES)
+        .setCurrentChallengeId(ChallengeData.DEF_CURRENT_CHALLENGE_ID)
+        .setChallengeStatuses(ChallengeData.DEF_CHALLENGES_AND_STATUSES)
         .build();
 
     datastore.put(user.toEntity());
@@ -247,12 +245,4 @@ public class UserServlet extends HttpServlet {
       addedEvents.add(eventId);
       user.setAddedToCalendarEvents(addedEvents);
   }
-
-  private static HashMap<String, Integer> createMap(){
-    HashMap<String,Integer> def_chal_map = new HashMap<String, Integer>();
-    def_chal_map.put("GARD_0",0);
-    def_chal_map.put("RECY_0",0);
-    def_chal_map.put("WAST_0",0);
-    return def_chal_map;
- }
 } 

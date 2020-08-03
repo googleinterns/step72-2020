@@ -67,7 +67,7 @@ public class ChallengesServlet extends HttpServlet {
   private static final String COMPLETED_CHALLENGES = "completed-chal";
   private static final String CURRENT_CHALLENGE = "current-chal";
 
-  private ArrayList<Challenge> requested_challenge_list = new ArrayList<>();
+ 
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -91,6 +91,7 @@ public class ChallengesServlet extends HttpServlet {
     User user = User.convertEntitytoUser(entity, user_id);
 
     HashMap<String, Integer> challenge_statuses = user.getChallengeStatuses();
+    ArrayList<Challenge> requested_challenge_list = new ArrayList<>();
     for(String key : challenge_statuses.keySet()){
       Challenge my_challenge = ChallengeData.CHALLENGES_MAP.get(key);
       requested_challenge_list.add(my_challenge);
@@ -145,8 +146,6 @@ public class ChallengesServlet extends HttpServlet {
     HashMap<String, Integer> challenge_statuses = user.getChallengeStatuses();
     HashSet<String> completed_challenges = user.getCompletedChallenges();
     user.setCurrentChallenge(cur_id);
-
-    //challenge_statuses.remove(compl_id);
     user.appendToCompletedChallenges(compl_id);
     
     //add new challenge to challenge status.
