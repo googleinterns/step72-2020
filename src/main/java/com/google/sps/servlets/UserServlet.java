@@ -73,7 +73,7 @@ public class UserServlet extends HttpServlet {
   static final String ADDED_TO_CALENDAR_PARAM = "add";
   static final String ID_TOKEN_PARAM = "id_token";
   static final String NAME = "name";
-  static final String DEF_CURRENT_CHALLENGE_ID = "GARD_0";
+  static final String DEF_CURRENT_CHALLENGE_ID = "RECY_0";
 
   private static final HashMap DEF_CHALLENGES_AND_STATUSES = createMap();
 

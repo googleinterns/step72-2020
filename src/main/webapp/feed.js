@@ -42,6 +42,43 @@ function createMockChallenges() {
     return mockChallenges;
 }
 
+const YOU_COMPLETE_ONE = "You've Completed 1 ";
+const YOU_COMPLETE_THREE =  "You've Completed 3 ";
+
+const GARDENING_CHALLENGE = "Gardening Challenge";
+const RECYCLE_CHALLENGE = "Recycle Challenge";
+const WASTE_CHALLENGE = "Waste Challenge"
+
+function createBadges() {
+  badge_map = new Map();
+  badge_map.set("GARD_BADG_1",{
+    description: YOU_COMPLETE_ONE + GARDENING_CHALLENGE,
+    url: "resources/gard_medal_1.png"
+  } );
+  badge_map.set("RECY_BADG_1",{
+    description: YOU_COMPLETE_ONE + RECYCLE_CHALLENGE,
+    url: "resources/recy_medal_1.png"
+  } );  
+  badge_map.set("WAST_BADG_1",{
+    description: YOU_COMPLETE_ONE + WASTE_CHALLENGE,
+    url: "resources/wast_medal_1.png"
+  } );
+  badge_map.set("GARD_BADG_3",{
+    description: YOU_COMPLETE_THREE + GARDENING_CHALLENGE,
+    url: "resources/gard_medal_3.png"
+  } );
+  badge_map.set("RECY_BADG_3",{
+    description: YOU_COMPLETE_THREE + RECYCLE_CHALLENGE,
+    url: "resources/gard_medal_3.png"
+  } );  
+  badge_map.set("WAST_BADG_3",{
+    description: YOU_COMPLETE_THREE + WASTE_CHALLENGE,
+    url: ""
+  } );
+
+  return badge_map;
+}
+
 const CLIENT_ID = '605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com';
 const API_KEY = 'AIzaSyAUR8-gJeYJOCSDJTP6qgN7FsIDG3u-vgU';
 const SCOPES  = "https://www.googleapis.com/auth/calendar.app.created https://www.googleapis.com/auth/calendar.readonly";
@@ -51,12 +88,15 @@ const CHALLENGE_TYPE = {
     RECYCLE: "RECYCLE",
     WASTE: "WASTE",
     GARDENING: "GARDENING",
+    FOOD: "FOOD",
 };
 
+const masterBadgeMap = createBadges();
 
 let user;
 let challenges = [];
 let challengeMap = new Map();
+let badgeMap = new Map();
 const defaultNumChallenges = 3;
 
 const projectTitle = "GEN Capstone";
@@ -79,7 +119,6 @@ async function loadChallenges(num_challenges) {
 
     setChallengesNavBar();
 
-
     window.onclick = function(event) {
         const challengesModal = document.getElementById("challenges-modal");
         const createEventModal = document.getElementById("create-event-modal");
@@ -101,8 +140,24 @@ async function loadChallenges(num_challenges) {
     }
 }
 
+async function loadBadges() {
+  await getServerBadges(); 
+  setEarnedBadges();
+}
+
+async function getServerBadges() {
+  let id_token = getIdToken();
+  const getRequest = new Request(`/badges?&id_token=${id_token}`, {method: 'GET'});
+  let badgeJson = await fetch(getRequest).then(response => response.json());
+  
+  for(badge of badgeJson) {
+    badgeMap.set(badge.id, badge);
+    badgeMap.get(badge.id)["url"] = masterBadgeMap.get(badge.id).url;
+  }
+}
+
 async function loadEvents() {
-     const timezone = document.getElementById("user-timezone");
+    const timezone = document.getElementById("user-timezone");
     timezone.value = new Date().getTimezoneOffset();
 
     const idToken = document.getElementById("id-token");
@@ -115,6 +170,7 @@ async function loadEvents() {
         feed.appendChild(postEvent(event));
     }
 }
+
 
 function postEvent(event) {
     const eventEl = document.createElement('div');
@@ -363,6 +419,9 @@ async function getServerChallenges(numChallenges){
       case(CHALLENGE_TYPE.WASTE):
         challengeMap.get(chalIndex)["icon"] = "🗑";
         break;
+      case(CHALLENGE_TYPE.FOOD):
+        challengeMap.get(chalIndex)["icon"] = "🥑";
+        break;
       default:
         challengeMap.get(chalIndex)["icon"] = "⚠";
         break;
@@ -435,21 +494,58 @@ async function showNewChallengeCompletePage(challenge) {
     }
     else {
         text.innerHTML = `${challenge.challenge_type} challenge complete!<br>Next up is the <b>${challengeMap.get(newChallengeId).name}</b> challenge`;
-        //await sendCompletedChallenges(challenge.id, newChallengeId);
+        await sendCompletedChallenges(challenge.id, newChallengeId);
+        await loadChallenges(1);
+        await updateUserBadges(challenge.challenge_type);
+        await loadBadges();
     }
 
     //instead of newChallengeID us key name from Challenge Data
     //let idToken = getIdToken();
     //const putRequest = new Request(`/user?id_token=${idToken}&chal=${newChallengeId}`, {method: 'PUT'});
     //user = await fetch(putRequest).then(response => response.json());
-    await sendCompletedChallenges(challenge.id, newChallengeId);
-    await loadChallenges(1);
+ 
+
 }
 
 async function sendCompletedChallenges(complete_chal_id ,current_chal_id) {
     id_token = getIdToken();
     put_request = new Request(`/challenges?id_token=${id_token}&completed-chal=${complete_chal_id}&current-chal=${current_chal_id}`, {method: "PUT"});
     user = await fetch(put_request).then(response => response.json());
+}
+
+async function updateUserBadges(challenge_type){
+  id_token = getIdToken();
+  put_request = new Request(`/badges?id_token=${id_token}&challenge-type=${challenge_type}`, {method: "PUT"});
+  let new_badge_indicator = await fetch(put_request).then(response => response.json());
+}
+
+function setEarnedBadges(){
+  const badgeGallery = document.getElementById("gallery");
+  badgeGallery.innerHTML = "<h2 id='badges-header'> Badges </h2>";
+  for(badge of badgeMap){
+    badgeGallery.appendChild(createBadgeItem(badge[1]));
+    /*const itemBackground = document.createElement('div') + badge;
+    itemBackground.className "badges-item-backgroud";
+    let */
+  }
+}
+
+function createBadgeItem(badge) {
+  const item = document.createElement('div');
+  item.className = "badge-item";
+  item.id = "badge-item-" + badge.id;
+
+  const badgeImage = document.createElement('img');
+  badgeImage.setAttribute("src", badgeMap.get(badge.id).url);
+  item.append(badgeImage);
+
+  const badgeDesc = document.createElement('p');
+  badgeDesc.className = "badge-item-description";
+  badgeDesc.innerText = badgeMap.get(badge.id).description;
+  item.append(badgeDesc);
+
+  return item;
 }
 
 function findNextUncompletedChallenge(prevChallengeId) {
@@ -574,7 +670,7 @@ function openChallengesModal() {
     if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
 
     if (user.current_challenge_id == -1) {
-        //showChallengeCompletePage(challengeMap, false);
+        showChallengeCompletePage(challengeMap.get(user.current_challenge_id), false);
     }
 
     else {
@@ -622,13 +718,19 @@ function closeCreateEventModal() {
 function openBadgesModal(){
     const modal = document.getElementById("badges-modal");
     modal.style.display = "flex"; // or flex
+    //setEarnedBadges();
 
-    const galleryItems = document.getElementsByClassName("gallery");
+    //const galleryItems = document.getElementById("gallery");
+}
+
+function showBadges(){
+    
+  
 }
 
 function closeBadgesModal(){
-    const modal = document.getElementById("badges-modal");
-    modal.style.display = "none";
+  const modal = document.getElementById("badges-modal");
+  modal.style.display = "none";
 }
 
 function updateCalendar(event) {
@@ -728,6 +830,7 @@ if (isSignedIn) {
     await getUserInfo();
     await loadEvents();
     await loadChallenges(defaultNumChallenges);
+    await loadBadges();
     showAddToCalendarButtons();
 } else {
     authorizeButton.style.display = 'block';

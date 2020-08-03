@@ -6,7 +6,7 @@ import javafx.util.Pair;
 
 public class Challenge {
   public enum Type {
-    GARDENING, RECYCLE, WASTE
+    GARDENING, RECYCLE, WASTE, FOOD
   }
 
   private Type challenge_type;

@@ -1,12 +1,18 @@
 package com.google.sps.data;
 
+import com.google.sps.data.Challenge;
+
+import java.util.HashSet;
 
 public class Badge {
-  private Type challenge_type;
-  private int num_to_complete;
+  private String id;
+  private Challenge.Type challenge_type;
+  //private int num_to_complete;
+  private String description;
 
-  public Bagde(Type challenge_type, int num_to_complete){
+  public Badge(Challenge.Type challenge_type, String id, String description){
     this.challenge_type = challenge_type;
-    this.num_to_complete = num_to_complete;
+    this.id = id;
+    this.description = description;
   }
 }

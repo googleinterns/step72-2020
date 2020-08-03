@@ -38,6 +38,7 @@ public final class User {
   public static final String CURRENT_CHALLENGE = "current_challenge";
   public static final String CHALLENGE_STATUSES = "challenge_statuses";
   public static final String COMPLETED_CHALLENGES = "completed_challenges";
+  public static final String EARNED_BADGES = "earned_badges";
 
   private String id;
   private String nickname;
@@ -47,6 +48,7 @@ public final class User {
   private String current_challenge_id;
   private HashMap<String, Integer> challenge_statuses;
   private HashSet<String> completed_challenges = new HashSet<>();
+  private HashSet<String> earned_badges = new HashSet<>();
 
   /* Stored so that calls to datastore.put(entity) will overwrite the user with the
    same userId if such a user already exists -- prevents multiple instances of 
@@ -61,7 +63,8 @@ public final class User {
         private ArrayList<Long> added_to_calendar_events;
         private String current_challenge_id;
         private HashMap<String, Integer> challenge_statuses;
-        private HashSet<String> completed_challenges = new HashSet<>();
+        private HashSet<String> completed_challenges =  new HashSet<>();
+        private HashSet<String> earned_badges = new HashSet<>();
         private Key entity_key;
 
         public Builder(String id) {
@@ -99,6 +102,14 @@ public final class User {
             this.entity_key = entity_key;
             return this;
         }
+        public Builder setCompletedChallenges(HashSet<String> completed_challenges) {
+            this.completed_challenges = completed_challenges;
+            return this;
+        }
+        public Builder setEarnedBadges(HashSet<String> earned_badges) {
+            this.earned_badges = earned_badges;
+            return this;
+        }
 
         public User build(){
             User user = new User();  
@@ -110,6 +121,8 @@ public final class User {
             user.added_to_calendar_events = this.added_to_calendar_events;
             user.current_challenge_id = this.current_challenge_id;
             user.challenge_statuses = this.challenge_statuses;
+            user.completed_challenges =this.completed_challenges;
+            user.earned_badges = this.earned_badges;
             return user;
         }
    }
@@ -122,6 +135,7 @@ public final class User {
       this.challenge_statuses = new HashMap<>();
       this.completed_challenges = new HashSet<>();
       this.entity_key = null;
+      this.earned_badges = new HashSet<>();
    }
 
   public String getCurrentChallenge() {
@@ -153,6 +167,10 @@ public final class User {
       this.completed_challenges.add(id);
   }
 
+  public void appendToEarnedBadges(String id) {
+      this.earned_badges.add(id);
+  }
+
   public ArrayList<Long> getCreatedEvents() {
       return (ArrayList) this.created_events;
   }
@@ -179,6 +197,14 @@ public final class User {
   public void setAddedToCalendarEvents(ArrayList<Long> added_to_calendar_events) {
       this.added_to_calendar_events = (ArrayList) added_to_calendar_events.clone();
   }
+
+  public HashSet<String> getEarnedBadges () {
+      return (HashSet) this.earned_badges;
+  }
+
+  public void setEarnedBadges(HashSet<String> earned_badges) {
+      this.earned_badges = (HashSet) earned_badges.clone();
+  }
  
 
   public static User convertEntitytoUser(Entity entity, String userId) {
@@ -189,7 +215,8 @@ public final class User {
     ArrayList<Long> bookmarkedEvents = (ArrayList<Long>) entity.getProperty(BOOKMARKED_EVENTS);
     ArrayList<Long> addedEvents = (ArrayList<Long>) entity.getProperty(ADDED_TO_CALENDAR_EVENTS);
     HashMap<String, Integer> challengeStatuses = getChallengeStatusFromEntity(entity);
-    HashSet<String> completedChallenges = getCompletedChallengesFromEntity(entity);
+    HashSet<String> completedChallenges = getHashSetFromEntity(entity, COMPLETED_CHALLENGES);
+    HashSet<String> earnedBadges = getHashSetFromEntity(entity, EARNED_BADGES);
 
     User user = new User.Builder(userId)
         .setNickname(nickname)
@@ -199,6 +226,8 @@ public final class User {
         .setAddedToCalendarEvents(addedEvents)
         .setCurrentChallengeId(currentChallengeId)
         .setChallengeStatuses(challengeStatuses)
+        .setCompletedChallenges(completedChallenges)
+        .setEarnedBadges(earnedBadges)
         .build();
 
     return user;
@@ -219,7 +248,8 @@ public final class User {
       userEntity.setProperty(ADDED_TO_CALENDAR_EVENTS, this.added_to_calendar_events);
       userEntity.setProperty(CURRENT_CHALLENGE, this.current_challenge_id);
       userEntity.setProperty(CHALLENGE_STATUSES, embedChallengeStatuses());
-      userEntity.setProperty(COMPLETED_CHALLENGES,  getCompletedChallengesAsArray());
+      userEntity.setProperty(COMPLETED_CHALLENGES,  convertHashSetToArrayList(this.completed_challenges));
+      userEntity.setProperty(EARNED_BADGES, convertHashSetToArrayList(this.earned_badges));
       return userEntity;
   }
 
@@ -251,9 +281,9 @@ public final class User {
     return challenge_statuses;
   }
 
-  private ArrayList<String> getCompletedChallengesAsArray(){
-    ArrayList<String> compl_challenges = new ArrayList<String>(completed_challenges);
-    return compl_challenges;
+  private ArrayList<String> convertHashSetToArrayList(HashSet hash_set) {
+    ArrayList<String> array_list = new ArrayList<>(hash_set);
+    return array_list;
   }
 
   private static HashSet<String> getCompletedChallengesFromEntity(Entity entity) {
@@ -265,5 +295,16 @@ public final class User {
       compl_challenges = new HashSet<String>();
     }
     return compl_challenges;
+  }
+
+  private static HashSet<String> getHashSetFromEntity(Entity entity, String property_name) {
+    ArrayList<String> temp = (ArrayList<String>) entity.getProperty(property_name);
+    HashSet<String> hash_set;
+    if (temp != null){
+      hash_set = new HashSet<String>(temp);
+    } else {
+      hash_set = new HashSet<String>();
+    }
+    return hash_set;
   }
 } 

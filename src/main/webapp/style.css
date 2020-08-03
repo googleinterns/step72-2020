@@ -238,7 +238,7 @@ html, body {
     height: 200px;
 }
 
-#challenges-modal, #create-event-modal, #badges-modal {
+#challenges-modal, #create-event-modal {
     color: #004643;
     display: none; 
     position: fixed;
@@ -250,6 +250,26 @@ html, body {
     height: 100%;
     overflow: auto;
     background: rgba(0,0,0,0.4);
+}
+
+#badges-modal {
+    color: #004643;
+    display: none; 
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background: rgba(0,0,0,0.4);
+}
+
+.badge-item {
+  float: left;
+  width: 33.33%;
+  padding: 5px;
 }
 
 .challenges-modal-content {
@@ -455,17 +475,17 @@ html, body {
     width: 100%;
 }
 
-.gallery img{
-    /*transition: 2s;
-    /*width: 200px; */
-    padding: 14px;
+#gallery img{
+    transition: 2s;
+    float: left;
+    width: 200px;
+    padding: 10px;
 }
 
-.gallery{
+#gallery{
     background: #fafafa;
     height: 60%;
     border: solid 3px #004643;
-
     margin: 10px 50px;
 
 .map_overlay {
