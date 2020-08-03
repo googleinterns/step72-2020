@@ -70,17 +70,22 @@ public class ChallengesServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     int num_challenges = getNumChallenges(request);
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     Payload payload = GoogleIdHelper.verifyId(request);
     if (payload == null) {
         response.setStatus(400);
         return;
     }
-
     String user_id = payload.getSubject();
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
 
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, user_id));
     Entity entity = datastore.prepare(query).asSingleEntity();
+
+    if(entity == null){
+      response.setStatus(404);
+      return;
+    }
     User user = User.convertEntitytoUser(entity, user_id);
 
     ArrayList<Challenge> requested_challenge_list = new ArrayList<>();
@@ -95,9 +100,9 @@ public class ChallengesServlet extends HttpServlet {
     response.getWriter().println(json);
   }
 
-  /* remove challenge id from user status map
-     add new challenge id to user status map
-     add challenge id to user completed challenge map */
+
+  /* add new challenge id to user status map, update current challenge id
+     and add challenge id to user completed challenge map */
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String completed_challenge_id = request.getParameter(COMPLETED_CHALLENGES);
@@ -140,8 +145,6 @@ public class ChallengesServlet extends HttpServlet {
     HashMap<String, Integer> challenge_statuses = user.getChallengeStatuses();
     HashSet<String> completed_challenges = user.getCompletedChallenges();
     user.setCurrentChallenge(cur_id);
-
-    //challenge_statuses.remove(compl_id);
     user.appendToCompletedChallenges(compl_id);
     
     //add new challenge to challenge status.

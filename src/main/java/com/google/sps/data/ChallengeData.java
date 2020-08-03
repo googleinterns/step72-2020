@@ -18,6 +18,9 @@ public final class ChallengeData {
     private static final String WAST_0 = "WAST_0";
     private static final String WAST_1 = "WAST_1";
 
+    //default key
+    public static final String DEF_CURRENT_CHALLENGE_ID = RECY_0;
+
     //Challenge names
     private static final String FOOD_CHALLENGE_0 = "Don't waste leftovers";
     private static final String FOOD_CHALLENGE_1 = "Reduce meat consumption";
@@ -73,11 +76,12 @@ public final class ChallengeData {
       new Pair<String, String>("Step 3", "Use containers to store leftovers and lunches instead of wasteful plastic wraps."));
 
     //Each challenge will be linked to a unique id
-    public static final Map<String,Challenge> CHALLENGES_MAP = createMap();
+    public static final HashMap<String,Challenge> CHALLENGES_MAP = createMap();
+    public static final HashMap<String, Integer> DEF_CHALLENGES_AND_STATUSES = createDefaultMap();
 
     /*To avoid unwanted behavior, a function is used for initialization. */
-    private static Map<String, Challenge> createMap(){
-      Map<String,Challenge> challenge_map = new HashMap<String, Challenge>();
+    private static HashMap<String, Challenge> createMap(){
+      HashMap<String,Challenge> challenge_map = new HashMap<String, Challenge>();
       challenge_map.put(GARD_0,new Challenge(Challenge.Type.GARDENING,GARD_0,GARDENING_CHALLENGE_0, GARDENING_STEPS_0));
       challenge_map.put(GARD_1,new Challenge(Challenge.Type.GARDENING,GARD_1,GARDENING_CHALLENGE_1, GARDENING_STEPS_1));
       challenge_map.put(RECY_0,new Challenge(Challenge.Type.RECYCLE,RECY_0,RECYCLE_CHALLENGE_0, RECYCLE_STEPS_0));
@@ -87,6 +91,14 @@ public final class ChallengeData {
       challenge_map.put(FOOD_0,new Challenge(Challenge.Type.FOOD,FOOD_0,FOOD_CHALLENGE_0,FOOD_STEPS_0));
       challenge_map.put(FOOD_1,new Challenge(Challenge.Type.FOOD,FOOD_1,FOOD_CHALLENGE_1,FOOD_STEPS_1));
       return challenge_map;
+    }
+
+    private static HashMap<String, Integer> createDefaultMap(){
+      HashMap<String,Integer> def_chal_map = new HashMap<String, Integer>();
+      def_chal_map.put(RECY_0,0);
+      def_chal_map.put(GARD_0,0);
+      def_chal_map.put(WAST_0,0);
+      return def_chal_map;
     }
 
     private ChallengeData() {
