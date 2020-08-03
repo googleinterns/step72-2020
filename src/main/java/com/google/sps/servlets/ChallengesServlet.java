@@ -79,7 +79,7 @@ public class ChallengesServlet extends HttpServlet {
 
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, user_id));
     Entity entity = datastore.prepare(query).asSingleEntity();
-    User user = User.convertEntitytoUser(entity, user_id);
+    User user = User.convertEntityToUser(entity, user_id);
 
     HashMap<String, Integer> challenge_statuses = user.getChallengeStatuses();
     for(String key : challenge_statuses.keySet()){
