@@ -607,3 +607,27 @@ html, body {
     cursor: pointer;
     outline: none;
 }
+
+#show-bookmarked-div {
+    display: none;
+}
+
+#show-bookmarked-div > p {
+    margin-top: 5px;
+}
+
+#show-bookmarked-checkbox {
+    border: 1.5px solid #004643;
+    height: 20px;
+    width: 20px;
+    margin-left: 10px;
+    position: relative;
+    top: 7px;
+}
+
+#show-bookmarked-checkmark {
+    position: relative;
+    right: 6px;
+    bottom: 8px;
+    display: none;
+}
