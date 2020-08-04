@@ -19,6 +19,7 @@ function initMap() {
     streetViewControl: false,
     maxZoom: 13,
     minZoom: 4,
+    mapTypeControl: false,
     style: [
         {
           "featureType": "all",
