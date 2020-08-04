@@ -29,8 +29,8 @@ const badgeHeight = 120;
 const NUM_BOOKMARKS_TEXT = 1;
 let lastBoldedItem;
 
-async function loadChallenges() {
-    await getServerChallenges(defaultNumChallenges);
+async function loadChallenges(num_challenges) {
+    await getServerChallenges(num_challenges);
 
     setChallengeBox(user.current_challenge_id);
 
@@ -93,7 +93,7 @@ async function clickAddToCalendar(addToCalDiv, event) {
     checkAddToCalendarButton(addToCalDiv);
 
     let idToken = getIdToken();
-    const putRequest = new Request(`/user?add=${event.extendedProperties.event_id}&id_token=${idToken}`, {method: 'PUT'});
+    const putRequest = new Request(`/user?add_to_cal=${event.extendedProperties.event_id}&id_token=${idToken}`, {method: 'PUT'});
     user = await fetch(putRequest).then(response => response.json());
 
     updateCalendar(event);
@@ -422,21 +422,24 @@ async function showNewChallengeCompletePage(challenge) {
     let newChallengeId = findNextUncompletedChallenge(challenge.id);
     if (newChallengeId == -1) {
         text.innerHTML = "All challenges complete!";
-        await getServerChallenges(3);
     }
     else {
         text.innerHTML = `${challenge.challenge_type} challenge complete!<br>Next up is the <b>${challengeMap.get(newChallengeId).name}</b> challenge`;
+        //await sendCompletedChallenges(challenge.id, newChallengeId);
     }
 
     //instead of newChallengeID us key name from Challenge Data
-    let idToken = getIdToken();
-    const putRequest = new Request(`/user?id_token=${idToken}&chal=${newChallengeId}`, {method: 'PUT'});
-
-    user = await fetch(putRequest).then(response => response.json());
+    //let idToken = getIdToken();
+    //const putRequest = new Request(`/user?id_token=${idToken}&chal=${newChallengeId}`, {method: 'PUT'});
+    //user = await fetch(putRequest).then(response => response.json());
+    await sendCompletedChallenges(challenge.id, newChallengeId);
+    await loadChallenges(1);
 }
 
-async function sendCompletedChallenges() {
-    fetch('/challenges', {methdod:'POST'});
+async function sendCompletedChallenges(complete_chal_id ,current_chal_id) {
+    id_token = getIdToken();
+    put_request = new Request(`/challenges?id_token=${id_token}&completed-chal=${complete_chal_id}&current-chal=${current_chal_id}`, {method: "PUT"});
+    user = await fetch(put_request).then(response => response.json());
 }
 
 function findNextUncompletedChallenge(prevChallengeId) {
@@ -561,7 +564,7 @@ function openChallengesModal() {
     if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
 
     if (user.current_challenge_id == -1) {
-        //showChallengeCompletePage(challengeMap[], false);
+        //showChallengeCompletePage(challengeMap, false);
     }
 
     else {
@@ -697,6 +700,7 @@ async function updateSigninStatus(isSignedIn) {
     const signoutButton = document.getElementById('signout-button');
     const feedRightSide = document.getElementById("feed-right-side");
     const showBookmarkedOption = document.getElementById("show-bookmarked-div");
+<<<<<<< HEAD
     if (isSignedIn) {
         authorizeButton.style.display = 'none';
         signoutButton.style.display = 'block';
@@ -714,6 +718,25 @@ async function updateSigninStatus(isSignedIn) {
         await loadEvents();
         hideAddToCalendarButtons();
     }
+=======
+if (isSignedIn) {
+    authorizeButton.style.display = 'none';
+    signoutButton.style.display = 'block';
+    feedRightSide.style.display = "block";  
+    showBookmarkedOption.style.display = "flex";
+    await getUserInfo();
+    await loadEvents();
+    await loadChallenges(defaultNumChallenges);
+    showAddToCalendarButtons();
+} else {
+    authorizeButton.style.display = 'block';
+    signoutButton.style.display = 'none';
+    feedRightSide.style.display = "none";
+    showBookmarkedOption.style.display = "none";
+    await loadEvents();
+    hideAddToCalendarButtons();
+}
+>>>>>>> 1daa152161317c07041c584abe2b924a3c5dd0b9
 }
 
 /**
