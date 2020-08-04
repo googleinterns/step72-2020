@@ -700,7 +700,6 @@ async function updateSigninStatus(isSignedIn) {
     const signoutButton = document.getElementById('signout-button');
     const feedRightSide = document.getElementById("feed-right-side");
     const showBookmarkedOption = document.getElementById("show-bookmarked-div");
-<<<<<<< HEAD
     if (isSignedIn) {
         authorizeButton.style.display = 'none';
         signoutButton.style.display = 'block';
@@ -708,7 +707,7 @@ async function updateSigninStatus(isSignedIn) {
         showBookmarkedOption.style.display = "flex";
         await getUserInfo();
         await loadEvents();
-        await loadChallenges();
+        await loadChallenges(defaultNumChallenges);
         showAddToCalendarButtons();
     } else {
         authorizeButton.style.display = 'block';
@@ -718,25 +717,6 @@ async function updateSigninStatus(isSignedIn) {
         await loadEvents();
         hideAddToCalendarButtons();
     }
-=======
-if (isSignedIn) {
-    authorizeButton.style.display = 'none';
-    signoutButton.style.display = 'block';
-    feedRightSide.style.display = "block";  
-    showBookmarkedOption.style.display = "flex";
-    await getUserInfo();
-    await loadEvents();
-    await loadChallenges(defaultNumChallenges);
-    showAddToCalendarButtons();
-} else {
-    authorizeButton.style.display = 'block';
-    signoutButton.style.display = 'none';
-    feedRightSide.style.display = "none";
-    showBookmarkedOption.style.display = "none";
-    await loadEvents();
-    hideAddToCalendarButtons();
-}
->>>>>>> 1daa152161317c07041c584abe2b924a3c5dd0b9
 }
 
 /**
