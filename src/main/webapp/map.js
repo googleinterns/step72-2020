@@ -156,9 +156,12 @@ function addSuperfundMarkers(areaType, areaCode){
 // }
 
 function addWaterSystem(areaType, zipCode){
+    const waterElement = document.getElementById("water");
+    waterElement.innerHTML = "<h2 class='water_pollution'>Loading...</h2>"
     fetch("/water?town="+town+"&state="+state).then(response => response.json()).then((systems) => {
-        const waterElement = document.getElementById("water");
-        var waterPollutionHTML = "";
+        if(systems.length > 0){
+            var waterPollutionHTML =  "<button class='exit' onclick='closeElement(\"water\");'> X </button>";
+        }
         systems.forEach((system) => {
             console.log(system);
             console.log(system.contaminants);
@@ -171,9 +174,9 @@ function addWaterSystem(areaType, zipCode){
                 if(!contaminants.has(contaminant.contaminantCode)){
                     contaminants.set(contaminant.contaminantCode, contaminant);
                 }
-                waterPollutionHTML += "<p  onclick=showContaminantInfo("+contaminant.contaminantCode+");><strong>"+contaminant.contaminantName+"</strong></p>";
+                waterPollutionHTML += "<p onclick=showContaminantInfo("+contaminant.contaminantCode+");><strong>"+contaminant.contaminantName+"</strong></p>";
                 for([date, enforcements] of Object.entries(contaminant.violations)){
-                    waterPollutionHTML += "<p style='margin-left: 2em;'>&nbsp;"+date+": ";
+                    waterPollutionHTML += "<p class='enf_date'>&nbsp;"+date+": ";
                     enforcements.forEach((enforcementAction) => {
                         waterPollutionHTML += "&nbsp;&nbsp;&nbsp;&nbsp;"+enforcementAction;
                     });
@@ -199,9 +202,15 @@ function showContaminantInfo(contaminantCode){
     if(!contaminants.has(contaminantCode)) return;
     const contaminant = contaminants.get(contaminantCode);
     const contaminantElement = document.getElementById("contaminant");
-    contaminantElement.innerHTML = "<h2>"+contaminant.contaminantName+"</h2>"+
+    contaminantElement.innerHTML =  "<button class='exit' onclick='closeElement(\"contaminant\");'> X </button>"+
+        "<h2>"+contaminant.contaminantName+"</h2>"+
         "<p><strong>Sources: </strong>"+contaminant.sources+"</p>"+
         "<p><strong>Definition: </strong>"+contaminant.definition+"</p>"+
         "<p><strong>Health Effects: </strong>"+contaminant.healthEffects+"</p>";
     console.log(contaminant.contaminantName);
+}
+
+function closeElement(elementId){
+    const element = document.getElementById(elementId);
+    element.innerHTML= "";
 }
