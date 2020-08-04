@@ -4,7 +4,7 @@ import com.google.sps.data.Challenge;
 import com.google.sps.data.ChallengeData;
 import java.util.Arrays;
 import java.util.List;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,20 +14,20 @@ import org.junit.runner.RunWith;
 
 @RunWith(JUnit4.class)
 public final class ChallengeTest {
-  private List<Pair<String,String>> step_desc_pairs;
+  private List<MutablePair<String,String>> step_desc_MutablePairs;
   private List<Challenge> challenge_list;
 
   @Before
   public void setup(){
-    step_desc_pairs = Arrays.asList(
-      new Pair<String, String>("step 1", "Use a reusable bag for Gro"),
-      new Pair<String, String>("step 2", "Reduce..."),
-      new Pair<String, String>("step 3", "Recylce"));
+    step_desc_MutablePairs = Arrays.asList(
+      new MutablePair<String, String>("step 1", "Use a reusable bag for Gro"),
+      new MutablePair<String, String>("step 2", "Reduce..."),
+      new MutablePair<String, String>("step 3", "Recylce"));
 
     challenge_list = Arrays.asList(
-      new Challenge(Challenge.Type.GARDENING,"GARD_0","Environmentally friendly fertilizer!", step_desc_pairs),
-      new Challenge(Challenge.Type.RECYCLE,"RECY_0","Old Electronics",step_desc_pairs),
-      new Challenge(Challenge.Type.WASTE,"WAST_0","Create your own compost", step_desc_pairs));
+      new Challenge(Challenge.Type.GARDENING,"GARD_0","Environmentally friendly fertilizer!", step_desc_MutablePairs),
+      new Challenge(Challenge.Type.RECYCLE,"RECY_0","Old Electronics",step_desc_MutablePairs),
+      new Challenge(Challenge.Type.WASTE,"WAST_0","Create your own compost", step_desc_MutablePairs));
   }
   
   @Test

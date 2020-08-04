@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 public final class ChallengeData {
 
@@ -28,34 +28,34 @@ public final class ChallengeData {
 
     /* Note: step 1, step 2, step 3 are place holders */
     private static final List GARDENING_STEPS_0 =
-      Arrays.asList(new Pair<String, String>("step 1", "fertilize 1"),
-      new Pair<String, String>("step 2", "fertilize 2"),
-      new Pair<String, String>("step 3", "fertilize 3"));
+      Arrays.asList(new MutablePair<String, String>("step 1", "fertilize 1"),
+      new MutablePair<String, String>("step 2", "fertilize 2"),
+      new MutablePair<String, String>("step 3", "fertilize 3"));
 
     private static final List GARDENING_STEPS_1 =
-      Arrays.asList(new Pair<String, String>("step 1", "plant the seed"),
-      new Pair<String, String>("step 2", "Maintain and water plant"),
-      new Pair<String, String>("step 3", "Watch it grow :D"));
+      Arrays.asList(new MutablePair<String, String>("step 1", "plant the seed"),
+      new MutablePair<String, String>("step 2", "Maintain and water plant"),
+      new MutablePair<String, String>("step 3", "Watch it grow :D"));
     
     private static final List RECYCLE_STEPS_0 =
-      Arrays.asList(new Pair<String, String>("step 1", "Use a reusable bag for Gro"),
-      new Pair<String, String>("step 2", "Reduce..."),
-      new Pair<String, String>("step 3", "Recylce"));
+      Arrays.asList(new MutablePair<String, String>("step 1", "Use a reusable bag for Gro"),
+      new MutablePair<String, String>("step 2", "Reduce..."),
+      new MutablePair<String, String>("step 3", "Recylce"));
 
     private static final List RECYCLE_STEPS_1 =
-      Arrays.asList(new Pair<String, String>("step 1", "Clothing Donations Help Reduce landfills"),
-      new Pair<String, String>("step 2", "Clothing Donations Help Reduce Carbon Footprint"),
-      new Pair<String, String>("step 3", "Clothing  Donations Save Water"));
+      Arrays.asList(new MutablePair<String, String>("step 1", "Clothing Donations Help Reduce landfills"),
+      new MutablePair<String, String>("step 2", "Clothing Donations Help Reduce Carbon Footprint"),
+      new MutablePair<String, String>("step 3", "Clothing  Donations Save Water"));
 
     private static final List WASTE_STEPS_0 =
-      Arrays.asList(new Pair<String, String>("step 1", "Find a nice dry, shady place near water for your compost"),
-      new Pair<String, String>("step 2", "Add chopped/shredded brown and green materials"),
-      new Pair<String, String>("step 3", "Mix Grass clippings and green waste into the pile. Also bury fruit and vegetable waste under 10 inches"));
+      Arrays.asList(new MutablePair<String, String>("step 1", "Find a nice dry, shady place near water for your compost"),
+      new MutablePair<String, String>("step 2", "Add chopped/shredded brown and green materials"),
+      new MutablePair<String, String>("step 3", "Mix Grass clippings and green waste into the pile. Also bury fruit and vegetable waste under 10 inches"));
 
     private static final List WASTE_STEPS_1 =
-      Arrays.asList(new Pair<String, String>("step 1", "Replace bottled water with a reusable water bottle"),
-      new Pair<String, String>("step 2", "Invest in a cloth bag to use for groceries instead of accumulating plastic grocery bags"),
-      new Pair<String, String>("step 3", "Use containers to store leftovers and lunches instead of wasteful plastic wraps."));
+      Arrays.asList(new MutablePair<String, String>("step 1", "Replace bottled water with a reusable water bottle"),
+      new MutablePair<String, String>("step 2", "Invest in a cloth bag to use for groceries instead of accumulating plastic grocery bags"),
+      new MutablePair<String, String>("step 3", "Use containers to store leftovers and lunches instead of wasteful plastic wraps."));
 
     //Each challenge will be linked to a unique id
     public static final Map<String,Challenge> CHALLENGES_MAP = createMap();
