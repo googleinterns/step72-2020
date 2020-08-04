@@ -79,11 +79,11 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
+    <!-- <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-controls</artifactId>
       <version>11</version>
-    </dependency>
+    </dependency> -->
 
     <dependency>
         <groupId>org.mockito</groupId>
@@ -159,11 +159,11 @@
         </configuration>
       </plugin>
 
-      <plugin>
+      <!-- <plugin>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.1</version>
-      </plugin>
+      </plugin> -->
     </plugins>
   </build>
 </project>
