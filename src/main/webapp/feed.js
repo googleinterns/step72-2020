@@ -584,9 +584,6 @@ function setEarnedBadges(){
   badgeGallery.innerHTML = "<h2 id='badges-header'> Badges </h2>";
   for(badge of badgeMap){
     badgeGallery.appendChild(createBadgeItem(badge[1]));
-    /*const itemBackground = document.createElement('div') + badge;
-    itemBackground.className "badges-item-backgroud";
-    let */
   }
 }
 
