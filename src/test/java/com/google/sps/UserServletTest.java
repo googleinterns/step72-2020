@@ -45,7 +45,7 @@ import com.google.gson.*;
 @RunWith(JUnit4.class)
 public final class UserServletTest {
   private UserServlet servlet;
-  private static final String MOCK_ID_TOKEN = "123";;
+  private static final String MOCK_ID_TOKEN = "123";
   private static final String MOCK_USER_ID = "00";
   private static final String MOCK_NICKNAME = "Name";
 

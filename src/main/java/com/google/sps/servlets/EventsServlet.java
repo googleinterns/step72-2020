@@ -57,7 +57,7 @@ import com.google.api.services.calendar.model.Events;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Event.ExtendedProperties;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.sps.data.IdHelper;
 import com.google.sps.data.GoogleIdHelper;
 
 import java.io.FileNotFoundException;
@@ -198,5 +198,4 @@ public class EventsServlet extends HttpServlet {
       entity.setProperty(User.CREATED_EVENTS, createdEvents);
       datastore.put(entity);
   }
-
 }
