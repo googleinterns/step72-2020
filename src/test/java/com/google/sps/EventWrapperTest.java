@@ -54,7 +54,6 @@ import com.google.api.client.util.DateTime;
 @RunWith(JUnit4.class)
 public final class EventWrapperTest {
     private EventWrapper mockEventWrapper;
-    private JSONObject mockEventWrapperJson;
     private EventsServlet servlet;
     
     // Creates a mock user entity in order to test the getEventCreatorName() method in EventWrapper class
@@ -102,8 +101,6 @@ public final class EventWrapperTest {
         .setCategory(MOCK_CATEGORY)
         .setCreator(MOCK_USER_ID)
         .build();
-    
-    mockEventWrapperJson = new JSONObject(mockEventWrapper.toJSON());
     
     mockUser = new User.Builder(MOCK_USER_ID)
         .setNickname(MOCK_NICKNAME)
