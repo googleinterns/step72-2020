@@ -6,8 +6,8 @@ Web application to allow users learn more about their local environment and how 
 
 Features:
 
--   Gus Teran (gusteran)
--   Erick Kengni (ekengni)
+-   Display water and land pollution data as an overlay on a Google Maps API
+-   User challenges consisting of action items as a guide to a more environmentally friendly lifestyle
 -   Events feed to allow users to create and find environment-related events in their community
 
 
