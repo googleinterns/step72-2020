@@ -537,12 +537,15 @@ function showChallengeCompletePage(challenge, newCompletion) {
 
 async function showNewChallengeCompletePage(challenge) {
     const text = document.getElementById("challenge-complete-text");
+    const otherText = document.getElementById("challenge-others-text")
     let newChallengeId = findNextUncompletedChallenge(challenge.id);
     if (newChallengeId == -1) {
         text.innerHTML = "All challenges complete!";
     }
     else {
-        text.innerHTML = `${challenge.challenge_type} challenge complete!<br>Next up is the <b>${challengeMap.get(newChallengeId).name}</b> challenge`;
+        text.innerHTML = `${challenge.challenge_type} challenge complete!<br>Next up is the <b>${challengeMap.get(newChallengeId).name}</b> challenge <br>Share with another user?<br>`;
+        //otherText.innerHTML = `share with another User?`;
+        createInputElement(text);
         await sendCompletedChallenges(challenge.id, newChallengeId);
         await loadChallenges(1);
         await updateUserBadges(challenge.challenge_type);
@@ -553,8 +556,12 @@ async function showNewChallengeCompletePage(challenge) {
     //let idToken = getIdToken();
     //const putRequest = new Request(`/user?id_token=${idToken}&chal=${newChallengeId}`, {method: 'PUT'});
     //user = await fetch(putRequest).then(response => response.json());
- 
+}
 
+function createInputElement(container) {
+  var input = document.createElement('input');
+  input.type = "text";
+  container.appendChild(input);
 }
 
 async function sendCompletedChallenges(complete_chal_id ,current_chal_id) {
@@ -570,7 +577,7 @@ async function updateUserBadges(challenge_type){
 }
 
 function setEarnedBadges(){
-  const badgeGallery = document.getElementById("gallery");
+  const badgeGallery = document.getElementById("gallery-content");
   badgeGallery.innerHTML = "<h2 id='badges-header'> Badges </h2>";
   for(badge of badgeMap){
     badgeGallery.appendChild(createBadgeItem(badge[1]));

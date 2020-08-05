@@ -96,7 +96,7 @@ public final class ChallengeData {
     private static HashMap<String, Integer> createDefaultMap(){
       HashMap<String,Integer> def_chal_map = new HashMap<String, Integer>();
       def_chal_map.put(RECY_0,0);
-      def_chal_map.put(GARD_0,0);
+      def_chal_map.put(FOOD_0,0);
       def_chal_map.put(WAST_0,0);
       return def_chal_map;
     }
