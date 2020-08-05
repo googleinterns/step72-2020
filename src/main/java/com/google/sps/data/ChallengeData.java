@@ -18,7 +18,7 @@ public final class ChallengeData {
     private static final String WAST_0 = "WAST_0";
     private static final String WAST_1 = "WAST_1";
 
-    //default key
+    //Default key
     public static final String DEF_CURRENT_CHALLENGE_ID = RECY_0;
 
     //Challenge names

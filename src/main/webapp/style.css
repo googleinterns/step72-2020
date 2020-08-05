@@ -659,6 +659,32 @@ p#challenge-complete-text{
     width: 200px;
     padding: 10px;
 } */
- /*       <div>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from 
-        <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
-      </div> */
+
+
+#show-bookmarked-div {
+    display: none;
+}
+
+#show-bookmarked-div > p {
+    margin-top: 5px;
+}
+
+#show-bookmarked-checkbox {
+    border: 1.5px solid #004643;
+    height: 20px;
+    width: 20px;
+    margin-left: 10px;
+    position: relative;
+    top: 7px;
+}
+
+#show-bookmarked-checkmark {
+    position: relative;
+    right: 6px;
+    bottom: 8px;
+    display: none;
+}
+
+ /* <div> Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from 
+      <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
+    </div> */

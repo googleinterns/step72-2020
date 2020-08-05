@@ -189,7 +189,8 @@ function addEventAddToCalendarButton(event) {
     const addToCalDiv = document.createElement('div');
     addToCalDiv.style.height = 10;
     addToCalDiv.className = "add-to-calendar-div";
-    if (user.added_to_calendar_events.includes(event.extendedProperties.event_id)) checkAddToCalendarButton(addToCalDiv);
+    let signedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
+    if (signedIn && user.added_to_calendar_events.includes(event.extendedProperties.event_id)) checkAddToCalendarButton(addToCalDiv);
     else {
         addToCalDiv.innerText = "+";
         addToCalDiv.onclick = () => { clickAddToCalendar(addToCalDiv, event); };
@@ -263,7 +264,8 @@ function addEventBookmark(event) {
 async function clickBookmark(bookmark, bookmarkDiv, event) {
     bookmark.src="/resources/filled-bookmark.png"; 
     bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].style.color = "#fafafa";
-    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText = parseInt(bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText)+1;
+    event.extendedProperties.bookmarks+=1;
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText = event.extendedProperties.bookmarks;
 
     let idToken = getIdToken();
     const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}&add=true&id_token=${idToken}`, {method: 'PUT'});
@@ -279,7 +281,8 @@ async function clickBookmark(bookmark, bookmarkDiv, event) {
 async function unclickBookmark(bookmark, bookmarkDiv, event) {
     bookmark.src = "/resources/bookmark.png";
     bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].style.color = "#004643";
-    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText = parseInt(bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText)-1;
+    event.extendedProperties.bookmarks-=1;
+    bookmarkDiv.childNodes[NUM_BOOKMARKS_TEXT].innerText = event.extendedProperties.bookmarks;
 
     let idToken = getIdToken();
     const putRequest = new Request(`/user?book=${event.extendedProperties.event_id}&add=false&id_token=${idToken}`, {method: 'PUT'});
@@ -879,10 +882,12 @@ async function updateSigninStatus(isSignedIn) {
     const authorizeButton = document.getElementById('authorize-button');
     const signoutButton = document.getElementById('signout-button');
     const feedRightSide = document.getElementById("feed-right-side");
+    const showBookmarkedOption = document.getElementById("show-bookmarked-div");
 if (isSignedIn) {
     authorizeButton.style.display = 'none';
     signoutButton.style.display = 'block';
     feedRightSide.style.display = "block";  
+    showBookmarkedOption.style.display = "flex";
     await getUserInfo();
     await loadEvents();
     await loadChallenges(defaultNumChallenges);
@@ -892,6 +897,7 @@ if (isSignedIn) {
     authorizeButton.style.display = 'block';
     signoutButton.style.display = 'none';
     feedRightSide.style.display = "none";
+    showBookmarkedOption.style.display = "none";
     await loadEvents();
     hideAddToCalendarButtons();
 }
@@ -962,6 +968,31 @@ async function sortEventsByDistance(location) {
 async function getLocalEvents(location) {
     await sortEventsByDistance(location);
 
+    if (showBookmarked) showOnlyBookmarkedEvents();
+    else showAllEvents();
+}
+
+let showBookmarked = false;
+
+function toggleShowBookmarked() {
+    showBookmarked = !showBookmarked;
+    showBookmarked ? showOnlyBookmarkedEvents() : showAllEvents();   
+}
+
+function showOnlyBookmarkedEvents() {
+    const checkmark = document.getElementById("show-bookmarked-checkmark");
+    checkmark.style.display = "block";
+    const feed = document.getElementById("events-feed");
+    feed.innerHTML = "";
+    for (event of events) {
+        if (user.bookmarked_events.includes(event.extendedProperties.event_id)) feed.appendChild(postEvent(event));
+    }
+    showAddToCalendarButtons();
+}
+
+function showAllEvents() {
+    const checkmark = document.getElementById("show-bookmarked-checkmark");
+    checkmark.style.display = "none";
     const feed = document.getElementById("events-feed");
     feed.innerHTML = "";
     for (event of events) {

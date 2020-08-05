@@ -112,7 +112,6 @@ public class UserServlet extends HttpServlet {
 
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
-
     response.getWriter().println(user.toJSON());
   }
 
@@ -134,7 +133,6 @@ public class UserServlet extends HttpServlet {
         .build();
 
     datastore.put(user.toEntity());
-
     response.sendRedirect("/index.html");
   }
 

@@ -41,6 +41,7 @@ import com.google.sps.data.ChallengeData;
 import com.google.sps.data.GoogleIdHelper;
 import com.google.sps.data.IdHelper;
 import com.google.sps.data.User;
+import com.google.sps.data.IdHelper;
 
 import java.io.IOException;
 import java.net.URL;
@@ -68,7 +69,7 @@ public class ChallengesServlet extends HttpServlet {
   private static final String ID_TOKEN = "id_token";
   private static final String COMPLETED_CHALLENGES = "completed-chal";
   private static final String CURRENT_CHALLENGE = "current-chal";
-  
+
   private IdHelper id_helper = new GoogleIdHelper();
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -80,7 +81,7 @@ public class ChallengesServlet extends HttpServlet {
       response.setStatus(400);
       return;
     }
-   
+
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, user_id));
     Entity entity = datastore.prepare(query).asSingleEntity();
     if(entity == null){
@@ -110,6 +111,7 @@ public class ChallengesServlet extends HttpServlet {
     String completed_challenge_id = request.getParameter(COMPLETED_CHALLENGES);
     String current_challenge_id = request.getParameter(CURRENT_CHALLENGE);
     String user_id = id_helper.getUserId(request);
+
     if (user_id == null) {
       response.setStatus(400);
       return;

@@ -130,16 +130,7 @@ public final class User {
         }
    }
 
-   private User() {
-      this.created_events = new ArrayList<Long>();
-      this.bookmarked_events = new ArrayList<Long>();
-      this.added_to_calendar_events = new ArrayList<Long>();
-      this.current_challenge_id = "";
-      this.challenge_statuses = new HashMap<>();
-      this.completed_challenges = new HashSet<>();
-      this.entity_key = null;
-      this.earned_badges = new HashSet<>();
-   }
+   private User() {}
 
    public String getId() {
        return this.user_id;

@@ -36,6 +36,12 @@
                 <input type="text" name="zipcode" id="events-searchbar-input" placeholder="zip code"></input>
                 <button id="zipcode-submit-button" onclick="getLocalEvents(document.getElementById('events-searchbar-input').value)">→</button>
             </div>
+            <div id="show-bookmarked-div">
+                <p>only show bookmarked</p>
+                <div id="show-bookmarked-checkbox" onclick="toggleShowBookmarked()">
+                    <img id="show-bookmarked-checkmark" src="/resources/greencheckmark.png" alt="checkmark"/>
+                </div>
+            </div>
         </div>
         <div id="events-feed"></div>
         <div id="feed-right-side">
