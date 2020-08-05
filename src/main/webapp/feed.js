@@ -547,18 +547,12 @@ async function showNewChallengeCompletePage(challenge) {
     }
     else {
         text.innerHTML = `${challenge.challenge_type} challenge complete!<br>Next up is the <b>${challengeMap.get(newChallengeId).name}</b> challenge <br>Share with another user?<br>`;
-        //otherText.innerHTML = `share with another User?`;
         createInputElement(text);
         await sendCompletedChallenges(challenge.id, newChallengeId);
         await loadChallenges(1);
         await updateUserBadges(challenge.challenge_type);
         await loadBadges();
     }
-
-    //instead of newChallengeID us key name from Challenge Data
-    //let idToken = getIdToken();
-    //const putRequest = new Request(`/user?id_token=${idToken}&chal=${newChallengeId}`, {method: 'PUT'});
-    //user = await fetch(putRequest).then(response => response.json());
 }
 
 function createInputElement(container) {
@@ -577,6 +571,12 @@ async function updateUserBadges(challenge_type){
   id_token = getIdToken();
   put_request = new Request(`/badges?id_token=${id_token}&challenge-type=${challenge_type}`, {method: "PUT"});
   let new_badge_indicator = await fetch(put_request).then(response => response.json());
+  setNewBadgeIndicator(new_badge_indicator);
+}
+
+function setNewBadgeIndicator(new_badge_indicator){
+  const icon = document.getElementsByClassName("badge-indicator-icon");
+  new_badge_indicator? icon[0].innerHTML = `<p>🔵</p>` : icon[0].innerHTML = `<p>🏆</p>`;
 }
 
 function setEarnedBadges(){
@@ -776,10 +776,8 @@ function closeCreateEventModal() {
 
 function openBadgesModal(){
     const modal = document.getElementById("badges-modal");
-    modal.style.display = "flex"; // or flex
-    //setEarnedBadges();
-
-    //const galleryItems = document.getElementById("gallery");
+    modal.style.display = "flex";
+    setNewBadgeIndicator(false);
 }
 
 function showBadges(){

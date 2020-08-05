@@ -55,6 +55,10 @@ html, body {
     font-size: 32px;
 }
 
+.badge-indicator-icon{
+    font-size: 32px
+}
+
 .feed-box {
     border: solid 2.5px #004643;
     width: 260px;

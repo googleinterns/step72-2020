@@ -18,10 +18,6 @@ public final class BadgeData {
   private static final String RECYCLE_CHALLENGE = "Recycle Challenge";
   private static final String WASTE_CHALLENGE = "Waste Challenge";
 
-  private static final int COMPL_ONE_CHAL = 1;
-  private static final int COMPL_THREE_CHAL = 3;
-  private static final int COMPL_FIVE_CHAL = 5;
-
   public static HashMap<String, Badge> BADGE_MAP = createMap();
 
   private static HashMap<String, Badge> createMap() {
