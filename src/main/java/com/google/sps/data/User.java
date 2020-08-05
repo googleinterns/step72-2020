@@ -272,11 +272,13 @@ public final class User {
       boolean createdEventsEqual = checkIfArrayListsEqual(this.created_events, user.created_events);
       boolean bookmarkedEventsEqual = checkIfArrayListsEqual(this.bookmarked_events, user.bookmarked_events);
       boolean addedEventsEqual = checkIfArrayListsEqual(this.added_to_calendar_events, user.added_to_calendar_events);
+      boolean completedChallenges = checkIfHashSetsEqual(this.completed_challenges, user.completed_challenges);
+      boolean earnedBadges = checkIfHashSetsEqual(this.earned_badges, user.earned_badges);
       boolean challengeStatusesEqual = (this.challenge_statuses == null && user.challenge_statuses == null) 
         || (this.challenge_statuses == null && user.challenge_statuses != null && user.challenge_statuses.isEmpty())
         || (this.challenge_statuses != null && this.challenge_statuses.isEmpty() && user.challenge_statuses == null)
         || (!(this.challenge_statuses == null || user.challenge_statuses == null) && this.challenge_statuses.equals(user.challenge_statuses));
-      return idsEqual && nicknamesEqual && currentChallengeEqual && entityKeyEqual && createdEventsEqual && bookmarkedEventsEqual && addedEventsEqual && challengeStatusesEqual;
+      return idsEqual && nicknamesEqual && currentChallengeEqual && entityKeyEqual && createdEventsEqual && bookmarkedEventsEqual && addedEventsEqual && completedChallenges && challengeStatusesEqual;
   }
 
   private boolean checkIfArrayListsEqual(ArrayList<Long> arr1, ArrayList<Long> arr2) {
@@ -284,6 +286,14 @@ public final class User {
         || (arr1 == null && arr2 != null && arr2.isEmpty())
         || (arr1 != null && arr1.isEmpty() && arr2 == null)
         || (!(arr1 == null || arr2 == null) && arr1.equals(arr2));
+  }
+
+  private boolean checkIfHashSetsEqual(HashSet<String> hash_1, HashSet<String> hash_2) {
+    return (hash_1 == null && hash_2 == null) 
+      || (hash_1 == null && hash_2 != null && hash_2.isEmpty())
+      || (hash_1 != null && hash_1.isEmpty() && hash_2 == null)
+      || (!(hash_1 == null || hash_2 == null) && hash_1.equals(hash_2));      
+    
   }
 
   /* Function embeds Map of challenge_statuses into an Entity so it may

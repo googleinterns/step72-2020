@@ -69,7 +69,7 @@ public final class UserServletTest {
 
     user = new User.Builder(MOCK_USER_ID)
         .setNickname(MOCK_NICKNAME)
-        .setCurrentChallengeId("GARD_0")
+        .setCurrentChallengeId("RECY_0")
         .setChallengeStatuses(DEFAULT_CHALLENGE_STATUSES)
         .build();
     
