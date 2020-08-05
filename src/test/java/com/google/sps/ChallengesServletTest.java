@@ -19,14 +19,38 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito.*;
 
 
+
 @RunWith(JUnit4.class)
 public final class ChallengesServletTest {
   private ChallengesServlet servlet;
-  private String NUM_CHALLNEGES = "3"; 
+  private String NUM_CHALLNEGES = "3";
+  private static final String DEFAULT_CHALLENGE_ID = "GARD_0";
+  private static final HashMap<String, Integer> DEFAULT_CHALLENGE_STATUSES = getDefaultChallengeStatuses();
+
+  private User user;
+  private JSONObject user_json;
+
+  private final LocalServiceTestHelper helper =
+      new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+
+  private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
   @Before
   public void setup(){
+    helper.setUp();
+    user = new User.Builder(USER_ID)
+        .setNickname(NICKNAME)
+        .setCurrentChallengeId(DEFAULT_CHALLENGE_ID)
+        .setChallengeStatuses(DEFAULT_CHALLENGE_STATUSES)
+        .build();
+    
+    user_json = new JSONObject(user.toJSON());  
     servlet = new ChallengesServlet();
+  }
+
+  @After
+  public void tearDown() {
+    helper.tearDown();
   }
 
   @Test
