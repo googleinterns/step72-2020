@@ -63,10 +63,18 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/badges")
 public class BadgeServlet extends HttpServlet {
   private static final int NO_CHALLENGES = 0;
-  private static final String COMPLETED_CHALLENGE_TYPE ="challenge-type";
+  public static final String COMPLETED_CHALLENGE_TYPE = "challenge-type";
   
   private IdHelper id_helper = new GoogleIdHelper();
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+  public void setIdHelper(IdHelper id_helper) {
+      this.id_helper = id_helper;
+  }
+
+  public void setDatastoreService(DatastoreService service) {
+      this.datastore = service;
+  }
   
   /** grabs users badge data */
   @Override
@@ -90,7 +98,6 @@ public class BadgeServlet extends HttpServlet {
     }
     
     String json = convertToJsonUsingGson(requested_badges);
-    //System.out.println(json);
     response.setContentType("application/json;");
     response.getWriter().println(json);
   }
