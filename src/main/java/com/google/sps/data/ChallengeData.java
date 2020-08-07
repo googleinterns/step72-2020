@@ -62,7 +62,10 @@ public final class ChallengeData {
 
     //Each challenge will be linked to a unique id
     public static final HashMap<String,Challenge> CHALLENGES_MAP = createMap();
-    public static final HashMap<String, Integer> DEF_CHALLENGES_AND_STATUSES = createDefaultMap();
+    public static final HashMap<String, Integer> DEF_CHALLENGES_AND_STATUSES = createDefaultStatuses();
+
+    //Challenge map used for Servlet Test
+    public static final HashMap<String, Challenge> CHALLENGE_MAP_TEST = createChallengeMapTest();
 
     /*To avoid unwanted behavior, a function is used for initialization. */
     private static HashMap<String, Challenge> createMap(){
@@ -76,14 +79,21 @@ public final class ChallengeData {
       return challenge_map;
     }
 
-    private static HashMap<String, Integer> createDefaultMap(){
-      HashMap<String,Integer> def_chal_map = new HashMap<String, Integer>();
-      def_chal_map.put(RECY_0,0);
-      def_chal_map.put(GARD_0,0);
-      def_chal_map.put(WAST_0,0);
-      return def_chal_map;
+    private static HashMap<String, Integer> createDefaultStatuses(){
+      HashMap<String,Integer> statuses = new HashMap<String, Integer>();
+      statuses.put(RECY_0,0);
+      statuses.put(GARD_0,0);
+      statuses.put(WAST_0,0);
+      return statuses;
     }
 
+   private static HashMap<String, Challenge> createChallengeMapTest() {
+    HashMap<String, Challenge> def_chal_map = new HashMap<String, Challenge>();
+    def_chal_map.put(GARD_0,new Challenge(Challenge.Type.GARDENING,GARD_0,GARDENING_CHALLENGE_0, GARDENING_STEPS_0));
+    def_chal_map.put(RECY_0,new Challenge(Challenge.Type.RECYCLE,RECY_0,RECYCLE_CHALLENGE_0, RECYCLE_STEPS_0));
+    def_chal_map.put(WAST_0,new Challenge(Challenge.Type.WASTE,WAST_0,WASTE_CHALLENGE_0, WASTE_STEPS_0));
+    return def_chal_map;
+  }
     private ChallengeData() {
      //To prevent initialization
     }
