@@ -35,13 +35,13 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 
-
+import com.google.sps.data.Badge;
+import com.google.sps.data.BadgeData;
 import com.google.sps.data.Challenge;
 import com.google.sps.data.ChallengeData;
 import com.google.sps.data.GoogleIdHelper;
 import com.google.sps.data.IdHelper;
 import com.google.sps.data.User;
-import com.google.sps.data.IdHelper;
 
 import java.io.IOException;
 import java.net.URL;
@@ -59,108 +59,134 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
-/** Servlet that manages challenges **/
-@WebServlet("/challenges")
-public class ChallengesServlet extends HttpServlet {
-  public static final int NO_CHALLENGES = 0;
-  public static final String ID_TOKEN = "id_token";
-  public static final String COMPLETED_CHALLENGE = "completed-chal";
-  public static final String CURRENT_CHALLENGE = "current-chal";
-
+/** Servlet that manages badges **/
+@WebServlet("/badges")
+public class BadgeServlet extends HttpServlet {
+  private static final int NO_CHALLENGES = 0;
+  public static final String COMPLETED_CHALLENGE_TYPE = "challenge-type";
+  
   private IdHelper id_helper = new GoogleIdHelper();
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
   public void setIdHelper(IdHelper id_helper) {
-    this.id_helper = id_helper;
+      this.id_helper = id_helper;
   }
 
   public void setDatastoreService(DatastoreService service) {
-    this.datastore = service;
+      this.datastore = service;
   }
-
+  
+  /** grabs users badge data */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String user_id = id_helper.getUserId(request);
     if (user_id == null) {
-      response.setStatus(400);
-      return;
+        response.setStatus(400);
+        return;
     }
 
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, user_id));
     Entity entity = datastore.prepare(query).asSingleEntity();
-    if(entity == null){
-      response.setStatus(404);
-      return;
-    }
-
     User user = User.convertEntityToUser(entity, user_id);
 
-    ArrayList<Challenge> requested_challenge_list = new ArrayList<>();
-    HashMap<String, Integer> challenge_statuses = user.getChallengeStatuses();
-    for(String key : challenge_statuses.keySet()){
-      Challenge my_challenge = ChallengeData.CHALLENGES_MAP.get(key);
-      requested_challenge_list.add(my_challenge);
-    }
 
-    String json = convertToJsonUsingGson(requested_challenge_list);
+    HashSet<String> earned_badges = user.getEarnedBadges();
+    ArrayList<Badge> requested_badges = new ArrayList<>();
+    for(String badge_id : earned_badges){
+      Badge badge = BadgeData.BADGE_MAP.get(badge_id);
+      requested_badges.add(badge);
+    }
+    
+    String json = convertToJsonUsingGson(requested_badges);
     response.setContentType("application/json;");
     response.getWriter().println(json);
   }
 
-
-  /* add new challenge id to user status map, update current challenge id
-     and add challenge id to user completed challenge map */
+  /* Update user's badge data and returns indication if a new badge was added*/
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    String completed_challenge_id = request.getParameter(COMPLETED_CHALLENGE);
-    String current_challenge_id = request.getParameter(CURRENT_CHALLENGE);
+    Challenge.Type completed_challenge_type;
+    try{
+      completed_challenge_type = Challenge.Type.valueOf(request.getParameter(COMPLETED_CHALLENGE_TYPE));
+    } catch(IllegalArgumentException e) {
+      completed_challenge_type = Challenge.Type.RECYCLE;
+    } 
+
     String user_id = id_helper.getUserId(request);
     if (user_id == null) {
-      response.setStatus(400);
-      return;
+        response.setStatus(400);
+        return;
     }
 
     Query query = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, user_id));
     Entity entity = datastore.prepare(query).asSingleEntity();
     User user = User.convertEntityToUser(entity, user_id);
 
-    if(completed_challenge_id != null && current_challenge_id != null){
-      try{
-        updateUserChallenges(user, completed_challenge_id, current_challenge_id);
-        } catch(Exception e) {
-          System.err.println(e.getMessage());
+    HashSet<String> earned_badges = user.getEarnedBadges();
+    HashSet<String> completed_challenges = user.getCompletedChallenges();
+    boolean new_badge_earned;
+
+    int num_cmpl_chal_type = 0;
+    for(String chal_id : completed_challenges){
+      if(ChallengeData.CHALLENGES_MAP.get(chal_id).getType() == completed_challenge_type){
+        num_cmpl_chal_type++;
       }
     }
+    
+    new_badge_earned = addNewBadgesToSet(user,completed_challenge_type ,num_cmpl_chal_type);
     datastore.put(user.toEntity());
 
     response.setContentType("application/json; charset=UTF-8");
-    response.getWriter().println(user.toJSON());
+    response.getWriter().println(new Gson().toJson(new_badge_earned));
+  }
+
+  /**Add new badges to HashSet*/
+  private boolean addNewBadgesToSet(User user, Challenge.Type challenge_type, int num_cmpl_chal) {
+    HashSet<String> earned_badges = user.getEarnedBadges();
+    boolean new_badge_earned = false;
+    if(num_cmpl_chal >= 1) {
+      switch(challenge_type){
+        case GARDENING:
+          new_badge_earned = !earned_badges.contains(BadgeData.GARD_BADG_1);
+          earned_badges.add(BadgeData.GARD_BADG_1);
+          break;
+        case RECYCLE:
+          new_badge_earned = !earned_badges.contains(BadgeData.RECY_BADG_1);
+          earned_badges.add(BadgeData.RECY_BADG_1);
+          break;
+        case WASTE:
+          new_badge_earned = !earned_badges.contains(BadgeData.WAST_BADG_1);
+          earned_badges.add(BadgeData.WAST_BADG_1);
+          break;
+        default:
+          break;
+      }
+
+    } else if (num_cmpl_chal >= 3) {
+        switch(challenge_type){
+          case GARDENING:
+            new_badge_earned = !earned_badges.contains(BadgeData.GARD_BADG_3);
+            earned_badges.add(BadgeData.GARD_BADG_3);
+            break;
+          case RECYCLE:
+            new_badge_earned = !earned_badges.contains(BadgeData.RECY_BADG_3);
+            earned_badges.add(BadgeData.RECY_BADG_3);
+            break;
+          case WASTE:
+            new_badge_earned = !earned_badges.contains(BadgeData.WAST_BADG_3);
+            earned_badges.add(BadgeData.WAST_BADG_3);
+            break;
+          default:
+            break;
+        }  
+    }    
+    user.setEarnedBadges(earned_badges);
+    return new_badge_earned;
   }
 
   /** Converts array of challenges into json format */
-  private String convertToJsonUsingGson(ArrayList challenge_list) {
-    String json = new Gson().toJson(challenge_list);
+  private String convertToJsonUsingGson(ArrayList badge_list) {
+    String json = new Gson().toJson(badge_list);
     return json;
-  }
-
-  //This function Update's User's Current, and Completed challenges
-  // along with statuses
-  private void updateUserChallenges(User user, String compl_id, String cur_id) {
-    HashMap<String, Integer> challenge_statuses = user.getChallengeStatuses();
-    HashSet<String> completed_challenges = user.getCompletedChallenges();
-    user.setCurrentChallenge(cur_id);
-    user.appendToCompletedChallenges(compl_id);
-    
-    //add new challenge to challenge status.
-    for(String challenge_id : ChallengeData.CHALLENGES_MAP.keySet()){
-      if(!completed_challenges.contains(challenge_id) &&
-         !challenge_statuses.containsKey(challenge_id)){
-
-          challenge_statuses.put(challenge_id, 0);
-          user.setChallengeStatuses(challenge_statuses);
-          break;
-      }   
-    }
   }
 }

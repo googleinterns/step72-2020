@@ -119,8 +119,8 @@ public class UserServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String userId = idHelper.getUserId(request);
     if (userId == null) {
-          response.setStatus(400);
-          return;
+      response.setStatus(400);
+      return;
     }
 
     String userNickname = idHelper.getUserNickname(request);

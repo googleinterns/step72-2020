@@ -55,6 +55,10 @@ html, body {
     font-size: 32px;
 }
 
+.badge-indicator-icon{
+    font-size: 32px
+}
+
 .feed-box {
     border: solid 2.5px #004643;
     width: 260px;
@@ -323,7 +327,7 @@ html, body {
     height: 100%;
 }
 
-#challenge-complete-text {
+p#challenge-complete-text{
     font-size: 24px;
     text-align: center;
     margin: auto;
@@ -608,6 +612,84 @@ html, body {
     outline: none;
 }
 
+#gallery-content::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+#gallery-content {
+  background: #fafafa;
+  height: 60%;
+  border: solid 3px #004643;
+  display: flex;
+  margin: 10px 50px;
+  margin-left: 20%;
+}
+
+@media screen and (max-wdith:500px) {
+  .badge-item {
+    width: 100%;
+  }
+}
+
+#close-badges-modal-button {
+  position: relative;
+  right: 33%;
+}
+
+.badge-item:hover {
+  float: left;
+  filter: grayscale(90%);
+  transform:(1.5);
+  top: 50px;
+}
+
+.badge-item {
+  float: left;
+  width: 33.33%;
+  padding: 20px;
+  position: relative;
+  top: 50px; 
+  height: auto;
+}
+
+#badges-modal {
+    color: #004643;
+    display: none; 
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background: rgba(0,0,0,0.4);
+}
+
+
+/*#gallery{
+    background: #fafafa;
+    height: 60%;
+    border: solid 3px #004643;
+    margin: 10px 50px;
+} */
+
+
+/*#gallery {
+ position:fixed;
+}
+
+
+/*#gallery img{
+    transition: 2s;
+    float: left;
+    width: 200px;
+    padding: 10px;
+} */
+
+
 #show-bookmarked-div {
     display: none;
 }
@@ -631,3 +713,7 @@ html, body {
     bottom: 8px;
     display: none;
 }
+
+ /* <div> Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from 
+      <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
+    </div> */

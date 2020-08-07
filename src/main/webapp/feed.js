@@ -7,12 +7,14 @@ const CHALLENGE_TYPE = {
     RECYCLE: "RECYCLE",
     WASTE: "WASTE",
     GARDENING: "GARDENING",
+    FOOD: "FOOD",
 };
 
 let user;
 let events;
 let challenges = [];
 let challengeMap = new Map();
+let badgeMap = new Map();
 const defaultNumChallenges = 3;
 
 const projectTitle = "EnviroGEN";
@@ -29,8 +31,8 @@ const badgeHeight = 120;
 const NUM_BOOKMARKS_TEXT = 1;
 let lastBoldedItem;
 
-async function loadChallenges(num_challenges) {
-    await getServerChallenges(num_challenges);
+async function loadChallenges() {
+    await getServerChallenges();
 
     setChallengeBox(user.current_challenge_id);
 
@@ -39,17 +41,42 @@ async function loadChallenges(num_challenges) {
     window.onclick = function(event) {
         const challengesModal = document.getElementById("challenges-modal");
         const createEventModal = document.getElementById("create-event-modal");
-        if (event.target == challengesModal) {
+        const badgesModal = document.getElementById("badges-modal");
+        
+        switch(event.target){
+          case (challengesModal):
             closeChallengesModal();
-        }
-        else if (event.target == createEventModal) {
+            break;
+          case (createEventModal):
             closeCreateEventModal();
+            break;
+          case (badgesModal):
+            closeBadgesModal();
+            break;
+          default:
+            break;  
         }
     }
 }
 
+async function loadBadges() {
+  await getServerBadges(); 
+  setEarnedBadges();
+}
+
+async function getServerBadges() {
+  let id_token = getIdToken();
+  const getRequest = new Request(`/badges?&id_token=${id_token}`, {method: 'GET'});
+  let badgeJson = await fetch(getRequest).then(response => response.json());
+  
+  for(badge of badgeJson) {
+    badgeMap.set(badge.id, badge);
+    //badgeMap.get(badge.id)["url"] = masterBadgeMap.get(badge.id).url;
+  }
+}
+
 async function loadEvents() {
-     const timezone = document.getElementById("user-timezone");
+    const timezone = document.getElementById("user-timezone");
     timezone.value = new Date().getTimezoneOffset();
 
     const idToken = document.getElementById("id-token");
@@ -62,6 +89,7 @@ async function loadEvents() {
         feed.appendChild(postEvent(event));
     }
 }
+
 
 function postEvent(event) {
     const eventEl = document.createElement('div');
@@ -337,25 +365,28 @@ function createChallengeNavBarItem(challenge) {
     return item;
 }
 
-async function getServerChallenges(numChallenges){
+async function getServerChallenges(){
   let id_token = getIdToken();
-  const response = await fetch(`/challenges?num-challenges=${numChallenges}&id_token=${id_token}`);
+  const response = await fetch(`/challenges?id_token=${id_token}`);
   const challengeJson = await response.json();
   
   for(var i = 0; i < challengeJson.length; i++) {
     let chalIndex = challengeJson[i].id;
     challengeMap.set(chalIndex,challengeJson[i]);
-    
+
     switch (challengeMap.get(chalIndex).challenge_type){
       case(CHALLENGE_TYPE.RECYCLE):
         challengeMap.get(chalIndex)["icon"] = "♻️";
-        console.log(challengeMap.get(chalIndex).icon);
+        //console.log(challengeMap.get(chalIndex).icon);
         break;
       case(CHALLENGE_TYPE.GARDENING):
         challengeMap.get(chalIndex)["icon"] = "🌱";
         break;
       case(CHALLENGE_TYPE.WASTE):
         challengeMap.get(chalIndex)["icon"] = "🗑";
+        break;
+      case(CHALLENGE_TYPE.FOOD):
+        challengeMap.get(chalIndex)["icon"] = "🥑";
         break;
       default:
         challengeMap.get(chalIndex)["icon"] = "⚠";
@@ -382,13 +413,13 @@ function showChallengeInfo(challenge, displayedStep) {
     header.innerText = challenge.icon + " " + challenge.name + " " + stepsText;
 
     const stepText = document.getElementById("challenges-main-panel-step");
-    stepText.innerText = challenge.steps[displayedStep-1].key;
+    stepText.innerText = challenge.steps[displayedStep-1].left;
 
     setPrevButton(displayedStep, challenge);
     setNextButton(displayedStep, challenge);
     
     const description = document.getElementById("challenges-main-panel-description");
-    description.innerText = challenge.steps[displayedStep-1].value;
+    description.innerText = challenge.steps[displayedStep-1].right;
 
     createModalChallengesBadge(displayedStep, challenge);
 
@@ -419,27 +450,68 @@ function showChallengeCompletePage(challenge, newCompletion) {
 
 async function showNewChallengeCompletePage(challenge) {
     const text = document.getElementById("challenge-complete-text");
+    const otherText = document.getElementById("challenge-others-text")
     let newChallengeId = findNextUncompletedChallenge(challenge.id);
     if (newChallengeId == -1) {
         text.innerHTML = "All challenges complete!";
     }
     else {
-        text.innerHTML = `${challenge.challenge_type} challenge complete!<br>Next up is the <b>${challengeMap.get(newChallengeId).name}</b> challenge`;
-        //await sendCompletedChallenges(challenge.id, newChallengeId);
+        text.innerHTML = `${challenge.challenge_type} challenge complete!<br>Next up is the <b>${challengeMap.get(newChallengeId).name}</b> challenge <br>Share with another user?<br>`;
+        createInputElement(text);
+        await sendCompletedChallenges(challenge.id, newChallengeId);
+        await loadChallenges();
+        await updateUserBadges(challenge.challenge_type);
+        await loadBadges();
     }
+}
 
-    //instead of newChallengeID us key name from Challenge Data
-    //let idToken = getIdToken();
-    //const putRequest = new Request(`/user?id_token=${idToken}&chal=${newChallengeId}`, {method: 'PUT'});
-    //user = await fetch(putRequest).then(response => response.json());
-    await sendCompletedChallenges(challenge.id, newChallengeId);
-    await loadChallenges(1);
+function createInputElement(container) {
+  var input = document.createElement('input');
+  input.type = "text";
+  container.appendChild(input);
 }
 
 async function sendCompletedChallenges(complete_chal_id ,current_chal_id) {
     id_token = getIdToken();
     put_request = new Request(`/challenges?id_token=${id_token}&completed-chal=${complete_chal_id}&current-chal=${current_chal_id}`, {method: "PUT"});
     user = await fetch(put_request).then(response => response.json());
+}
+
+async function updateUserBadges(challenge_type){
+  id_token = getIdToken();
+  put_request = new Request(`/badges?id_token=${id_token}&challenge-type=${challenge_type}`, {method: "PUT"});
+  let new_badge_indicator = await fetch(put_request).then(response => response.json());
+  setNewBadgeIndicator(new_badge_indicator);
+}
+
+function setNewBadgeIndicator(new_badge_indicator){
+  const icon = document.getElementsByClassName("badge-indicator-icon");
+  new_badge_indicator? icon[0].innerHTML = `<p>🔵</p>` : icon[0].innerHTML = `<p>🏆</p>`;
+}
+
+function setEarnedBadges(){
+  const badgeGallery = document.getElementById("gallery-content");
+  badgeGallery.innerHTML = "<h2 id='badges-header'> Badges </h2>";
+  for(badge of badgeMap){
+    badgeGallery.appendChild(createBadgeItem(badge[1]));
+  }
+}
+
+function createBadgeItem(badge) {
+  const item = document.createElement('div');
+  item.className = "badge-item";
+  item.id = "badge-item-" + badge.id;
+
+  const badgeImage = document.createElement('img');
+  badgeImage.setAttribute("src", badgeMap.get(badge.id).url);
+  item.append(badgeImage);
+
+  const badgeDesc = document.createElement('p');
+  badgeDesc.className = "badge-item-description";
+  badgeDesc.innerText = badgeMap.get(badge.id).description;
+  item.append(badgeDesc);
+
+  return item;
 }
 
 function findNextUncompletedChallenge(prevChallengeId) {
@@ -564,7 +636,7 @@ function openChallengesModal() {
     if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
 
     if (user.current_challenge_id == -1) {
-        //showChallengeCompletePage(challengeMap, false);
+        showChallengeCompletePage(challengeMap.get(user.current_challenge_id), false);
     }
 
     else {
@@ -607,6 +679,22 @@ function openCreateEventModal() {
 function closeCreateEventModal() {
     const modal = document.getElementById("create-event-modal");
     modal.style.display = "none";
+}
+
+function openBadgesModal(){
+    const modal = document.getElementById("badges-modal");
+    modal.style.display = "flex";
+    setNewBadgeIndicator(false);
+}
+
+function showBadges(){
+    
+  
+}
+
+function closeBadgesModal(){
+  const modal = document.getElementById("badges-modal");
+  modal.style.display = "none";
 }
 
 function updateCalendar(event) {
@@ -707,7 +795,8 @@ async function updateSigninStatus(isSignedIn) {
         showBookmarkedOption.style.display = "flex";
         await getUserInfo();
         await loadEvents();
-        await loadChallenges(defaultNumChallenges);
+        await loadChallenges();
+        await loadBadges();
         showAddToCalendarButtons();
     } else {
         authorizeButton.style.display = 'block';

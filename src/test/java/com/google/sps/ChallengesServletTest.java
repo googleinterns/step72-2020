@@ -38,7 +38,6 @@ import org.json.JSONArray;
 @RunWith(JUnit4.class)
 public final class ChallengesServletTest {
   private ChallengesServlet servlet;
-  private static final String NUM_CHALLNEGES = "3";
 
   private static final String MOCK_ID_TOKEN = "123";
   private static final String MOCK_NICKNAME = "name";
@@ -78,7 +77,6 @@ public final class ChallengesServletTest {
     datastore.put(user.toEntity());
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
-    when(request.getParameter(ChallengesServlet.NUM_CHALLENGES)).thenReturn(NUM_CHALLNEGES);
     when(request.getParameter(ChallengesServlet.ID_TOKEN)).thenReturn(MOCK_ID_TOKEN);
 
     StringWriter writer = new StringWriter();

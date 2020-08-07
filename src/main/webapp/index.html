@@ -56,6 +56,11 @@
                     <div class="badge-filling" id="feed-badge-filling"></div>
                 </div>
             </div>
+            <div class="feed-box badges-box" onclick="openBadgesModal()">
+              <div class="feed-box-content badges-box-content">
+                  <p class="badge-indicator-icon">🏆 </p><p class="badges-text"> badges</p>
+              </div> 
+            </div>
         </div>
     </div>
     <div id="challenges-modal">
@@ -119,5 +124,9 @@
             <input class="button" id="submit-button" type="submit" />
         </form>
     </div>
+    <div id="badges-modal">
+      <p class ="close-modal-button" id="close-badges-modal-button" onclick="closeBadgesModal()">x</p>
+       <div id = "gallery-content"></div>
+    </div>  
     </body>
 </html>

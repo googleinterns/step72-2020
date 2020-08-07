@@ -1,4 +1,3 @@
-
 package com.google.sps.data;
 
 import java.util.ArrayList;
@@ -7,7 +6,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class Challenge {
   public enum Type {
-    GARDENING, RECYCLE, WASTE
+    GARDENING, RECYCLE, WASTE, FOOD
   }
 
   private Type challenge_type;
