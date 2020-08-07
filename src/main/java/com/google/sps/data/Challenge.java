@@ -3,7 +3,7 @@ package com.google.sps.data;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class Challenge {
   public enum Type {
@@ -15,7 +15,7 @@ public class Challenge {
   private String name;
 
   //<Step name, Step description>
-  private List <MutablePair<String,String>> steps;
+  private List <ImmutablePair<String,String>> steps;
 
   public Challenge(Type type, String id, String name, List steps){  
     this.challenge_type = type;
