@@ -36,11 +36,6 @@ public final class ChallengeTest {
   }
 
   @Test
-  public void isEqualValidDiffInstance(){
-    Assert.assertTrue(ChallengeData.CHALLENGES_MAP.get("RECY_0").isEqual(challenge_list.get(1)));
-  }
-
-  @Test
   public void isEqualInvalid(){
     Assert.assertFalse(challenge_list.get(0).isEqual(challenge_list.get(1)));
   }
