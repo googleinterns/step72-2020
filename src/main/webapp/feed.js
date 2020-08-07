@@ -10,7 +10,6 @@ const CHALLENGE_TYPE = {
     FOOD: "FOOD",
 };
 
-
 let user;
 let events;
 let challenges = [];
@@ -32,8 +31,8 @@ const badgeHeight = 120;
 const NUM_BOOKMARKS_TEXT = 1;
 let lastBoldedItem;
 
-async function loadChallenges(num_challenges) {
-    await getServerChallenges(num_challenges);
+async function loadChallenges() {
+    await getServerChallenges();
 
     setChallengeBox(user.current_challenge_id);
 
@@ -366,15 +365,15 @@ function createChallengeNavBarItem(challenge) {
     return item;
 }
 
-async function getServerChallenges(numChallenges){
+async function getServerChallenges(){
   let id_token = getIdToken();
-  const response = await fetch(`/challenges?num-challenges=${numChallenges}&id_token=${id_token}`);
+  const response = await fetch(`/challenges?id_token=${id_token}`);
   const challengeJson = await response.json();
   
   for(var i = 0; i < challengeJson.length; i++) {
     let chalIndex = challengeJson[i].id;
     challengeMap.set(chalIndex,challengeJson[i]);
-    
+
     switch (challengeMap.get(chalIndex).challenge_type){
       case(CHALLENGE_TYPE.RECYCLE):
         challengeMap.get(chalIndex)["icon"] = "♻️";
@@ -414,13 +413,13 @@ function showChallengeInfo(challenge, displayedStep) {
     header.innerText = challenge.icon + " " + challenge.name + " " + stepsText;
 
     const stepText = document.getElementById("challenges-main-panel-step");
-    stepText.innerText = challenge.steps[displayedStep-1].key;
+    stepText.innerText = challenge.steps[displayedStep-1].left;
 
     setPrevButton(displayedStep, challenge);
     setNextButton(displayedStep, challenge);
     
     const description = document.getElementById("challenges-main-panel-description");
-    description.innerText = challenge.steps[displayedStep-1].value;
+    description.innerText = challenge.steps[displayedStep-1].right;
 
     createModalChallengesBadge(displayedStep, challenge);
 
@@ -460,7 +459,7 @@ async function showNewChallengeCompletePage(challenge) {
         text.innerHTML = `${challenge.challenge_type} challenge complete!<br>Next up is the <b>${challengeMap.get(newChallengeId).name}</b> challenge <br>Share with another user?<br>`;
         createInputElement(text);
         await sendCompletedChallenges(challenge.id, newChallengeId);
-        await loadChallenges(1);
+        await loadChallenges();
         await updateUserBadges(challenge.challenge_type);
         await loadBadges();
     }
@@ -796,7 +795,7 @@ async function updateSigninStatus(isSignedIn) {
         showBookmarkedOption.style.display = "flex";
         await getUserInfo();
         await loadEvents();
-        await loadChallenges(defaultNumChallenges);
+        await loadChallenges();
         await loadBadges();
         showAddToCalendarButtons();
     } else {

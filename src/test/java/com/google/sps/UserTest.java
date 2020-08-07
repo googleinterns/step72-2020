@@ -38,7 +38,7 @@ import static org.junit.Assert.assertFalse;
 public final class UserTest {
   private static final String USER_ID = "00";
   private static final String NICKNAME = "Name";
-  private static final String DEFAULT_CHALLENGE_ID = "GARD_0";;
+  private static final String DEFAULT_CHALLENGE_ID = "GARD_0";
   private static final HashMap<String, Integer> DEFAULT_CHALLENGE_STATUSES = getDefaultChallengeStatuses();
 
   private User user;

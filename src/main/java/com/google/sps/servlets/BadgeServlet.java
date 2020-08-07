@@ -105,7 +105,13 @@ public class BadgeServlet extends HttpServlet {
   /* Update user's badge data and returns indication if a new badge was added*/
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    Challenge.Type completed_challenge_type = Challenge.Type.valueOf(request.getParameter(COMPLETED_CHALLENGE_TYPE));
+    Challenge.Type completed_challenge_type;
+    try{
+      completed_challenge_type = Challenge.Type.valueOf(request.getParameter(COMPLETED_CHALLENGE_TYPE));
+    } catch(IllegalArgumentException e) {
+      completed_challenge_type = Challenge.Type.RECYCLE;
+    } 
+
     String user_id = id_helper.getUserId(request);
     if (user_id == null) {
         response.setStatus(400);

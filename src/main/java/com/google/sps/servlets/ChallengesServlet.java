@@ -59,23 +59,28 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import javafx.util.Pair;
 
 /** Servlet that manages challenges **/
 @WebServlet("/challenges")
 public class ChallengesServlet extends HttpServlet {
-  private static final int NO_CHALLENGES = 0;
-  private static final String NUM_CHALLENGES = "num-challenges";
-  private static final String ID_TOKEN = "id_token";
-  private static final String COMPLETED_CHALLENGES = "completed-chal";
-  private static final String CURRENT_CHALLENGE = "current-chal";
+  public static final int NO_CHALLENGES = 0;
+  public static final String ID_TOKEN = "id_token";
+  public static final String COMPLETED_CHALLENGE = "completed-chal";
+  public static final String CURRENT_CHALLENGE = "current-chal";
 
   private IdHelper id_helper = new GoogleIdHelper();
   private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
+  public void setIdHelper(IdHelper id_helper) {
+    this.id_helper = id_helper;
+  }
+
+  public void setDatastoreService(DatastoreService service) {
+    this.datastore = service;
+  }
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    int num_challenges = getNumChallenges(request);
     String user_id = id_helper.getUserId(request);
     if (user_id == null) {
       response.setStatus(400);
@@ -108,10 +113,9 @@ public class ChallengesServlet extends HttpServlet {
      and add challenge id to user completed challenge map */
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    String completed_challenge_id = request.getParameter(COMPLETED_CHALLENGES);
+    String completed_challenge_id = request.getParameter(COMPLETED_CHALLENGE);
     String current_challenge_id = request.getParameter(CURRENT_CHALLENGE);
     String user_id = id_helper.getUserId(request);
-
     if (user_id == null) {
       response.setStatus(400);
       return;
@@ -158,22 +162,5 @@ public class ChallengesServlet extends HttpServlet {
           break;
       }   
     }
-  }
-
-  /** Convert request parameter NUM_CHALLENGES into an Integeer */
-  private int getNumChallenges(HttpServletRequest request){
-    String num_of_challenges_requested = request.getParameter(NUM_CHALLENGES);
-    int num_challenges;
-    try{
-      num_challenges = Integer.parseInt(num_of_challenges_requested);
-    } catch(NumberFormatException e){
-        System.err.println("Could not convert to int " + num_of_challenges_requested);
-        return NO_CHALLENGES;
-    }
-
-    if (num_challenges > ChallengeData.CHALLENGES_MAP.size()){
-      return NO_CHALLENGES; 
-    }
-    return num_challenges;
   }
 }
