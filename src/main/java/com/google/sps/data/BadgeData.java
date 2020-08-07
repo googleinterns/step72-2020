@@ -7,6 +7,13 @@ public final class BadgeData {
   public static final String RECY_BADG_1 = "RECY_BADG_1";
   public static final String WAST_BADG_1 = "WAST_BADG_1";
 
+  public static final String GARD_BADG_1_URL = "resources/gard_medal_1.png";
+  public static final String RECY_BADG_1_URL = "resources/recy_medal_1.png";
+  public static final String WAST_BADG_1_URL = "resources/wast_medal_1.png";
+
+  public static final String GARD_BADG_3_URL = "resources/gard_medal_3.png";
+  public static final String RECY_BADG_3_URL = "resources/gard_medal_3.png";
+
   public static final String GARD_BADG_3 = "GARD_BADG_3";
   public static final String RECY_BADG_3 = "RECY_BADG_3";
   public static final String WAST_BADG_3 = "WAST_BADG_3";
@@ -22,9 +29,9 @@ public final class BadgeData {
 
   private static HashMap<String, Badge> createMap() {
     HashMap<String, Badge> badge_map = new HashMap<String, Badge>();
-    badge_map.put(GARD_BADG_1,new Badge(Challenge.Type.GARDENING,GARD_BADG_1,YOU_COMPLETE_ONE + GARDENING_CHALLENGE));
-    badge_map.put(RECY_BADG_1,new Badge(Challenge.Type.RECYCLE,RECY_BADG_1,YOU_COMPLETE_ONE + RECYCLE_CHALLENGE));
-    badge_map.put(WAST_BADG_1,new Badge(Challenge.Type.WASTE,WAST_BADG_1,YOU_COMPLETE_ONE + WASTE_CHALLENGE));
+    badge_map.put(GARD_BADG_1,new Badge(Challenge.Type.GARDENING,GARD_BADG_1,GARD_BADG_1_URL,YOU_COMPLETE_ONE + GARDENING_CHALLENGE));
+    badge_map.put(RECY_BADG_1,new Badge(Challenge.Type.RECYCLE,RECY_BADG_1,RECY_BADG_1_URL,YOU_COMPLETE_ONE + RECYCLE_CHALLENGE));
+    badge_map.put(WAST_BADG_1,new Badge(Challenge.Type.WASTE,WAST_BADG_1,WAST_BADG_1_URL,YOU_COMPLETE_ONE + WASTE_CHALLENGE));
     return badge_map;
   } 
 

@@ -42,43 +42,6 @@ function createMockChallenges() {
     return mockChallenges;
 }
 
-const YOU_COMPLETE_ONE = "You've Completed 1 ";
-const YOU_COMPLETE_THREE =  "You've Completed 3 ";
-
-const GARDENING_CHALLENGE = "Gardening Challenge";
-const RECYCLE_CHALLENGE = "Recycle Challenge";
-const WASTE_CHALLENGE = "Waste Challenge"
-
-function createBadges() {
-  badge_map = new Map();
-  badge_map.set("GARD_BADG_1",{
-    description: YOU_COMPLETE_ONE + GARDENING_CHALLENGE,
-    url: "resources/gard_medal_1.png"
-  } );
-  badge_map.set("RECY_BADG_1",{
-    description: YOU_COMPLETE_ONE + RECYCLE_CHALLENGE,
-    url: "resources/recy_medal_1.png"
-  } );  
-  badge_map.set("WAST_BADG_1",{
-    description: YOU_COMPLETE_ONE + WASTE_CHALLENGE,
-    url: "resources/wast_medal_1.png"
-  } );
-  badge_map.set("GARD_BADG_3",{
-    description: YOU_COMPLETE_THREE + GARDENING_CHALLENGE,
-    url: "resources/gard_medal_3.png"
-  } );
-  badge_map.set("RECY_BADG_3",{
-    description: YOU_COMPLETE_THREE + RECYCLE_CHALLENGE,
-    url: "resources/gard_medal_3.png"
-  } );  
-  badge_map.set("WAST_BADG_3",{
-    description: YOU_COMPLETE_THREE + WASTE_CHALLENGE,
-    url: ""
-  } );
-
-  return badge_map;
-}
-
 const CLIENT_ID = '605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com';
 const API_KEY = 'AIzaSyAUR8-gJeYJOCSDJTP6qgN7FsIDG3u-vgU';
 const SCOPES  = "https://www.googleapis.com/auth/calendar.app.created https://www.googleapis.com/auth/calendar.readonly";
@@ -91,7 +54,6 @@ const CHALLENGE_TYPE = {
     FOOD: "FOOD",
 };
 
-const masterBadgeMap = createBadges();
 
 let user;
 let events;
@@ -154,7 +116,7 @@ async function getServerBadges() {
   
   for(badge of badgeJson) {
     badgeMap.set(badge.id, badge);
-    badgeMap.get(badge.id)["url"] = masterBadgeMap.get(badge.id).url;
+    //badgeMap.get(badge.id)["url"] = masterBadgeMap.get(badge.id).url;
   }
 }
 
