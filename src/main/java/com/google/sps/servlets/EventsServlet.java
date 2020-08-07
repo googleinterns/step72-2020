@@ -57,7 +57,7 @@ import com.google.api.services.calendar.model.Events;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Event.ExtendedProperties;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.sps.data.IdHelper;
 import com.google.sps.data.GoogleIdHelper;
 
 import java.io.FileNotFoundException;
@@ -80,10 +80,20 @@ public class EventsServlet extends HttpServlet {
     public static final String TIMESTAMP = "timestamp";
     public static final String USER_TIMEZONE = "timezone";
     public static final String DATE = "date";
+    
+    private IdHelper idHelper = new GoogleIdHelper();
+    private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+    public void setIdHelper(IdHelper idHelper) {
+        this.idHelper = idHelper;
+    }
+
+    public void setDatastoreService(DatastoreService service) {
+        this.datastore = service;
+    }
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     FetchOptions fetchOptions = FetchOptions.Builder.withLimit(10);
     Query query = new Query(EVENT).addSort(TIMESTAMP, SortDirection.DESCENDING);
     PreparedQuery pq = datastore.prepare(query);
@@ -104,12 +114,11 @@ public class EventsServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      Payload payload = GoogleIdHelper.verifyId(request);
-      if (payload == null) {
-        response.setStatus(400);
-        return;
+      String userId = idHelper.getUserId(request);
+      if (userId == null) {
+          response.setStatus(400);
+          return;
       }
-      String userId = payload.getSubject();
 
       String eventSummary = request.getParameter(EventWrapper.SUMMARY);
       String eventDescription = request.getParameter(EventWrapper.DESCRIPTION);
@@ -146,7 +155,6 @@ public class EventsServlet extends HttpServlet {
 
       Entity eventEntity = eventWrapper.toEntity();
         
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       datastore.put(eventEntity);
       updateUserCreatedEvents(userId, eventEntity.getKey().getId());
     
@@ -182,7 +190,6 @@ public class EventsServlet extends HttpServlet {
   }
 
   public void updateUserCreatedEvents(String userId, long eventId) {
-      DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Query userQuery = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
       Entity entity = datastore.prepare(userQuery).asSingleEntity();
       ArrayList<Long> createdEvents =(ArrayList<Long>) entity.getProperty(User.CREATED_EVENTS);
@@ -191,5 +198,4 @@ public class EventsServlet extends HttpServlet {
       entity.setProperty(User.CREATED_EVENTS, createdEvents);
       datastore.put(entity);
   }
-
 }
