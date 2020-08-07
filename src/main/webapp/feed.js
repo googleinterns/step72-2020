@@ -1,47 +1,3 @@
-function createMockChallenges() {
-    let mockChallenges = [];
-    mockChallenges[0] = new Map();
-    mockChallenges[0].set("id", 0);
-    mockChallenges[0].set("title", "Gardening");
-    mockChallenges[0].set("icon", "🌱");
-    let mockGardeningSteps = ["Plant tomatoes", "Plant a tree", "Save rainwater"];
-    let mockGardeningStepDescriptions = ["Start a garden in your backyard",
-    "More trees are always good", "Reuse rainwater for your plants"];
-    let mockGardeningStepResources = ["Here is a link for more information",
-    "Here is a link for more information", "Here is a link for more information"];
-    mockChallenges[0].set("steps", mockGardeningSteps);
-    mockChallenges[0].set("descriptions", mockGardeningStepDescriptions);
-    mockChallenges[0].set("resources", mockGardeningStepResources);
-
-    mockChallenges[1] = new Map();
-    mockChallenges[1].set("id", 1);
-    mockChallenges[1].set("title", "Recycling");
-    mockChallenges[1].set("icon", "♻️");
-    let mockRecyclingSteps = ["Use a reusable bag for groceries", "Reduce","Recycle"];
-    let mockRecyclingStepDescriptions = ["(More information about why this helps the environment)",
-    "Description for step 2", "Description for step 3"];
-    let mockRecyclingStepResources = ["(External resources about recycling related environmental issues)",
-    "Here is a link for more information", "Here is a link for more information"];
-    mockChallenges[1].set("steps", mockRecyclingSteps);
-    mockChallenges[1].set("descriptions", mockRecyclingStepDescriptions);
-    mockChallenges[1].set("resources", mockRecyclingStepResources);
-
-    mockChallenges[2] = new Map();
-    mockChallenges[2].set("id", 2);
-    mockChallenges[2].set("title", "Food");
-    mockChallenges[2].set("icon", "🥑");
-    let mockFoodSteps = ["Food step 1", "Food step 2", "Food step 3"];
-    let mockFoodStepDescriptions = ["food description 1",
-    "food description 2", "food description 3"];
-    let mockFoodStepResources = ["Here is a link for more information",
-    "Here is a link for more information", "Here is a link for more information"];
-    mockChallenges[2].set("steps", mockFoodSteps);
-    mockChallenges[2].set("descriptions", mockFoodStepDescriptions);
-    mockChallenges[2].set("resources", mockFoodStepResources);
-
-    return mockChallenges;
-}
-
 const CLIENT_ID = '605480199600-e4uo1livbvl58cup3qtd1miqas7vspcu.apps.googleusercontent.com';
 const API_KEY = 'AIzaSyAUR8-gJeYJOCSDJTP6qgN7FsIDG3u-vgU';
 const SCOPES  = "https://www.googleapis.com/auth/calendar.app.created https://www.googleapis.com/auth/calendar.readonly";
@@ -59,7 +15,7 @@ let challenges = [];
 let challengeMap = new Map();
 const defaultNumChallenges = 3;
 
-const projectTitle = "GEN Capstone";
+const projectTitle = "EnviroGEN";
 let calendarId = null; 
 
 let eventCategoryIcons = new Map();
@@ -79,7 +35,6 @@ async function loadChallenges(num_challenges) {
     setChallengeBox(user.current_challenge_id);
 
     setChallengesNavBar();
-
 
     window.onclick = function(event) {
         const challengesModal = document.getElementById("challenges-modal");
@@ -131,7 +86,6 @@ function addEventAddToCalendarButton(event) {
         addToCalDiv.onmouseover = () => { addToCalDiv.appendChild(createAddToCalendarPopup()); };
         addToCalDiv.onmouseout = () => { addToCalDiv.removeChild(addToCalDiv.childNodes[1]); };
     }
-    
     return addToCalDiv;
 }
 
@@ -310,7 +264,6 @@ function setChallengeBox(challengeId) {
         stepsText.innerText = "Complete!";
     }
     else {
-        //console.log("challenges length = " + challenges.length) ;
         icon.innerText = challengeMap.get(challengeId).icon;
 
         const currentStep = user.challenge_statuses[challengeId];
@@ -338,7 +291,6 @@ function fillBadge(currentStep, totalSteps) {
     }
 }
 
-//start here to implement (note for me)
 function setChallengesNavBar() {
     const navBar = document.getElementById("challenges-nav-bar");
     navBar.innerHTML = "<p id='challenges-nav-bar-header'>Challenges</p>";
@@ -413,7 +365,6 @@ async function getServerChallenges(numChallenges){
 }
 
 function boldCurrentChallengeTitle(chosenItem) {
-    const items = document.getElementsByClassName("challenges-nav-bar-item");
     if (lastBoldedItem != null) lastBoldedItem.style.fontWeight = "normal";
     chosenItem.style.fontWeight = "bold";
     lastBoldedItem = chosenItem;
@@ -438,9 +389,6 @@ function showChallengeInfo(challenge, displayedStep) {
     
     const description = document.getElementById("challenges-main-panel-description");
     description.innerText = challenge.steps[displayedStep-1].value;
-
-    const resources = document.getElementById("challenges-main-panel-resources");
-    //resources.innerText = challenge.get("resources")[displayedStep-1];
 
     createModalChallengesBadge(displayedStep, challenge);
 
@@ -752,23 +700,23 @@ async function updateSigninStatus(isSignedIn) {
     const signoutButton = document.getElementById('signout-button');
     const feedRightSide = document.getElementById("feed-right-side");
     const showBookmarkedOption = document.getElementById("show-bookmarked-div");
-if (isSignedIn) {
-    authorizeButton.style.display = 'none';
-    signoutButton.style.display = 'block';
-    feedRightSide.style.display = "block";  
-    showBookmarkedOption.style.display = "flex";
-    await getUserInfo();
-    await loadEvents();
-    await loadChallenges(defaultNumChallenges);
-    showAddToCalendarButtons();
-} else {
-    authorizeButton.style.display = 'block';
-    signoutButton.style.display = 'none';
-    feedRightSide.style.display = "none";
-    showBookmarkedOption.style.display = "none";
-    await loadEvents();
-    hideAddToCalendarButtons();
-}
+    if (isSignedIn) {
+        authorizeButton.style.display = 'none';
+        signoutButton.style.display = 'block';
+        feedRightSide.style.display = "block";  
+        showBookmarkedOption.style.display = "flex";
+        await getUserInfo();
+        await loadEvents();
+        await loadChallenges(defaultNumChallenges);
+        showAddToCalendarButtons();
+    } else {
+        authorizeButton.style.display = 'block';
+        signoutButton.style.display = 'none';
+        feedRightSide.style.display = "none";
+        showBookmarkedOption.style.display = "none";
+        await loadEvents();
+        hideAddToCalendarButtons();
+    }
 }
 
 /**
