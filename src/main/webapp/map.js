@@ -45,9 +45,9 @@ function initMap() {
     map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
 
-    map.controls[google.maps.ControlPosition.LEFT_TOP].push(document.getElementById("content_form"));
     map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(document.getElementById("water"));
     map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById("contaminant"));
+    map.controls[google.maps.ControlPosition.LEFT_TOP].push(document.getElementById("content_form"));
 }
 
 function loadAreaDataFromForm(){
@@ -142,20 +142,6 @@ function addSuperfundMarkers(areaType, areaCode){
     });
 }
 
-// const low_danger = 25;
-// const medium_danger = 40;
-// const high_danger = 55;
-
-// function iconUrl(score){
-// 	var url = "https://maps.google.com/mapfiles/ms/icons/";
-// 	if(score < low_danger) url+= "green";
-// 	else if(score < medium_danger) url += "yellow";
-// 	else if (score < high_danger) url +="orange";
-//     else url +="red";
-// 	url += "-dot.png";
-// 	return url;
-// }
-
 function addWaterSystem(areaType, zipCode){
     const waterElement = document.getElementById("water");
     waterElement.innerHTML = "<h2 class='water_pollution'>Loading...</h2>"
@@ -177,7 +163,7 @@ function addWaterSystem(areaType, zipCode){
                 }
                 waterPollutionHTML += "<p onclick=showContaminantInfo("+contaminant.contaminantCode+");><strong>"+contaminant.contaminantName+"</strong></p>";
                 for([date, enforcements] of Object.entries(contaminant.violations)){
-                    waterPollutionHTML += "<p class='enf_date'>&nbsp;"+date+": ";
+                    waterPollutionHTML += "<p class='enforcement_date' >&nbsp;"+date+": ";
                     enforcements.forEach((enforcementAction) => {
                         waterPollutionHTML += "&nbsp;&nbsp;&nbsp;&nbsp;"+enforcementAction;
                     });
