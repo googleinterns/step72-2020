@@ -459,6 +459,15 @@ html, body {
     width: 100%;
 }
 
+.superfund_website {
+    max-width: 1020px;
+    max-height: 700px;
+    width: 700px;
+    height: 700px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
 .map_overlay {
     border: 20px;
     background-color: white;
@@ -474,7 +483,7 @@ html, body {
 }
 
 .map_overlay h4, .map_overlay p {
-    font-size: 12px;;
+    font-size: 14px;
 }
 
 .water_pollution * {
@@ -511,17 +520,33 @@ html, body {
 }
 
 .selected_water_system h2 {
-    background-color: lightskyblue;
+    /* background-color: lightskyblue; */
+    text-decoration: underline;
     font-size: 22px;
 }
 
 .water_pollution h2:hover {
-    background-color: lightskyblue;
+    /* background-color: lightskyblue; */
+    text-decoration: underline;
+}
+
+.selected_water_system p:hover, .selected_contaminant {
+    text-decoration: underline;
+}
+
+.enforcement_date {
+    text-decoration: none;
+    margin-left: 4em;
 }
 
 .selected_water_system * {
     visibility: visible;
     margin: 10px;
+}
+
+.exit {
+    float: right;
+    width: fit-content;
 }
 
 #authorize-button, #signout-button {

@@ -19,6 +19,7 @@ function initMap() {
     streetViewControl: false,
     maxZoom: 13,
     minZoom: 4,
+    mapTypeControl: false,
     style: [
         {
           "featureType": "all",
@@ -44,9 +45,9 @@ function initMap() {
     map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
 
-    map.controls[google.maps.ControlPosition.LEFT_TOP].push(document.getElementById("content_form"));
     map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(document.getElementById("water"));
     map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById("contaminant"));
+    map.controls[google.maps.ControlPosition.LEFT_TOP].push(document.getElementById("content_form"));
 }
 
 function loadAreaDataFromForm(){
@@ -107,16 +108,23 @@ function addSuperfundMarkers(areaType, areaCode){
     fetch('/superfund?area='+areaType+"&zip_code="+areaCode).then(response => response.json()).then((sites) => {
         sites.forEach((site) => {
 
-        bounds.extend({lat: site.lattitude, lng: site.longitude});
+            console.log(site);
+
+        bounds.extend({lat: site.latitude, lng: site.longitude});
 
         var marker = new google.maps.Marker(
-                    {position: {lat: site.lattitude, lng: site.longitude}, 
+                    {position: {lat: site.latitude, lng: site.longitude}, 
                     title: site.name,
                     icon: "resources/danger.png",
                     map: map});
+                var siteId = ("0000000" + site.siteId);
+                siteId = siteId.substring(siteId.length - 7);
                 var contentStr = "<h3>"+site.name+"</h3>" +
-                    "<h4>"+site.city+", "+site.state+"</h4>";
-        var infoWindow = new google.maps.InfoWindow({
+                    "<h4>"+site.city+", "+site.state+"</h4>"+
+                    "<h4><a target=_blank' href='https://cumulis.epa.gov/supercpad/cursites/csitinfo.cfm?id="+siteId+"#main-content'>Site's EPA website</a></h4>";
+                var iFrameString = "<iframe class='superfund_website' src='https://cumulis.epa.gov/supercpad/cursites/csitinfo.cfm?id="+siteId+"#main-content'>";
+                var infoWindowStr = "<div class='superfund_website'>"+iFrameString+"</div>";
+                var infoWindow = new google.maps.InfoWindow({
                     content: contentStr
                 });
             marker.addListener('click', () => {
@@ -134,24 +142,13 @@ function addSuperfundMarkers(areaType, areaCode){
     });
 }
 
-const low_danger = 25;
-const medium_danger = 40;
-const high_danger = 55;
-
-function iconUrl(score){
-	var url = "https://maps.google.com/mapfiles/ms/icons/";
-	if(score < low_danger) url+= "green";
-	else if(score < medium_danger) url += "yellow";
-	else if (score < high_danger) url +="orange";
-    else url +="red";
-	url += "-dot.png";
-	return url;
-}
-
 function addWaterSystem(areaType, zipCode){
+    const waterElement = document.getElementById("water");
+    waterElement.innerHTML = "<h2 class='water_pollution'>Loading...</h2>"
     fetch("/water?town="+town+"&state="+state).then(response => response.json()).then((systems) => {
-        const waterElement = document.getElementById("water");
-        var waterPollutionHTML = "";
+        if(systems.length > 0){
+            var waterPollutionHTML =  "<button class='exit' onclick='closeElement(\"water\");'> X </button>";
+        }
         systems.forEach((system) => {
             console.log(system);
             console.log(system.contaminants);
@@ -164,9 +161,9 @@ function addWaterSystem(areaType, zipCode){
                 if(!contaminants.has(contaminant.contaminantCode)){
                     contaminants.set(contaminant.contaminantCode, contaminant);
                 }
-                waterPollutionHTML += "<p  onclick=showContaminantInfo("+contaminant.contaminantCode+");><strong>"+contaminant.contaminantName+"</strong></p>";
+                waterPollutionHTML += "<p onclick=showContaminantInfo("+contaminant.contaminantCode+");><strong>"+contaminant.contaminantName+"</strong></p>";
                 for([date, enforcements] of Object.entries(contaminant.violations)){
-                    waterPollutionHTML += "<p style='margin-left: 2em;'>&nbsp;"+date+": ";
+                    waterPollutionHTML += "<p class='enforcement_date' >&nbsp;"+date+": ";
                     enforcements.forEach((enforcementAction) => {
                         waterPollutionHTML += "&nbsp;&nbsp;&nbsp;&nbsp;"+enforcementAction;
                     });
@@ -192,9 +189,15 @@ function showContaminantInfo(contaminantCode){
     if(!contaminants.has(contaminantCode)) return;
     const contaminant = contaminants.get(contaminantCode);
     const contaminantElement = document.getElementById("contaminant");
-    contaminantElement.innerHTML = "<h2>"+contaminant.contaminantName+"</h2>"+
+    contaminantElement.innerHTML =  "<button class='exit' onclick='closeElement(\"contaminant\");'> X </button>"+
+        "<h2>"+contaminant.contaminantName+"</h2>"+
         "<p><strong>Sources: </strong>"+contaminant.sources+"</p>"+
         "<p><strong>Definition: </strong>"+contaminant.definition+"</p>"+
         "<p><strong>Health Effects: </strong>"+contaminant.healthEffects+"</p>";
     console.log(contaminant.contaminantName);
+}
+
+function closeElement(elementId){
+    const element = document.getElementById(elementId);
+    element.innerHTML= "";
 }
