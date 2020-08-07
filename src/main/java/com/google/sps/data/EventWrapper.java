@@ -21,6 +21,8 @@ import java.util.Date;
 
 import com.google.gson.*;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
@@ -173,6 +175,18 @@ public final class EventWrapper {
 
    private EventWrapper() {
    }
+   
+   public String getSummary() {
+       return this.summary;
+   }
+   
+   public String getDescription() {
+       return this.description;
+   }
+   
+   public String getLocation() {
+       return this.location;
+   }
 
    public Event toEvent() {
        DateTime startDateTime = new DateTime(this.start);
@@ -193,7 +207,7 @@ public final class EventWrapper {
        ExtendedProperties ep = new ExtendedProperties();
        ep.set(CATEGORY, this.category);
        ep.set(EVENT_CREATOR, getEventCreatorName(this.creator_id));
-       ep.set(EVENT_ID, this.entity_key.getId());
+       if (this.entity_key != null) ep.set(EVENT_ID, this.entity_key.getId());
        ep.set(BOOKMARKS, this.bookmarks);
        event.setExtendedProperties(ep);
        return event;
@@ -265,11 +279,20 @@ public final class EventWrapper {
       return input;
   }
 
-  private static String getEventCreatorName(String userId) {
+  public static String getEventCreatorName(String userId) {
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       Query userQuery = new Query(User.DATA_TYPE).setFilter(new FilterPredicate(User.ID, FilterOperator.EQUAL, userId));
       Entity eventCreator = datastore.prepare(userQuery).asSingleEntity();
       String nickname = (String) eventCreator.getProperty(User.NICKNAME);
       return nickname;
+  }
+  
+  public boolean equals(EventWrapper other) {
+      boolean entityKeysEqual = (this.entity_key == null && other.entity_key == null) 
+        || (!(this.entity_key == null || other.entity_key == null) && this.entity_key.getId() == other.entity_key.getId());
+      return StringUtils.equals(this.summary, other.summary) && StringUtils.equals(this.description, other.description)
+        && StringUtils.equals(this.location, other.location) && this.start.equals(other.start) && this.end.equals(other.end) 
+        && StringUtils.equals(this.category, other.category) && StringUtils.equals(this.creator_id, other.creator_id)
+        && this.bookmarks == other.bookmarks && entityKeysEqual;
   }
 } 
